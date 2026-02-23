@@ -4,7 +4,8 @@ using UnityEngine;
 public class PlayerAttributes
 {
     [Header("Thông số Cơ bản")]
-    public int maxBambooCount = 0;
+    public int maxBambooCount = 100;
+    public int currentBambooCount = 0;
     public int burnBambooOnAttack = 0;    
     public int burnBambooPerUnit = 0;
     public int healthPoint = 0;
