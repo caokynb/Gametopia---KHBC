@@ -1434,9 +1434,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00348287ada67bc4ca28c92df50a93eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  moveSpeed: 8
-  jumpForce: 15
-  normalGravity: 3
+  stats:
+    maxBambooCount: 100
+    currentBambooCount: 0
+    burnBambooOnAttack: 0
+    burnBambooPerUnit: 0
+    healthPoint: 0
+    moveSpeed: 8
+    jumpForce: 15
+    normalGravity: 3
   maxSlopeAngle: 60
   groundCheckDistance: 0.2
   groundLayer:
