@@ -50,6 +50,12 @@ public class PlayerMovement : MonoBehaviour
 
         // Dùng GetKey để lấy trạng thái ĐANG GIỮ phím. Giúp tạo cơ chế "Chạm đất là tự nhảy tiếp" (Bunny Hop)
         isJumpHeld = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space);
+
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            stats.currentBambooCount = 0;
+            Debug.Log("Bamboo Cleared! " + stats.currentBambooCount);
+        }
     }
 
     void FixedUpdate()
