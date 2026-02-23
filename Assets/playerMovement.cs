@@ -8,10 +8,11 @@ public class playerMovement : MonoBehaviour
     public float jumpForce=5f;
 
     public Transform groundCheckTransform;
-    public Vector2 groundCheckSize = new Vector2(1f,1f);
+    public Vector2 groundCheckSize = new Vector2(1f,0.2f);
     public LayerMask groundLayer;
-    
+    [SerializeField] private Rigidbody2D.SlideMovement slideMovement = new();
     bool isGrounded;
+    bool Jumpy = false;
     float move;
 
     Rigidbody2D rb;
@@ -49,9 +50,12 @@ public class playerMovement : MonoBehaviour
 
     void Jumping(InputAction.CallbackContext ctx)
     {
+        //Debug.Log("Jumped! isGrounded = " + isGrounded);
         if (ctx.performed && isGrounded)
         {
             rb.linearVelocityY = jumpForce;
+            Jumpy = true;
+            //Debug.Log("Jumpy flag successfully set to TRUE!");
         }
     }
     void Start()
@@ -62,8 +66,17 @@ public class playerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        Vector2 finalVelocity = new Vector2(move * moveSpeed, rb.linearVelocityY);
         isGrounded = Physics2D.OverlapBox(groundCheckTransform.position, groundCheckSize, 0f, groundLayer);
         rb.linearVelocityX = move * moveSpeed;
+        if (Jumpy)
+        {
+            finalVelocity.y = jumpForce;
+            Jumpy = false;
+        }
+        rb.Slide(finalVelocity, Time.deltaTime, slideMovement);
+        rb.linearVelocity = finalVelocity;
+        
     }
 
     void OnDrawGizmosSelected()
