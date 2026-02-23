@@ -7,7 +7,7 @@ public class CameraMovement : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if(other.CompareTag("Player") && !other.isTrigger)
+        if (other.CompareTag("Player") && !other.isTrigger)
         {
             VirtualCam.SetActive(true);
         }
