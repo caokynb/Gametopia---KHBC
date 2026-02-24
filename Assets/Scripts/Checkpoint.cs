@@ -8,7 +8,7 @@ public class Checkpoint : MonoBehaviour
     void Update()
     {
         // If the player is standing inside the checkpoint zone AND presses 'E'
-        if (isPlayerNear && Input.GetKeyDown(KeyCode.E))
+        if (isPlayerNear && Input.GetKeyDown(KeyCode.F))
         {
             // Refill the current bamboo to match the max bamboo limit!
             playerScript.stats.currentBambooCount = playerScript.stats.maxBambooCount;
@@ -30,7 +30,7 @@ public class Checkpoint : MonoBehaviour
             // Grab the PlayerMovement script from the player so we can access their 'stats'
             playerScript = collision.GetComponent<PlayerMovement>();
 
-            Debug.Log("Player is near the checkpoint. Press 'E' to rest!");
+            Debug.Log("Player is near the checkpoint. Press 'F' to rest!");
         }
     }
 
