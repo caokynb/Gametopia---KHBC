@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement; // NEW: Thư viện để load lại màn chơi
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(BoxCollider2D))]
@@ -44,6 +45,7 @@ public class PlayerMovement : MonoBehaviour
     private float moveInput;
     private float currentSpeed; // NEW: Lưu tốc độ ngang thực tế đang thay đổi mượt mà
     private bool isJumpHeld;    // NEW: Cờ kiểm tra đè nút nhảy
+    private bool isDead = false; // NEW: Cờ xác nhận đã chết chưa
 
     private bool isGrounded;
     private bool isOnSlope;
@@ -71,6 +73,11 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     void Update()
     {
+        if (stats.currentBambooCount <= 0 && !isDead)
+        {
+            Die();
+        }
+        if (isDead) return;
         moveInput = Input.GetAxisRaw("Horizontal");
 
         // --- Lật mặt ---
@@ -268,7 +275,28 @@ public class PlayerMovement : MonoBehaviour
         localScale.x *= -1f;
         transform.localScale = localScale;
     }
+    // --- NEW: HỆ THỐNG CHẾT VÀ HỒI SINH ---
+    void Die()
+    {
+        isDead = true;
 
+        // Ép vận tốc về 0 để nhân vật không trượt đi tiếp
+        rb.linearVelocity = Vector2.zero;
+
+        // Tắt mô phỏng vật lý để nhân vật không bị rơi xuyên qua sàn
+        rb.simulated = false;
+
+        Debug.Log("Hết Bamboo! Nhân vật đã chết.");
+
+        // Gọi hàm RestartLevel sau 1.5 giây
+        Invoke(nameof(RestartLevel), 1.5f);
+    }
+
+    void RestartLevel()
+    {
+        // Load lại chính xác màn chơi hiện tại (Reset toàn bộ)
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
     void OnDrawGizmos()
     {
         if (cc == null) cc = GetComponent<BoxCollider2D>();
