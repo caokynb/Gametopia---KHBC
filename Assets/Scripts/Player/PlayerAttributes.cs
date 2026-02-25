@@ -1,14 +1,14 @@
 using UnityEngine;
 
 [System.Serializable]
-public class PlayerAttributes
+public class PlayerAttributes : MonoBehaviour
 {
     [Header("Thông số Cơ bản")]
     public int maxBambooCount = 100;
-    public int currentBambooCount = 0;
-    public int burnBambooOnAttack = 0;    
+    public int currentBambooCount = 100;
+    public int burnBambooOnAttack = 0;
     public int burnBambooPerUnit = 0;
-    public int healthPoint = 0;
+    public int healthPoint = 1;
 
     [Header("Thông số Di chuyển")]
     public float moveSpeed = 8f;     // Tốc độ chạy ngang của nhân vật

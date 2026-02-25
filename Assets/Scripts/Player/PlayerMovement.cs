@@ -9,13 +9,14 @@ public class PlayerMovement : MonoBehaviour
     // ZONE 1: VARIABLES & SETTINGS
     // ==========================================
     [Header("Dữ liệu Nhân vật")]
-    public PlayerAttributes stats;
+    private PlayerAttributes stats;
 
     [Header("Cài đặt Dò tia (Raycast)")]
     public float groundCheckWidth = 0.8f;
     public int groundCheckRayCount = 3;
     public float groundCheckDistance = 0.5f;
     public LayerMask groundLayer;
+    public LayerMask bambooLayer;
 
     [Header("Cài đặt Dốc (Slope)")]
     public float maxSlopeAngle = 60f;
@@ -30,10 +31,12 @@ public class PlayerMovement : MonoBehaviour
     [Header("Game Feel (Cảm giác bay nhảy)")]
     public float coyoteTime = 0.15f;
     private float coyoteTimeCounter;
-
     public float jumpBufferTime = 0.1f;
     private float jumpBufferCounter;
     public float jumpCutMultiplier = 0.5f;
+
+    [Header("Thời gian Cooldown Restart Level")]
+    public float restartDelay = 1.5f; 
 
     private bool isFacingRight = true;
 
@@ -61,6 +64,8 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     void Start()
     {
+        stats = GetComponent<PlayerAttributes>();
+
         rb = GetComponent<Rigidbody2D>();
         cc = GetComponent<BoxCollider2D>();
 
@@ -115,14 +120,14 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     void FixedUpdate()
     {
-        CheckGroundedAndSlope();
+        CheckGroundedBambooAndSlope();
         ApplyMovement();
     }
 
     // ==========================================
     // ZONE 5: SENSORS & MATH
     // ==========================================
-    void CheckGroundedAndSlope()
+    void CheckGroundedBambooAndSlope()
     {
         if (Time.time < lastJumpTime + jumpCooldown)
         {
@@ -139,12 +144,17 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = false;
         RaycastHit2D validHit = new RaycastHit2D();
 
+        // --- NEW UPDATE: Gộp Layer Ground và Bamboo ---
+        // Sử dụng toán tử Bitwise (|) để tạo ra một LayerMask gộp cả 2
+        LayerMask combinedLayer = groundLayer | bambooLayer;
+
         for (int i = 0; i < groundCheckRayCount; i++)
         {
             float xOffset = Mathf.Lerp(-groundCheckWidth / 2, groundCheckWidth / 2, (float)i / (groundCheckRayCount - 1));
             Vector2 rayOrigin = new Vector2(center.x + xOffset, center.y);
 
-            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.down, rayLength, groundLayer);
+            // Bắn tia laser kiểm tra CẢ ĐẤT LẪN TRE cùng một lúc
+            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.down, rayLength, combinedLayer);
 
             if (hit)
             {
@@ -288,8 +298,8 @@ public class PlayerMovement : MonoBehaviour
 
         Debug.Log("Hết Bamboo! Nhân vật đã chết.");
 
-        // Gọi hàm RestartLevel sau 1.5 giây
-        Invoke(nameof(RestartLevel), 1.5f);
+        // Gọi hàm RestartLevel sau restartDelay giây
+        Invoke(nameof(RestartLevel), restartDelay);
     }
 
     void RestartLevel()
