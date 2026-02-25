@@ -1865,7 +1865,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   stats:
     maxBambooCount: 100
-    currentBambooCount: 0
+    currentBambooCount: 1
     burnBambooOnAttack: 0
     burnBambooPerUnit: 0
     healthPoint: 0
