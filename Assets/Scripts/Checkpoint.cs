@@ -3,58 +3,70 @@
 public class Checkpoint : MonoBehaviour
 {
     private bool isPlayerNear = false;
-    private PlayerAttributes playerScript;
 
-    // --- NEW: Thêm một biến để giữ liên lạc với script Xây dựng ---
+    // ĐÃ SỬA: Phải lấy PlayerMovement thay vì PlayerAttributes
+    private PlayerMovement playerMovement;
     private ConstructionMode constructionScript;
+
+    // --- NEW: Cờ đánh dấu Checkpoint đã được lưu ---
+    private bool isActivated = false;
+
+    void Start()
+    {
+        // ĐÃ SỬA: Vì ConstructionMode nằm trên một object khác (ConstructionMode_Player),
+        // ta yêu cầu Unity tự tìm nó trong màn chơi ngay từ lúc bắt đầu!
+        constructionScript = Object.FindFirstObjectByType<ConstructionMode>();
+    }
 
     void Update()
     {
-        // If the player is standing inside the checkpoint zone AND presses 'E'
+        // Khi người chơi đứng trong vùng Checkpoint và bấm phím F
         if (isPlayerNear && Input.GetKeyDown(KeyCode.F))
         {
-            // Refill the current bamboo to match the max bamboo limit!
-            playerScript.currentBambooCount = playerScript.maxBambooCount;
+            // 1. Refill Bamboo (Trỏ qua stats của PlayerMovement)
+            playerMovement.stats.currentBambooCount = playerMovement.stats.maxBambooCount;
+            Debug.Log("Checkpoint Used! Bamboo refilled to: " + playerMovement.stats.currentBambooCount);
 
-            Debug.Log("Checkpoint Used! Bamboo refilled to: " + playerScript.currentBambooCount);
-
-            // Note: Later on, you can add code here to save the game, heal the player, or play a shiny particle effect!
-
-            // --- NEW: Kích hoạt lệnh xóa tre ---
+            // 2. Dọn dẹp bản đồ
             if (constructionScript != null)
             {
                 constructionScript.ClearAllSpawnedBamboo();
                 Debug.Log("Bản đồ đã được dọn dẹp sạch sẽ!");
             }
+
+            // 3. LƯU VỊ TRÍ HỒI SINH (Static Memory)
+            PlayerMovement.respawnPosition = transform.position;
+            PlayerMovement.hasCheckpoint = true;
+
+            if (!isActivated)
+            {
+                isActivated = true;
+                Debug.Log("<color=cyan>Checkpoint Activated!</color> Vị trí hồi sinh đã được lưu.");
+            }
         }
     }
 
-    // This runs the exact frame the player touches the checkpoint
     void OnTriggerEnter2D(Collider2D collision)
     {
-        // Check if the object that touched us has the "Player" tag
         if (collision.CompareTag("Player"))
         {
             isPlayerNear = true;
 
-            // Grab the PlayerMovement script from the player so we can access their 'stats'
-            playerScript = collision.GetComponent<PlayerAttributes>();
-
-            // Lấy thêm script Xây dựng từ trên người Player
-            constructionScript = collision.GetComponent<ConstructionMode>();
+            // Lấy PlayerMovement từ nhân vật chạm vào
+            playerMovement = collision.GetComponent<PlayerMovement>();
 
             Debug.Log("Player is near the checkpoint. Press 'F' to rest!");
         }
     }
 
-    // This runs the exact frame the player walks away from the checkpoint
     void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.CompareTag("Player"))
         {
             isPlayerNear = false;
-            playerScript = null; // Clear the script to prevent errors
-            constructionScript = null; // Cắt liên lạc khi rời đi
+
+            // Xóa bộ nhớ tạm để tránh lỗi
+            playerMovement = null;
         }
     }
 }
