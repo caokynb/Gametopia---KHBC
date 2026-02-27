@@ -73,7 +73,7 @@ public class EnemyAttack : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            collision.gameObject.GetComponent<PlayerCombat>()?.Respawn();
+            collision.gameObject.GetComponent<AttackMode>()?.Respawn();
         }
     }
 }

@@ -52,7 +52,7 @@ public class EnemyAI : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            PlayerCombat pc = collision.gameObject.GetComponent<PlayerCombat>();
+            AttackMode pc = collision.gameObject.GetComponent<AttackMode>();
             if (pc != null)
             {
                 pc.Respawn();

@@ -415,7 +415,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &117455422
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2015,14 +2015,17 @@ GameObject:
   - component: {fileID: 620983982}
   - component: {fileID: 620983980}
   - component: {fileID: 620983990}
+  - component: {fileID: 620983992}
   - component: {fileID: 620983989}
+  - component: {fileID: 620983993}
+  - component: {fileID: 620983991}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!50 &620983980
 Rigidbody2D:
   serializedVersion: 5
@@ -2201,6 +2204,69 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.5, y: 0.75}
   m_EdgeRadius: 0
+--- !u!114 &620983991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 620983978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 802ea6823a6ffeb4096d3c25d3e19d25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ConstructionMode
+  segmentLength: 1
+  costPerSegment: 5
+  gravityScale: 1
+  spawnDelay: 0.5
+  previewBambooPrefab: {fileID: 0}
+  solidBambooPrefab: {fileID: 0}
+  chunkBambooPrefab: {fileID: 0}
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  checkSize: {x: 0.9, y: 0.15}
+--- !u!114 &620983992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 620983978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ded4c11d7df1d640aa02a748c8c3f25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAttributes
+  maxBambooCount: 100
+  currentBambooCount: 100
+  burnBambooOnAttack: 0
+  burnBambooPerUnit: 0
+  healthPoint: 1
+  moveSpeed: 8
+  jumpForce: 15
+  normalGravity: 3
+--- !u!114 &620983993
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 620983978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0115acd91ec1244ba6aa4e5a2ca9530, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
+  attributes: {fileID: 0}
+  attackPoint: {fileID: 0}
+  attackRange: 0.5
+  enemyLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  attackCooldown: 0.5
+  bambooRegenRate: 5
 --- !u!1 &674843326
 GameObject:
   m_ObjectHideFlags: 0
