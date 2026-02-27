@@ -8,8 +8,13 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     // ZONE 1: VARIABLES & SETTINGS
     // ==========================================
+
+    // --- NEW: Hệ thống Checkpoint (Static để sống sót qua Scene Reload) ---
+    public static Vector2 respawnPosition;
+    public static bool hasCheckpoint = false;
+
     [Header("Dữ liệu Nhân vật")]
-    private PlayerAttributes stats;
+    public PlayerAttributes stats;
 
     [Header("Cài đặt Dò tia (Raycast)")]
     public float groundCheckWidth = 0.8f;
@@ -36,7 +41,7 @@ public class PlayerMovement : MonoBehaviour
     public float jumpCutMultiplier = 0.5f;
 
     [Header("Thời gian Cooldown Restart Level")]
-    public float restartDelay = 1.5f; 
+    public float restartDelay = 1.5f;
 
     private bool isFacingRight = true;
 
@@ -71,6 +76,12 @@ public class PlayerMovement : MonoBehaviour
 
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         rb.gravityScale = stats.normalGravity;
+
+        // --- NEW: Dịch chuyển người chơi đến Checkpoint nếu có ---
+        if (hasCheckpoint)
+        {
+            transform.position = respawnPosition;
+        }
     }
 
     // ==========================================
