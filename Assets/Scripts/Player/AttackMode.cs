@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class PlayerCombat : MonoBehaviour
+public class AttackMode : MonoBehaviour
 {
     public PlayerAttributes attributes;
     private Vector3 startPosition;
