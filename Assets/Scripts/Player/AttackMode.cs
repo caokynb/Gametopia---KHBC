@@ -10,10 +10,9 @@ public class AttackMode : MonoBehaviour
     public Transform attackPoint;
     public float attackRange = 0.5f;
     public LayerMask enemyLayers;
+    public int bambooCostPerAttack = 5; // Ép cứng hoặc chỉnh ở đây
 
-    [Header("Thời gian hồi chiêu (Số giây phải chờ)")]
-    // SỬA TẠI ĐÂY: Đổi attackRate thành attackCooldown
-    // Ví dụ: Nhập 2 nghĩa là phải chờ đúng 2 giây mới được đánh tiếp
+    [Header("Thời gian hồi chiêu")]
     public float attackCooldown = 0.5f;
     private float nextAttackTime = 0f;
     private bool canAttack = true;
@@ -32,55 +31,73 @@ public class AttackMode : MonoBehaviour
     {
         RegenerateBamboo();
 
+        // Kiểm tra hồi chiêu
         if (Time.time >= nextAttackTime)
         {
             canAttack = true;
         }
 
+        // Thực hiện đánh khi nhấn Fire1 (Chuột trái)
         if (Input.GetButtonDown("Fire1") && canAttack)
         {
-            ExecuteCombat();
+            if (attributes.currentBambooCount >= bambooCostPerAttack)
+            {
+                ExecuteCombat();
+            }
+            else
+            {
+                Debug.Log("Không đủ Bamboo để đánh!");
+            }
         }
     }
 
     void ExecuteCombat()
     {
-        if (attributes.currentBambooCount < attributes.burnBambooOnAttack) return;
-
         canAttack = false;
-
-        // SỬA TẠI ĐÂY: Không chia nữa, cộng thẳng số giây cooldown vào thời gian hiện tại
         nextAttackTime = Time.time + attackCooldown;
-
         Attack();
     }
 
     void Attack()
     {
-        attributes.currentBambooCount -= attributes.burnBambooOnAttack;
-        // Debug lại cho dễ nhìn
-        Debug.Log("Đã đánh! Cần chờ " + attackCooldown + " giây để đánh tiếp.");
+        // Trừ 5 Bamboo mỗi lần đánh
+        attributes.currentBambooCount -= bambooCostPerAttack;
 
+        // Quét tất cả vật thể trong tầm đánh
         Collider2D[] hitObjects = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
+
+        if (hitObjects.Length == 0)
+        {
+            Debug.Log("Hụt! Không trúng đối tượng nào ở Layer được chọn.");
+        }
 
         foreach (Collider2D obj in hitObjects)
         {
+            Debug.Log("Đã chạm vào: " + obj.name);
+
+            // 1. Xử lý Enemy
             EnemyAttack enemy = obj.GetComponent<EnemyAttack>();
             if (enemy != null)
             {
                 enemy.TakeDamage(transform.position);
-                continue;
             }
 
+            // 2. Xử lý Vật thể phá hủy (Thùng, hòm...)
             DestructibleObject destructible = obj.GetComponent<DestructibleObject>();
             if (destructible != null)
             {
                 destructible.TakeDamage();
             }
+
+            // 3. Xử lý Bẫy mồi nhử (TrapTrigger)
+            TrapTrigger trap = obj.GetComponent<TrapTrigger>();
+            if (trap != null)
+            {
+                trap.OnBlockDestroyed();
+            }
         }
     }
 
-    // --- CÁC HÀM KHÁC GIỮ NGUYÊN ---
     void RegenerateBamboo()
     {
         if (attributes.currentBambooCount < attributes.maxBambooCount)
