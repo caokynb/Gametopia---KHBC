@@ -65,6 +65,7 @@ public class AttackMode : MonoBehaviour
 
         foreach (Collider2D obj in hitObjects)
         {
+            // 1. Chém quái nhỏ
             EnemyAttack enemy = obj.GetComponent<EnemyAttack>();
             if (enemy != null)
             {
@@ -72,6 +73,15 @@ public class AttackMode : MonoBehaviour
                 continue;
             }
 
+            // 2. Chém BOSS (Đoạn code mới được thêm vào!)
+            BossAI boss = obj.GetComponent<BossAI>();
+            if (boss != null)
+            {
+                boss.TakeDamage(transform.position);
+                continue;
+            }
+
+            // 3. Phá vật thể môi trường
             DestructibleObject destructible = obj.GetComponent<DestructibleObject>();
             if (destructible != null)
             {

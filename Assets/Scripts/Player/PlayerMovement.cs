@@ -49,6 +49,10 @@ public class PlayerMovement : MonoBehaviour
     [Header("Thời gian Cooldown Restart Level")]
     public float restartDelay = 1.5f;
 
+    [Header("Giao diện & Hiệu ứng")]
+    private SpriteRenderer spriteRenderer;
+    private Color originalColor;
+
     private bool isFacingRight = true;
 
     private Rigidbody2D rb;
@@ -84,6 +88,12 @@ public class PlayerMovement : MonoBehaviour
         if (hasCheckpoint)
         {
             transform.position = respawnPosition;
+        }
+
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            originalColor = spriteRenderer.color;
         }
     }
 
@@ -384,5 +394,34 @@ public class PlayerMovement : MonoBehaviour
         }
 
         return false;
+    }
+
+    // ==========================================
+    // ZONE: HỆ THỐNG NHẬN SÁT THƯƠNG (COMBAT)
+    // ==========================================
+    public void TakeDamage(int damageAmount)
+    {
+        stats.healthPoint -= damageAmount;
+        Debug.Log($"<color=red>AU!</color> Anh Khoai bị thương! Máu còn: {stats.healthPoint}");
+
+        // Chớp đỏ
+        if (spriteRenderer != null)
+        {
+            StartCoroutine(FlashRedEffect());
+        }
+
+        // Kiểm tra chết (Ép tre về 0 để hệ thống tự reset theo logic cũ của bạn)
+        if (stats.healthPoint <= 0)
+        {
+            stats.currentBambooCount = 0;
+            Debug.Log("Anh Khoai đã gục ngã!");
+        }
+    }
+
+    private System.Collections.IEnumerator FlashRedEffect()
+    {
+        spriteRenderer.color = Color.red;
+        yield return new WaitForSeconds(0.15f); // Nháy đỏ trong 0.15 giây
+        spriteRenderer.color = originalColor;
     }
 }
