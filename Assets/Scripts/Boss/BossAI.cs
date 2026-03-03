@@ -4,7 +4,13 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody2D))]
 public class BossAI : MonoBehaviour
 {
-    public enum BossState { Idle, SlamAttack, SpinRam, ThrowRock, Slipped }
+    public enum BossState { Passive, Idle, SlamAttack, SpinRam, ThrowRock, Slipped }
+
+    // THÊM: Biến cài đặt vùng kích hoạt boss
+    [Header("Cài đặt Kích Hoạt (Activation)")]
+    public float detectionRadius = 10f; // Khoảng cách Anh Khoai cần đứng để boss thức dậy
+    [SerializeField] private Color detectionGizmoColor = new Color(0f, 1f, 1f, 0.1f); // Màu xanh dương nhạt cho Gizmo
+    private bool playerDetected = false; // Cờ đánh dấu boss đã thức dậy chưa
 
     [Header("Trạng thái hiện tại")]
     public BossState currentState = BossState.Idle;
@@ -53,9 +59,40 @@ public class BossAI : MonoBehaviour
 
         player = GameObject.FindGameObjectWithTag("Player").transform;
         rb = GetComponent<Rigidbody2D>();
-        sr = GetComponent<SpriteRenderer>(); // <--- Lấy component hiển thị hình ảnh
-        if (sr != null) originalColor = sr.color; // Thêm dòng này để lưu màu gốc!
 
+        sr = GetComponent<SpriteRenderer>();
+        if (sr != null) originalColor = sr.color;
+
+        // ĐÃ XÓA: Dòng StartCoroutine(BossBehaviorLoop());
+        // Boss bây giờ đứng Passive chờ đợi.
+    }
+
+    // THÊM: Hàm Update để kiểm tra khoảng cách đến player
+    void Update()
+    {
+        // Nếu player chưa bị phát hiện, liên tục kiểm tra khoảng cách
+        if (!playerDetected && player != null)
+        {
+            float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+
+            // Nếu player đi vào vùng kích hoạt
+            if (distanceToPlayer <= detectionRadius)
+            {
+                ActivateBoss();
+            }
+        }
+    }
+
+    // THÊM: Hàm tiện ích để thức dậy boss
+    void ActivateBoss()
+    {
+        if (playerDetected) return; // Bảo mật: không thức dậy 2 lần
+
+        playerDetected = true;
+        Debug.Log("<color=purple>KÍCH HOẠT BOSS!</color> 'The Destroyer' đã thức giấc.");
+
+        // Chuyển sang Idle và bắt đầu Behavior Loop
+        currentState = BossState.Idle;
         StartCoroutine(BossBehaviorLoop());
     }
 
@@ -307,8 +344,8 @@ public class BossAI : MonoBehaviour
     {
         if (sr != null)
         {
-            sr.color = Color.red;
-            yield return new WaitForSeconds(0.15f); // Nháy đỏ trong 0.15s
+            sr.color = Color.yellow;
+            yield return new WaitForSeconds(0.5f); // Nháy đỏ trong 0.15s
             sr.color = originalColor;
         }
     }
@@ -321,6 +358,9 @@ public class BossAI : MonoBehaviour
             Gizmos.color = new Color(1f, 0f, 0f, 0.5f);
             Gizmos.DrawSphere(slamCenter.position, slamExplosionRadius);
         }
+        // THÊM: Vẽ vòng tròn kích hoạt màu xanh dương
+        Gizmos.color = detectionGizmoColor;
+        Gizmos.DrawSphere(transform.position, detectionRadius);
     }
 
     private void OnDrawGizmosSelected()
