@@ -800,8 +800,8 @@ MonoBehaviour:
   rockPrefab: {fileID: 3178983059684589811, guid: 210a6d31f8ed28043917a60491883056, type: 3}
   throwPoint: {fileID: 711704717}
   throwPower: 30
-  minThrowAngle: 5
-  maxThrowAngle: 15
+  minThrowAngle: 0
+  maxThrowAngle: 10
 --- !u!61 &1823369471
 BoxCollider2D:
   m_ObjectHideFlags: 0
