@@ -143,7 +143,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerModeManager
   attackModeScript: {fileID: 323457192}
   constructionModeScript: {fileID: 323457191}
-  attackVisual: {fileID: 0}
+  attackVisual: {fileID: 2072113089}
   constructionVisual: {fileID: 0}
 --- !u!114 &323457190
 MonoBehaviour:
@@ -158,7 +158,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttributes
   maxBambooCount: 100
-  currentBambooCount: 100
+  currentBambooCount: 1000
   burnBambooOnAttack: 0
   burnBambooPerUnit: 0
   healthPoint: 3
@@ -245,7 +245,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.4415095, g: 0.019159796, b: 0.08091243, a: 0}
+  m_BackGroundColor: {r: 0, g: 0.7206979, b: 1, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -355,12 +355,12 @@ GameObject:
   m_Component:
   - component: {fileID: 711704717}
   m_Layer: 0
-  m_Name: ThrowPoint
+  m_Name: Throw_Point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &711704717
 Transform:
   m_ObjectHideFlags: 0
@@ -370,7 +370,7 @@ Transform:
   m_GameObject: {fileID: 711704716}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.04, y: -1.05, z: 0}
+  m_LocalPosition: {x: -0.53, y: 0, z: 0}
   m_LocalScale: {x: 0.6666667, y: 0.6666667, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -679,12 +679,12 @@ GameObject:
   - component: {fileID: 1685215082}
   - component: {fileID: 1685215081}
   m_Layer: 0
-  m_Name: Hitbox_Slam
+  m_Name: Slam_Center_Point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1685215081
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -704,7 +704,7 @@ CircleCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1685215080}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
@@ -742,7 +742,7 @@ Transform:
   m_GameObject: {fileID: 1685215080}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.02, y: -1.03, z: 0}
+  m_LocalPosition: {x: 0.02, y: -1.05, z: 0}
   m_LocalScale: {x: 0.6666667, y: 0.6666667, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -781,22 +781,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossAI
   currentState: 0
-  maxHealth: 100
-  currentHealth: 0
-  maxActionCooldown: 3
-  minActionCooldown: 0.5
-  slipDuration: 5
-  runSpeed: 6
-  slamRange: 2.5
-  slamExplosionRadius: 3
+  maxHealth: 5
+  currentHealth: 5
+  idleSprite: {fileID: -3768264105405728860, guid: 479e5bc6100a981499549f556959f4d7, type: 3}
+  slamSprite: {fileID: -1259018314302218025, guid: 55e0529a8fac9474abc11cdad9be40fe, type: 3}
+  ramSprite: {fileID: -6131715370854684230, guid: a14761d7d5caf3e4dbec76339fb61784, type: 3}
+  throwSprite: {fileID: 2499240371415653476, guid: 4a50364c0f90a2f4b83322b82553287f, type: 3}
+  slippedSprite: {fileID: 1462352441865572416, guid: 073d6b5a1f821c24aabf121f49c27e60, type: 3}
+  runSpeed: 12
+  slamRange: 3
+  slamExplosionRadius: 3.5
   slamCenter: {fileID: 1685215083}
   ramSpeed: 15
   ramDuration: 1.2
-  ramHitbox: {fileID: 2077367298}
-  slipChance: 0.3
+  slipChance: 0.8
+  ramHitboxSize: {x: 4, y: 4}
+  ramCenter: {fileID: 2077367301}
   rockPrefab: {fileID: 3178983059684589811, guid: 210a6d31f8ed28043917a60491883056, type: 3}
   throwPoint: {fileID: 711704717}
-  throwForce: {x: 10, y: 5}
+  throwPower: 30
+  minThrowAngle: 5
+  maxThrowAngle: 15
 --- !u!61 &1823369471
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -831,17 +836,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.04091859, y: -1.0669668}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.14, y: 2.16}
+    oldSize: {x: 1.01, y: 2.365}
     newSize: {x: 2.14, y: 2.16}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.14, y: 2.16}
+  m_Size: {x: 2.0581632, y: 0.026367188}
   m_EdgeRadius: 0
 --- !u!50 &1823369472
 Rigidbody2D:
@@ -855,10 +860,10 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 3
+  m_Mass: 999
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 999
+  m_GravityScale: 1
   m_Material: {fileID: 6200000, guid: 0bc26069347b9b74d8a98f4720b28e93, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
@@ -919,7 +924,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 4967783049825656194, guid: 5accdc90cdbf10b46b6524ce1900fc50, type: 3}
+  m_Sprite: {fileID: -3768264105405728860, guid: 479e5bc6100a981499549f556959f4d7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -990,12 +995,12 @@ GameObject:
   - component: {fileID: 2077367300}
   - component: {fileID: 2077367299}
   m_Layer: 0
-  m_Name: Hitbox_Ram
+  m_Name: Ram_Center_Point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &2077367299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1015,7 +1020,7 @@ CircleCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2077367298}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
@@ -1053,7 +1058,7 @@ Transform:
   m_GameObject: {fileID: 2077367298}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.02, y: -0.01, z: 0}
+  m_LocalPosition: {x: 0.04, y: 0.01, z: 0}
   m_LocalScale: {x: 0.6666667, y: 0.6666667, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

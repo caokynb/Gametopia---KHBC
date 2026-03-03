@@ -13,6 +13,13 @@ public class BossAI : MonoBehaviour
     public float maxHealth = 15f;
     public float currentHealth;
 
+    [Header("Hình ảnh Boss (Sprites)")]
+    public Sprite idleSprite;
+    public Sprite slamSprite;
+    public Sprite ramSprite;
+    public Sprite throwSprite;
+    public Sprite slippedSprite;
+
     [Header("Cài đặt Attack 1 (Slam)")]
     public float runSpeed = 6f;
     public float slamRange = 2.5f;
@@ -28,13 +35,15 @@ public class BossAI : MonoBehaviour
 
     [Header("Cài đặt Attack 3 (Throw Rock)")]
     public GameObject rockPrefab;
-    public Transform throwPoint; // Điểm ném (ở tay Boss)
-    public float throwPower = 15f; // Lực ném tổng quát
-    public float minThrowAngle = 30f; // Góc ném thấp nhất (Ném thẳng)
-    public float maxThrowAngle = 70f; // Góc ném cao nhất (Ném bổng)
+    public Transform throwPoint;
+    public float throwPower = 15f;
+    public float minThrowAngle = 30f;
+    public float maxThrowAngle = 70f;
 
     private Transform player;
     private Rigidbody2D rb;
+    private SpriteRenderer sr; // <--- Thêm SpriteRenderer
+    private Color originalColor; // Thêm dòng này
 
     private bool isExploding = false;
 
@@ -44,8 +53,19 @@ public class BossAI : MonoBehaviour
 
         player = GameObject.FindGameObjectWithTag("Player").transform;
         rb = GetComponent<Rigidbody2D>();
+        sr = GetComponent<SpriteRenderer>(); // <--- Lấy component hiển thị hình ảnh
+        if (sr != null) originalColor = sr.color; // Thêm dòng này để lưu màu gốc!
 
         StartCoroutine(BossBehaviorLoop());
+    }
+
+    // Hàm tiện ích để đổi hình ảnh nhanh gọn
+    private void ChangeSprite(Sprite newSprite)
+    {
+        if (sr != null && newSprite != null)
+        {
+            sr.sprite = newSprite;
+        }
     }
 
     private IEnumerator BossBehaviorLoop()
@@ -55,27 +75,26 @@ public class BossAI : MonoBehaviour
             switch (currentState)
             {
                 case BossState.Idle:
+                    ChangeSprite(idleSprite); // Đổi hình Đứng im
                     Debug.Log("<color=white>BOSS: Đang nghỉ ngơi...</color>");
                     yield return new WaitForSeconds(2f);
                     ChooseNextAttack();
                     break;
 
                 case BossState.SlamAttack:
-                    // ĐÃ SỬA: Gọi đúng Coroutine của Slam
                     yield return StartCoroutine(ExecuteSlamAttack());
                     break;
 
                 case BossState.SpinRam:
-                    // ĐÃ SỬA: Gọi đúng Coroutine của Ram!
                     yield return StartCoroutine(ExecuteSpinRam());
                     break;
 
                 case BossState.ThrowRock:
-                    // ĐÃ SỬA: Gọi đúng Coroutine của Ram!
                     yield return StartCoroutine(ExecuteThrowRock());
                     break;
 
                 case BossState.Slipped:
+                    ChangeSprite(slippedSprite); // Đổi hình Ngã sấp mặt
                     Debug.Log("<color=green>BOSS: Trượt ngã!</color>");
                     yield return new WaitForSeconds(2f);
                     currentState = BossState.Idle;
@@ -99,6 +118,7 @@ public class BossAI : MonoBehaviour
     // ==========================================
     private IEnumerator ExecuteSlamAttack()
     {
+        ChangeSprite(slamSprite); // Đổi hình Giơ chùy đập đất
         Debug.Log("<color=red>BOSS:</color> Chạy tới đập đất!");
 
         while (Mathf.Abs(player.position.x - transform.position.x) > slamRange)
@@ -148,6 +168,7 @@ public class BossAI : MonoBehaviour
     // ==========================================
     private IEnumerator ExecuteSpinRam()
     {
+        ChangeSprite(ramSprite); // Đổi hình Cắm đầu húc
         Debug.Log("<color=orange>BOSS:</color> Xoay chùy húc tới!");
         FlipTowardsPlayer();
 
@@ -195,44 +216,46 @@ public class BossAI : MonoBehaviour
         }
         else
         {
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(4f);
             currentState = BossState.Idle;
         }
     }
 
     // ==========================================
-    // ATTACK 3: NÉM ĐÁ GÓC NGẪU NHIÊN
+    // ATTACK 3: NÉM 3 CỤC ĐÁ GÓC NGẪU NHIÊN
     // ==========================================
     private IEnumerator ExecuteThrowRock()
     {
-        Debug.Log("<color=yellow>BOSS:</color> Ném đá!");
+        ChangeSprite(throwSprite);
+        Debug.Log("<color=yellow>BOSS:</color> Ném 3 cục đá liên tiếp!");
         FlipTowardsPlayer();
 
         yield return new WaitForSeconds(0.5f); // Gồng chiêu
 
         if (rockPrefab != null && throwPoint != null)
         {
-            // 1. Tạo cục đá tại vị trí tay Boss
-            GameObject rock = Instantiate(rockPrefab, throwPoint.position, Quaternion.identity);
-            Rigidbody2D rockRb = rock.GetComponent<Rigidbody2D>();
-
-            if (rockRb != null)
+            // Vòng lặp ném 3 cục đá
+            for (int i = 0; i < 3; i++)
             {
-                // 2. Chọn một góc ném ngẫu nhiên và chuyển đổi sang Radian
-                float randomAngle = Random.Range(minThrowAngle, maxThrowAngle);
-                float radianAngle = randomAngle * Mathf.Deg2Rad;
+                GameObject rock = Instantiate(rockPrefab, throwPoint.position, Quaternion.identity);
+                Rigidbody2D rockRb = rock.GetComponent<Rigidbody2D>();
 
-                // 3. Dùng lượng giác để chia lực tổng (throwPower) thành trục X và Y
-                float xForce = Mathf.Cos(radianAngle) * throwPower;
-                float yForce = Mathf.Sin(radianAngle) * throwPower;
+                if (rockRb != null)
+                {
+                    // Chọn một góc ném ngẫu nhiên cho MỖI cục đá
+                    float randomAngle = Random.Range(minThrowAngle, maxThrowAngle);
+                    float radianAngle = randomAngle * Mathf.Deg2Rad;
 
-                // 4. Xác định ném sang trái hay phải
-                int direction = player.position.x > transform.position.x ? 1 : -1;
+                    float xForce = Mathf.Cos(radianAngle) * throwPower;
+                    float yForce = Mathf.Sin(radianAngle) * throwPower;
 
-                // 5. Quăng cục đá đi!
-                rockRb.linearVelocity = new Vector2(xForce * direction, yForce);
+                    int direction = player.position.x > transform.position.x ? 1 : -1;
 
-                Debug.Log($"Đã ném đá với góc: {randomAngle:F1} độ!");
+                    rockRb.linearVelocity = new Vector2(xForce * direction, yForce);
+                }
+
+                // Chờ 1 giây trước khi ném cục tiếp theo
+                yield return new WaitForSeconds(1f);
             }
         }
         else
@@ -240,7 +263,7 @@ public class BossAI : MonoBehaviour
             Debug.LogWarning("Chưa gắn Rock Prefab hoặc Throw Point vào BossAI!");
         }
 
-        yield return new WaitForSeconds(1.5f); // Đứng yên hồi chiêu sau khi ném
+        yield return new WaitForSeconds(1.0f); // Đứng yên hồi chiêu sau khi ném xong cả 3 cục
         currentState = BossState.Idle;
     }
 
@@ -253,6 +276,9 @@ public class BossAI : MonoBehaviour
         {
             currentHealth -= 1;
             Debug.Log($"<color=cyan>Boss bị chém!</color> Máu còn: {currentHealth}");
+
+            // GỌI HIỆU ỨNG CHỚP ĐỎ TẠI ĐÂY!
+            StartCoroutine(FlashRedEffect());
 
             if (currentHealth <= 0)
             {
@@ -275,6 +301,15 @@ public class BossAI : MonoBehaviour
         else if (player.position.x < transform.position.x && transform.localScale.x > 0)
         {
             transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+        }
+    }
+    private IEnumerator FlashRedEffect()
+    {
+        if (sr != null)
+        {
+            sr.color = Color.red;
+            yield return new WaitForSeconds(0.15f); // Nháy đỏ trong 0.15s
+            sr.color = originalColor;
         }
     }
 
