@@ -1,15 +1,16 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement; // NEW: Thư viện để load lại màn chơi
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(BoxCollider2D))]
+// Bắt buộc phải có Animator gắn trên người
+[RequireComponent(typeof(Animator))]
 public class PlayerMovement : MonoBehaviour
 {
     // ==========================================
     // ZONE 1: VARIABLES & SETTINGS
     // ==========================================
 
-    // --- NEW: Hệ thống Checkpoint (Static để sống sót qua Scene Reload) ---
     public static Vector2 respawnPosition;
     public static bool hasCheckpoint = false;
 
@@ -28,10 +29,9 @@ public class PlayerMovement : MonoBehaviour
     public float steepSlideSpeed = 12f;
     public float gentleSlideForce = 3f;
 
-    // --- NEW: Các thông số Quán tính (Momentum) ---
     [Header("Quán tính (Momentum)")]
-    public float acceleration = 35f;  // Tốc độ đạp ga (Số càng lớn, tăng tốc càng nhanh)
-    public float deceleration = 45f;  // Tốc độ bóp phanh (Số càng lớn, dừng càng khựng)
+    public float acceleration = 35f;
+    public float deceleration = 45f;
 
     [Header("Game Feel (Cảm giác bay nhảy)")]
     public float coyoteTime = 0.15f;
@@ -48,12 +48,13 @@ public class PlayerMovement : MonoBehaviour
     // --- Linh kiện (Components) ---
     private Rigidbody2D rb;
     private BoxCollider2D cc;
+    private Animator anim; // Khai báo biến Animator
 
     // --- Trạng thái (States) ---
     private float moveInput;
-    private float currentSpeed; // NEW: Lưu tốc độ ngang thực tế đang thay đổi mượt mà
-    private bool isJumpHeld;    // NEW: Cờ kiểm tra đè nút nhảy
-    private bool isDead = false; // NEW: Cờ xác nhận đã chết chưa
+    private float currentSpeed;
+    private bool isJumpHeld;
+    private bool isDead = false;
 
     private bool isGrounded;
     private bool isOnSlope;
@@ -70,14 +71,14 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         stats = GetComponent<PlayerAttributes>();
-
         rb = GetComponent<Rigidbody2D>();
         cc = GetComponent<BoxCollider2D>();
+
+        anim = GetComponent<Animator>(); // Lấy linh kiện Animator từ nhân vật
 
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         rb.gravityScale = stats.normalGravity;
 
-        // --- NEW: Dịch chuyển người chơi đến Checkpoint nếu có ---
         if (hasCheckpoint)
         {
             transform.position = respawnPosition;
@@ -102,28 +103,27 @@ public class PlayerMovement : MonoBehaviour
         else if (moveInput < 0 && isFacingRight)
             Flip();
 
-        // --- NEW: Lấy tín hiệu giữ nút nhảy (Auto-hop) ---
         isJumpHeld = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space);
 
-        // --- Jump Buffering (Tapping) ---
-        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space))
             jumpBufferCounter = jumpBufferTime;
         else
             jumpBufferCounter -= Time.deltaTime;
 
-        // --- Short Hop (Thả tay sớm) ---
         if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.Space))
         {
             if (rb.linearVelocity.y > 0)
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * jumpCutMultiplier);
         }
 
-        // Debug Checkpoint
         if (Input.GetKeyDown(KeyCode.L))
         {
             stats.currentBambooCount = 0;
             Debug.Log("Bamboo Cleared!");
         }
+
+        // Gọi hàm cập nhật hình ảnh mỗi khung hình
+        UpdateAnimations();
     }
 
     // ==========================================
@@ -155,8 +155,6 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = false;
         RaycastHit2D validHit = new RaycastHit2D();
 
-        // --- NEW UPDATE: Gộp Layer Ground và Bamboo ---
-        // Sử dụng toán tử Bitwise (|) để tạo ra một LayerMask gộp cả 2
         LayerMask combinedLayer = groundLayer | bambooLayer;
 
         for (int i = 0; i < groundCheckRayCount; i++)
@@ -164,7 +162,6 @@ public class PlayerMovement : MonoBehaviour
             float xOffset = Mathf.Lerp(-groundCheckWidth / 2, groundCheckWidth / 2, (float)i / (groundCheckRayCount - 1));
             Vector2 rayOrigin = new Vector2(center.x + xOffset, center.y);
 
-            // Bắn tia laser kiểm tra CẢ ĐẤT LẪN TRE cùng một lúc
             RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.down, rayLength, combinedLayer);
 
             if (hit)
@@ -217,9 +214,12 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     void ApplyMovement()
     {
-        // A. XỬ LÝ NHẢY (Bao gồm cả Auto-Hop bằng isJumpHeld)
-        if ((jumpBufferCounter > 0f || isJumpHeld) && coyoteTimeCounter > 0f && !isSteepSlope)
+        // [SỬA LỖI 1]: Bỏ "|| isJumpHeld" để tránh nhân vật bị cộng dồn lực khi đè phím
+        if (jumpBufferCounter > 0f && coyoteTimeCounter > 0f && !isSteepSlope)
         {
+            // [SỬA LỖI 2]: Bắt buộc mở lại trọng lực NGAY LẬP TỨC để physics hoạt động
+            rb.gravityScale = stats.normalGravity;
+
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, stats.jumpForce);
             jumpBufferCounter = 0f;
             coyoteTimeCounter = 0f;
@@ -230,36 +230,24 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        // --- NEW: TÍNH TOÁN QUÁN TÍNH ---
-        // Xác định tốc độ người chơi MUỐN đạt được
         float targetSpeed = moveInput * stats.moveSpeed;
-
-        // Chọn dùng gia tốc (nếu đang giữ phím) hay dùng lực phanh (nếu đã buông phím)
         float accelRate = (Mathf.Abs(moveInput) > 0) ? acceleration : deceleration;
-
-        // Di chuyển dần currentSpeed về phía targetSpeed một cách mượt mà
         currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, accelRate * Time.fixedDeltaTime);
 
-
-        // B. XỬ LÝ DỐC ĐỨNG
         if (isGrounded && isSteepSlope)
         {
             Vector2 slideDownDirection = slopeNormalPerp.y < 0 ? slopeNormalPerp : -slopeNormalPerp;
             rb.gravityScale = stats.normalGravity;
             rb.linearVelocity = slideDownDirection * steepSlideSpeed;
         }
-
-        // C. XỬ LÝ LEO DỐC THOẢI
         else if (isGrounded && isOnSlope)
         {
             Vector2 slideDownDirection = slopeNormalPerp.y < 0 ? slopeNormalPerp : -slopeNormalPerp;
             rb.gravityScale = stats.normalGravity;
 
-            // Truyền currentSpeed vào thay vì moveInput để áp dụng quán tính trên dốc!
             Vector2 moveVelocity = new Vector2(-currentSpeed * slopeNormalPerp.x,
                                                -currentSpeed * slopeNormalPerp.y);
 
-            // Chỉ trượt xuống khi thả tay VÀ đã phanh dừng hẳn
             if (moveInput == 0f && Mathf.Abs(currentSpeed) < 0.1f)
             {
                 rb.linearVelocity = slideDownDirection * gentleSlideForce;
@@ -269,19 +257,14 @@ public class PlayerMovement : MonoBehaviour
                 rb.linearVelocity = moveVelocity + (slideDownDirection * gentleSlideForce);
             }
         }
-
-        // D. ĐỨNG YÊN TRÊN ĐƯỜNG PHẲNG (Đã phanh dừng hẳn)
         else if (isGrounded && moveInput == 0f && Mathf.Abs(currentSpeed) < 0.1f && !isOnSlope && !isSteepSlope)
         {
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
             rb.gravityScale = 0f;
         }
-
-        // E. CHẠY THƯỜNG / BAY TRÊN KHÔNG
         else
         {
             rb.gravityScale = stats.normalGravity;
-            // Áp dụng currentSpeed mượt mà vào trục X
             rb.linearVelocity = new Vector2(currentSpeed, rb.linearVelocity.y);
         }
     }
@@ -289,6 +272,25 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     // ZONE 7: HELPER FUNCTIONS
     // ==========================================
+
+    void UpdateAnimations()
+    {
+        if (anim != null)
+        {
+            anim.SetFloat("Speed", Mathf.Abs(rb.linearVelocity.x));
+            anim.SetBool("isGrounded", isGrounded);
+
+            // [SỬA LỖI 3]: Lọc bớt nhiễu số thập phân để đảm bảo vSpeed nhảy số dứt khoát
+            float verticalSpeed = rb.linearVelocity.y;
+            if (Mathf.Abs(verticalSpeed) < 0.05f)
+            {
+                verticalSpeed = 0f;
+            }
+
+            anim.SetFloat("vSpeed", verticalSpeed);
+        }
+    }
+
     void Flip()
     {
         isFacingRight = !isFacingRight;
@@ -296,28 +298,21 @@ public class PlayerMovement : MonoBehaviour
         localScale.x *= -1f;
         transform.localScale = localScale;
     }
-    // --- NEW: HỆ THỐNG CHẾT VÀ HỒI SINH ---
+
     void Die()
     {
         isDead = true;
-
-        // Ép vận tốc về 0 để nhân vật không trượt đi tiếp
         rb.linearVelocity = Vector2.zero;
-
-        // Tắt mô phỏng vật lý để nhân vật không bị rơi xuyên qua sàn
         rb.simulated = false;
-
         Debug.Log("Hết Bamboo! Nhân vật đã chết.");
-
-        // Gọi hàm RestartLevel sau restartDelay giây
         Invoke(nameof(RestartLevel), restartDelay);
     }
 
     void RestartLevel()
     {
-        // Load lại chính xác màn chơi hiện tại (Reset toàn bộ)
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
+
     void OnDrawGizmos()
     {
         if (cc == null) cc = GetComponent<BoxCollider2D>();

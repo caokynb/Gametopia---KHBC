@@ -14,8 +14,12 @@ public class PlayerModeManager : MonoBehaviour
 
     private bool isAttackMode = false; // Mặc định vừa vào game là chế độ Khắc
 
+    // Thêm biến animator ở đầu class PlayerModeManager
+    private Animator anim;
+
     void Start()
     {
+        anim = GetComponent<Animator>(); // Lấy component Animator từ Player
         // Set trạng thái chuẩn ngay từ khung hình đầu tiên
         UpdateModeState();
     }
@@ -49,5 +53,11 @@ public class PlayerModeManager : MonoBehaviour
 
         if (constructionVisual != null)
             constructionVisual.SetActive(!isAttackMode);
+
+        if (anim != null)
+        {
+            // Gửi trực tiếp biến bool isAttackMode sang Animator
+            anim.SetBool("isAttackMode", isAttackMode);
+        }
     }
 }
