@@ -8,7 +8,7 @@ public class PlayerAttributes : MonoBehaviour
     public int currentBambooCount = 100;
     public int burnBambooOnAttack = 0;
     public int burnBambooPerUnit = 0;
-    public int healthPoint = 1;
+    public int healthPoint = 3;
 
     [Header("Thông số Di chuyển")]
     public float moveSpeed = 8f;     // Tốc độ chạy ngang của nhân vật

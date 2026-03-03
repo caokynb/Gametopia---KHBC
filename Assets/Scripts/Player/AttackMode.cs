@@ -83,6 +83,8 @@ public class AttackMode : MonoBehaviour
             enemyLayers           // Lớp kẻ địch
         );
 
+        bool hasHitAnything = false; // Biến đánh dấu xem có đánh trúng gì không
+
         foreach (Collider2D obj in hitObjects)
         {
             // Kiểm tra Kẻ địch
@@ -90,7 +92,35 @@ public class AttackMode : MonoBehaviour
             if (enemy != null)
             {
                 enemy.TakeDamage(transform.position);
-                continue;
+                continue; // Chém trúng rồi thì bỏ qua các check bên dưới
+            }
+
+            // 2. CHÉM BOSS (Đây là đoạn code bạn đang thiếu!)
+            BossAI boss = obj.GetComponent<BossAI>();
+            if (boss != null)
+            {
+                boss.TakeDamage(transform.position);
+                continue; // Chém trúng rồi thì bỏ qua các check bên dưới
+            }
+
+            // 3. Phá vật thể môi trường
+            bool hitValidTarget = false; // Kiểm tra mục tiêu hiện tại có hợp lệ không
+
+            // 1. Kiểm tra TrapTrigger
+            TrapTrigger trap = obj.GetComponent<TrapTrigger>();
+            if (trap == null) trap = obj.GetComponentInParent<TrapTrigger>();
+            if (trap != null)
+            {
+                trap.OnBlockDestroyed();
+                hitValidTarget = true;
+            }
+
+            // 2. Kiểm tra EnemyAI
+            EnemyAI enemy1 = obj.GetComponent<EnemyAI>();
+            if (enemy1 != null)
+            {
+                enemy1.TakeDamage(transform.position);
+                hitValidTarget = true;
             }
 
             // Kiểm tra vật thể phá hủy (thùng, cây...)
@@ -98,9 +128,8 @@ public class AttackMode : MonoBehaviour
             if (destructible != null)
             {
                 destructible.TakeDamage();
+                hitValidTarget = true;
             }
-        }
-    }
 
     void HandleBambooRegen()
     {
@@ -109,19 +138,51 @@ public class AttackMode : MonoBehaviour
             regenTimer += Time.deltaTime;
             if (regenTimer >= 1f)
             {
-                attributes.currentBambooCount = Mathf.Min(attributes.currentBambooCount + (int)bambooRegenRate, attributes.maxBambooCount);
-                regenTimer = 0;
+                hasHitAnything = true;
             }
+        }
+
+        // CHỈ TRỪ TRE KHI CÓ ĐÁNH TRÚNG ÍT NHẤT 1 THỨ
+        if (hasHitAnything)
+        {
+            attributes.currentBambooCount -= bambooCostPerAttack;
+            // Đảm bảo tre không bị âm
+            if (attributes.currentBambooCount < 0) attributes.currentBambooCount = 0;
+
+            Debug.Log("Đã đánh trúng! Trừ " + bambooCostPerAttack + " tre. Còn lại: " + attributes.currentBambooCount);
+        }
+        else
+        {
+            Debug.Log("Đánh hụt, không mất tre.");
         }
     }
 
     // --- Các hàm hỗ trợ hệ thống ---
     public void Respawn()
     {
-        transform.position = startPosition;
+        // KIỂM TRA CHECKPOINT TRƯỚC
+        if (PlayerMovement.hasCheckpoint)
+        {
+            transform.position = PlayerMovement.respawnPosition;
+            Debug.Log("Hồi sinh tại Checkpoint!");
+        }
+        else
+        {
+            // Nếu chưa ăn checkpoint nào thì về vị trí khởi đầu của Level
+            transform.position = startPosition;
+            Debug.Log("Hồi sinh tại điểm bắt đầu màn chơi!");
+        }
+
+        // Reset các chỉ số khác
         attributes.healthPoint = 1;
         attributes.currentBambooCount = attributes.maxBambooCount;
-        if (rb != null) rb.linearVelocity = Vector2.zero;
+
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.bodyType = RigidbodyType2D.Dynamic; // Đảm bảo người chơi không bị Static
+        }
+
         canAttack = true;
     }
 
