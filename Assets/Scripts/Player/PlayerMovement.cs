@@ -1,16 +1,15 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(BoxCollider2D))]
-// Bắt buộc phải có Animator gắn trên người
-[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(Animator))] // Bắt buộc phải có Animator
 public class PlayerMovement : MonoBehaviour
 {
     // ==========================================
     // ZONE 1: VARIABLES & SETTINGS
     // ==========================================
-
     public static Vector2 respawnPosition;
     public static bool hasCheckpoint = false;
 
@@ -24,6 +23,11 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask groundLayer;
     public LayerMask bambooLayer;
 
+    [Header("Mở Khóa Kỹ Năng (Team Feature)")]
+    public bool canJumpOnBamboo = false;
+    private bool isStandingOnBambooOnly;
+    private bool hasUsedFloatingJump = false; // Token chống spam nhảy lơ lửng
+
     [Header("Cài đặt Dốc (Slope)")]
     public float maxSlopeAngle = 60f;
     public float steepSlideSpeed = 12f;
@@ -33,24 +37,25 @@ public class PlayerMovement : MonoBehaviour
     public float acceleration = 35f;
     public float deceleration = 45f;
 
-    [Header("Game Feel (Cảm giác bay nhảy)")]
+    [Header("Game Feel")]
     public float coyoteTime = 0.15f;
     private float coyoteTimeCounter;
     public float jumpBufferTime = 0.1f;
     private float jumpBufferCounter;
     public float jumpCutMultiplier = 0.5f;
 
-    [Header("Thời gian Cooldown Restart Level")]
+    [Header("Thời gian Cooldown")]
     public float restartDelay = 1.5f;
 
-    private bool isFacingRight = true;
+    [Header("Giao diện & Hiệu ứng")]
+    private SpriteRenderer spriteRenderer;
+    private Color originalColor;
+    private Animator anim; // Linh kiện Animator từ code của bạn
 
-    // --- Linh kiện (Components) ---
+    private bool isFacingRight = true;
     private Rigidbody2D rb;
     private BoxCollider2D cc;
-    private Animator anim; // Khai báo biến Animator
 
-    // --- Trạng thái (States) ---
     private float moveInput;
     private float currentSpeed;
     private bool isJumpHeld;
@@ -73,39 +78,32 @@ public class PlayerMovement : MonoBehaviour
         stats = GetComponent<PlayerAttributes>();
         rb = GetComponent<Rigidbody2D>();
         cc = GetComponent<BoxCollider2D>();
-
-        anim = GetComponent<Animator>(); // Lấy linh kiện Animator từ nhân vật
+        anim = GetComponent<Animator>(); // Lấy Animator
+        spriteRenderer = GetComponent<SpriteRenderer>();
 
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         rb.gravityScale = stats.normalGravity;
 
-        if (hasCheckpoint)
-        {
-            transform.position = respawnPosition;
-        }
+        if (hasCheckpoint) transform.position = respawnPosition;
+        if (spriteRenderer != null) originalColor = spriteRenderer.color;
     }
 
     // ==========================================
-    // ZONE 3: INPUT (Runs every frame)
+    // ZONE 3: INPUT & ANIMATION CALLS
     // ==========================================
     void Update()
     {
-        if (stats.currentBambooCount <= 0 && !isDead)
-        {
-            Die();
-        }
+        if (stats.currentBambooCount <= 0 && !isDead) Die();
         if (isDead) return;
+
         moveInput = Input.GetAxisRaw("Horizontal");
 
-        // --- Lật mặt ---
-        if (moveInput > 0 && !isFacingRight)
-            Flip();
-        else if (moveInput < 0 && isFacingRight)
-            Flip();
+        if (moveInput > 0 && !isFacingRight) Flip();
+        else if (moveInput < 0 && isFacingRight) Flip();
 
         isJumpHeld = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space);
 
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.Space))
             jumpBufferCounter = jumpBufferTime;
         else
             jumpBufferCounter -= Time.deltaTime;
@@ -116,19 +114,10 @@ public class PlayerMovement : MonoBehaviour
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * jumpCutMultiplier);
         }
 
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            stats.currentBambooCount = 0;
-            Debug.Log("Bamboo Cleared!");
-        }
-
-        // Gọi hàm cập nhật hình ảnh mỗi khung hình
+        // Cập nhật Animation mỗi frame (Từ code của bạn)
         UpdateAnimations();
     }
 
-    // ==========================================
-    // ZONE 4: PHYSICS (Runs on a fixed timer)
-    // ==========================================
     void FixedUpdate()
     {
         CheckGroundedBambooAndSlope();
@@ -136,15 +125,13 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ==========================================
-    // ZONE 5: SENSORS & MATH
+    // ZONE 4: SENSORS (Team Logic + Grounded Fix)
     // ==========================================
     void CheckGroundedBambooAndSlope()
     {
         if (Time.time < lastJumpTime + jumpCooldown)
         {
             isGrounded = false;
-            isOnSlope = false;
-            isSteepSlope = false;
             coyoteTimeCounter = 0f;
             return;
         }
@@ -154,79 +141,77 @@ public class PlayerMovement : MonoBehaviour
 
         isGrounded = false;
         RaycastHit2D validHit = new RaycastHit2D();
-
         LayerMask combinedLayer = groundLayer | bambooLayer;
+
+        bool touchingGround = false;
+        bool touchingBamboo = false;
 
         for (int i = 0; i < groundCheckRayCount; i++)
         {
             float xOffset = Mathf.Lerp(-groundCheckWidth / 2, groundCheckWidth / 2, (float)i / (groundCheckRayCount - 1));
             Vector2 rayOrigin = new Vector2(center.x + xOffset, center.y);
 
-            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.down, rayLength, combinedLayer);
+            RaycastHit2D[] hits = Physics2D.RaycastAll(rayOrigin, Vector2.down, rayLength, combinedLayer);
 
-            if (hit)
+            foreach (RaycastHit2D hit in hits)
             {
                 isGrounded = true;
-                validHit = hit;
-                break;
+                if (((1 << hit.collider.gameObject.layer) & groundLayer.value) != 0)
+                {
+                    touchingGround = true;
+                    validHit = hit;
+                }
+                else if (((1 << hit.collider.gameObject.layer) & bambooLayer.value) != 0)
+                {
+                    touchingBamboo = true;
+                    if (!touchingGround) validHit = hit;
+
+                    Rigidbody2D bambooRB = hit.collider.attachedRigidbody;
+                    if (IsBambooChainGrounded(bambooRB)) touchingGround = true;
+                }
             }
         }
+
+        isStandingOnBambooOnly = touchingBamboo && !touchingGround;
+        if (touchingGround) hasUsedFloatingJump = false; // Reset token khi chạm đất an toàn
 
         if (isGrounded)
         {
             slopeAngle = Vector2.Angle(validHit.normal, Vector2.up);
-
             if (slopeAngle > 0.1f)
             {
                 slopeNormalPerp = Vector2.Perpendicular(validHit.normal).normalized;
-
-                if (slopeAngle <= maxSlopeAngle)
-                {
-                    isOnSlope = true;
-                    isSteepSlope = false;
-                }
-                else
-                {
-                    isOnSlope = false;
-                    isSteepSlope = true;
-                }
+                isOnSlope = slopeAngle <= maxSlopeAngle;
+                isSteepSlope = slopeAngle > maxSlopeAngle;
             }
-            else
-            {
-                isOnSlope = false;
-                isSteepSlope = false;
-            }
-        }
-        else
-        {
-            isOnSlope = false;
-            isSteepSlope = false;
+            else { isOnSlope = isSteepSlope = false; }
         }
 
-        if (isGrounded && !isSteepSlope)
+        // Kiểm tra quyền nhảy (Team Logic)
+        bool hasJumpPermission = !isSteepSlope && (!isStandingOnBambooOnly || (canJumpOnBamboo && !hasUsedFloatingJump));
+
+        if (isGrounded && hasJumpPermission)
             coyoteTimeCounter = coyoteTime;
         else
             coyoteTimeCounter -= Time.fixedDeltaTime;
     }
 
     // ==========================================
-    // ZONE 6: ACTIONS & MOVEMENT
+    // ZONE 5: MOVEMENT (Combined Logic)
     // ==========================================
     void ApplyMovement()
     {
-        // [SỬA LỖI 1]: Bỏ "|| isJumpHeld" để tránh nhân vật bị cộng dồn lực khi đè phím
         if (jumpBufferCounter > 0f && coyoteTimeCounter > 0f && !isSteepSlope)
         {
-            // [SỬA LỖI 2]: Bắt buộc mở lại trọng lực NGAY LẬP TỨC để physics hoạt động
-            rb.gravityScale = stats.normalGravity;
+            if (isStandingOnBambooOnly) hasUsedFloatingJump = true;
 
+            rb.gravityScale = stats.normalGravity; // Reset gravity khi nhảy (Code của bạn)
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, stats.jumpForce);
+
             jumpBufferCounter = 0f;
             coyoteTimeCounter = 0f;
             lastJumpTime = Time.time;
             isGrounded = false;
-            isOnSlope = false;
-            isSteepSlope = false;
             return;
         }
 
@@ -236,29 +221,13 @@ public class PlayerMovement : MonoBehaviour
 
         if (isGrounded && isSteepSlope)
         {
-            Vector2 slideDownDirection = slopeNormalPerp.y < 0 ? slopeNormalPerp : -slopeNormalPerp;
+            Vector2 slideDir = slopeNormalPerp.y < 0 ? slopeNormalPerp : -slopeNormalPerp;
             rb.gravityScale = stats.normalGravity;
-            rb.linearVelocity = slideDownDirection * steepSlideSpeed;
+            rb.linearVelocity = slideDir * steepSlideSpeed;
         }
-        else if (isGrounded && isOnSlope)
+        else if (isGrounded && moveInput == 0f && Mathf.Abs(currentSpeed) < 0.1f && !isOnSlope)
         {
-            Vector2 slideDownDirection = slopeNormalPerp.y < 0 ? slopeNormalPerp : -slopeNormalPerp;
-            rb.gravityScale = stats.normalGravity;
-
-            Vector2 moveVelocity = new Vector2(-currentSpeed * slopeNormalPerp.x,
-                                               -currentSpeed * slopeNormalPerp.y);
-
-            if (moveInput == 0f && Mathf.Abs(currentSpeed) < 0.1f)
-            {
-                rb.linearVelocity = slideDownDirection * gentleSlideForce;
-            }
-            else
-            {
-                rb.linearVelocity = moveVelocity + (slideDownDirection * gentleSlideForce);
-            }
-        }
-        else if (isGrounded && moveInput == 0f && Mathf.Abs(currentSpeed) < 0.1f && !isOnSlope && !isSteepSlope)
-        {
+            // Fix đứng yên không bị trượt (Code của bạn)
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
             rb.gravityScale = 0f;
         }
@@ -270,9 +239,8 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ==========================================
-    // ZONE 7: HELPER FUNCTIONS
+    // ZONE 6: ANIMATION SYSTEM (From your code)
     // ==========================================
-
     void UpdateAnimations()
     {
         if (anim != null)
@@ -280,23 +248,58 @@ public class PlayerMovement : MonoBehaviour
             anim.SetFloat("Speed", Mathf.Abs(rb.linearVelocity.x));
             anim.SetBool("isGrounded", isGrounded);
 
-            // [SỬA LỖI 3]: Lọc bớt nhiễu số thập phân để đảm bảo vSpeed nhảy số dứt khoát
             float verticalSpeed = rb.linearVelocity.y;
-            if (Mathf.Abs(verticalSpeed) < 0.05f)
-            {
-                verticalSpeed = 0f;
-            }
-
+            if (Mathf.Abs(verticalSpeed) < 0.05f) verticalSpeed = 0f;
             anim.SetFloat("vSpeed", verticalSpeed);
         }
     }
 
+    // ==========================================
+    // ZONE 7: HELPERS & COMBAT (Team Features)
+    // ==========================================
     void Flip()
     {
         isFacingRight = !isFacingRight;
-        Vector3 localScale = transform.localScale;
-        localScale.x *= -1f;
-        transform.localScale = localScale;
+        transform.localScale = new Vector3(transform.localScale.x * -1, transform.localScale.y, 1);
+    }
+
+    public void TakeDamage(int damage)
+    {
+        stats.healthPoint -= damage;
+        if (spriteRenderer != null) StartCoroutine(FlashRedEffect());
+        if (stats.healthPoint <= 0) Die();
+    }
+
+    private IEnumerator<WaitForSeconds> FlashRedEffect()
+    {
+        spriteRenderer.color = Color.red;
+        yield return new WaitForSeconds(0.15f);
+        spriteRenderer.color = originalColor;
+    }
+
+    private bool IsBambooChainGrounded(Rigidbody2D startRB)
+    {
+        if (startRB == null) return false;
+        List<Rigidbody2D> visited = new List<Rigidbody2D>();
+        return CheckBambooNodeRB(startRB, visited);
+    }
+
+    private bool CheckBambooNodeRB(Rigidbody2D currentRB, List<Rigidbody2D> visited)
+    {
+        if (visited.Contains(currentRB)) return false;
+        visited.Add(currentRB);
+        if (currentRB.IsTouchingLayers(groundLayer)) return true;
+
+        List<Collider2D> contacts = new List<Collider2D>();
+        ContactFilter2D filter = new ContactFilter2D { useLayerMask = true, layerMask = bambooLayer };
+        currentRB.GetContacts(filter, contacts);
+
+        foreach (var contact in contacts)
+        {
+            Rigidbody2D neighbor = contact.attachedRigidbody;
+            if (neighbor != null && neighbor != currentRB && CheckBambooNodeRB(neighbor, visited)) return true;
+        }
+        return false;
     }
 
     void Die()
@@ -304,31 +307,8 @@ public class PlayerMovement : MonoBehaviour
         isDead = true;
         rb.linearVelocity = Vector2.zero;
         rb.simulated = false;
-        Debug.Log("Hết Bamboo! Nhân vật đã chết.");
         Invoke(nameof(RestartLevel), restartDelay);
     }
 
-    void RestartLevel()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-    }
-
-    void OnDrawGizmos()
-    {
-        if (cc == null) cc = GetComponent<BoxCollider2D>();
-        if (cc != null && groundCheckRayCount > 1)
-        {
-            Gizmos.color = Color.yellow;
-            Vector2 center = cc.bounds.center;
-            float height = cc.bounds.extents.y + groundCheckDistance;
-
-            for (int i = 0; i < groundCheckRayCount; i++)
-            {
-                float xOffset = Mathf.Lerp(-groundCheckWidth / 2, groundCheckWidth / 2, (float)i / (groundCheckRayCount - 1));
-                Vector2 start = new Vector2(center.x + xOffset, center.y);
-                Vector2 end = new Vector2(center.x + xOffset, center.y - height);
-                Gizmos.DrawLine(start, end);
-            }
-        }
-    }
+    void RestartLevel() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 }
