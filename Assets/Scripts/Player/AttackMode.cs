@@ -94,10 +94,10 @@ public class AttackMode : MonoBehaviour
             }
 
             // 2. Kiểm tra EnemyAI
-            EnemyAI enemy = obj.GetComponent<EnemyAI>();
-            if (enemy != null)
+            EnemyAI enemy1 = obj.GetComponent<EnemyAI>();
+            if (enemy1 != null)
             {
-                enemy.TakeDamage(transform.position);
+                enemy1.TakeDamage(transform.position);
                 hitValidTarget = true;
             }
 
