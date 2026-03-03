@@ -70,15 +70,15 @@ public class AttackMode : MonoBehaviour
             if (enemy != null)
             {
                 enemy.TakeDamage(transform.position);
-                continue;
+                continue; // Chém trúng rồi thì bỏ qua các check bên dưới
             }
 
-            // 2. Chém BOSS (Đoạn code mới được thêm vào!)
+            // 2. CHÉM BOSS (Đây là đoạn code bạn đang thiếu!)
             BossAI boss = obj.GetComponent<BossAI>();
             if (boss != null)
             {
                 boss.TakeDamage(transform.position);
-                continue;
+                continue; // Chém trúng rồi thì bỏ qua các check bên dưới
             }
 
             // 3. Phá vật thể môi trường

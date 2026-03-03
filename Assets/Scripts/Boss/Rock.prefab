@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8904557047878232941}
   - component: {fileID: 7198123562911492419}
   - component: {fileID: 2449042124057467207}
+  - component: {fileID: 1818730542153092001}
   m_Layer: 0
   m_Name: Rock
   m_TagString: Untagged
@@ -156,3 +157,15 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.6
+--- !u!114 &1818730542153092001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3178983059684589811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e66bf3e69d1f7574dbf9143d1ab03ab2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossRock

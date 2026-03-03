@@ -4,25 +4,41 @@ public class BossRock : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Enemy") || collision.CompareTag("Boss")) return;
+        HandleHit(collision.gameObject);
+    }
 
-        if (collision.CompareTag("Player"))
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        HandleHit(collision.gameObject);
+    }
+
+    private void HandleHit(GameObject hitObject)
+    {
+        // SỬA TẠI ĐÂY: Bỏ qua nếu đá chạm vào bất kỳ ai thuộc Layer "Enemy" (bao gồm cả Boss)
+        if (hitObject.layer == LayerMask.NameToLayer("Enemy")) return;
+
+        // Xử lý khi trúng Anh Khoai
+        if (hitObject.CompareTag("Player"))
         {
-            PlayerMovement player = collision.GetComponent<PlayerMovement>();
-            if (player != null)
+            PlayerMovement pMovement = hitObject.GetComponent<PlayerMovement>();
+            if (pMovement != null)
             {
-                player.TakeDamage(1); // Gọi hàm chớp đỏ và trừ máu!
+                pMovement.TakeDamage(1);
+                Debug.Log("<color=yellow>BỐP!</color> Trúng đá tảng!");
             }
-            Destroy(gameObject); // (Dòng này chỉ giữ lại trong BossRock.cs nhé)
+            Destroy(gameObject); // Đá vỡ
         }
-        else if (((1 << collision.gameObject.layer) & LayerMask.GetMask("Bamboo")) != 0)
+        // Xử lý khi trúng khiên Tre
+        else if (((1 << hitObject.layer) & LayerMask.GetMask("Bamboo")) != 0)
         {
-            Destroy(collision.gameObject);
-            Destroy(gameObject);
+            Debug.Log("Đá đập trúng khiên Tre và vỡ vụn!");
+            Destroy(hitObject); // Phá vỡ tre
+            Destroy(gameObject); // Đá vỡ
         }
-        else if (((1 << collision.gameObject.layer) & LayerMask.GetMask("Ground")) != 0)
+        // Xử lý khi rơi xuống đất
+        else if (((1 << hitObject.layer) & LayerMask.GetMask("Ground")) != 0)
         {
-            Destroy(gameObject);
+            Destroy(gameObject); // Đá vỡ
         }
     }
 }
