@@ -65,6 +65,23 @@ public class AttackMode : MonoBehaviour
 
         foreach (Collider2D obj in hitObjects)
         {
+            // 1. Chém quái nhỏ
+            EnemyAttack enemy = obj.GetComponent<EnemyAttack>();
+            if (enemy != null)
+            {
+                enemy.TakeDamage(transform.position);
+                continue; // Chém trúng rồi thì bỏ qua các check bên dưới
+            }
+
+            // 2. CHÉM BOSS (Đây là đoạn code bạn đang thiếu!)
+            BossAI boss = obj.GetComponent<BossAI>();
+            if (boss != null)
+            {
+                boss.TakeDamage(transform.position);
+                continue; // Chém trúng rồi thì bỏ qua các check bên dưới
+            }
+
+            // 3. Phá vật thể môi trường
             bool hitValidTarget = false; // Kiểm tra mục tiêu hiện tại có hợp lệ không
 
             // 1. Kiểm tra TrapTrigger
