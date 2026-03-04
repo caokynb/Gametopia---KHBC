@@ -780,7 +780,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConstructionMode
   segmentLength: 0.7
-  costPerSegment: 1
+  costPerSegment: 2
   gravityScale: 2
   spawnDelay: 0.5
   singleBambooPrefab: {fileID: 6595069276853952041, guid: 889c7dddde920664cb4dd3319f57c9dd, type: 3}
@@ -810,7 +810,7 @@ MonoBehaviour:
   enemyLayers:
     serializedVersion: 2
     m_Bits: 8
-  bambooCostPerAttack: 5
+  bambooCostPerAttack: 2
   attackCooldown: 0.3
 --- !u!114 &86693731
 MonoBehaviour:
@@ -1042,7 +1042,7 @@ Transform:
   m_GameObject: {fileID: 86693728}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -2.04, z: 0}
+  m_LocalPosition: {x: 242.7, y: -14.9, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1652,7 +1652,11 @@ Transform:
   m_GameObject: {fileID: 402924410}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+<<<<<<< HEAD
   m_LocalPosition: {x: 110.37782, y: -2.04, z: -10}
+=======
+  m_LocalPosition: {x: 242.7, y: -14.9, z: -10}
+>>>>>>> 5864bd0c21bc3288cd9820ee50e8df37a1cbeeae
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2151,6 +2155,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6703991389605350059, guid: c0eed84ac8b8c4f4291bb3ba1632c9d3, type: 3}
   m_PrefabInstance: {fileID: 69295533}
   m_PrefabAsset: {fileID: 0}
+<<<<<<< HEAD
 --- !u!1 &574005741
 GameObject:
   m_ObjectHideFlags: 0
@@ -2252,6 +2257,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraMovement
   VirtualCam: {fileID: 1623812439}
+=======
+>>>>>>> 5864bd0c21bc3288cd9820ee50e8df37a1cbeeae
 --- !u!1 &671529162
 GameObject:
   m_ObjectHideFlags: 0
@@ -2633,6 +2640,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 412590ae9ce0b7743b424c460cde2043, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossHitbox
+<<<<<<< HEAD
 --- !u!1 &895136715
 GameObject:
   m_ObjectHideFlags: 0
@@ -2829,6 +2837,73 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraMovement
   VirtualCam: {fileID: 1679417182}
+=======
+--- !u!1001 &941693327
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 55.18
+      objectReference: {fileID: 0}
+    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.67
+      objectReference: {fileID: 0}
+    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7893483424004481895, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
+      propertyPath: m_Name
+      value: BuNhinRom
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
+>>>>>>> 5864bd0c21bc3288cd9820ee50e8df37a1cbeeae
 --- !u!1 &990969113
 GameObject:
   m_ObjectHideFlags: 0
@@ -3083,6 +3158,24 @@ MonoBehaviour:
       BarrelClipping: 0.25
       Anamorphism: 0
   BlendHint: 0
+<<<<<<< HEAD
+=======
+--- !u!4 &1004605580
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1004605577}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 242.7, y: -14.9, z: -10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+>>>>>>> 5864bd0c21bc3288cd9820ee50e8df37a1cbeeae
 --- !u!1001 &1126112962
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5025,7 +5118,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0.06, y: -0.02}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -5035,7 +5128,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.01, y: 2.365}
+  m_Size: {x: 2.7, y: 0.86}
   m_EdgeRadius: 0
 --- !u!1 &1698755927
 GameObject:
@@ -53223,4 +53316,9 @@ SceneRoots:
   - {fileID: 1992890735}
   - {fileID: 990969116}
   - {fileID: 2140902283}
+<<<<<<< HEAD
   - {fileID: 864570933}
+=======
+  - {fileID: 1383152276761368095}
+  - {fileID: 941693327}
+>>>>>>> 5864bd0c21bc3288cd9820ee50e8df37a1cbeeae
