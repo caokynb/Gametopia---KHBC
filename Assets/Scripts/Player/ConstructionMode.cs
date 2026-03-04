@@ -83,13 +83,19 @@ public class ConstructionMode : MonoBehaviour
             Vector2 pos = start + direction * (i * segmentLength + segmentLength / 2f);
             if (!Physics2D.OverlapBox(pos, checkSize, angle, groundLayer))
             {
-                // Chọn prefab preview tương ứng (có thể dùng chung logic hình ảnh như thật)
                 GameObject prefabToUse = GetBambooPrefab(i, segmentCount);
                 GameObject preview = Instantiate(prefabToUse, pos, rotation);
 
-                // Làm mờ Preview (Cần SpriteRenderer trên Prefab)
+                // Làm mờ Preview 
                 var renderer = preview.GetComponent<SpriteRenderer>();
                 if (renderer != null) renderer.color = new Color(1, 1, 1, 0.4f);
+
+                // SỬA TẠI ĐÂY: Tắt toàn bộ va chạm (Collider) của bản Preview
+                Collider2D[] colliders = preview.GetComponentsInChildren<Collider2D>();
+                foreach (Collider2D col in colliders)
+                {
+                    col.enabled = false;
+                }
 
                 activePreviews.Add(preview);
             }
