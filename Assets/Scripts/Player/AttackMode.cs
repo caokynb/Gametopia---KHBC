@@ -70,22 +70,20 @@ public class AttackMode : MonoBehaviour
     }
 
     // BƯỚC 2: GÂY SÁT THƯƠNG THỰC TẾ (ĐƯỢC GỌI BỞI ANIMATION EVENT)
-    // Bạn hãy gán hàm này vào frame đẹp nhất nhé!
     public void TriggerDamage()
     {
         Debug.Log("<color=lime>Anh Khoai đã chém trúng tầm đánh (Hình Chữ Nhật)!</color>");
 
-        // SỬA TẠI ĐÂY: Dùng OverlapBoxAll để quét hình chữ nhật
         Collider2D[] hitObjects = Physics2D.OverlapBoxAll(
-            attackPoint.position, // Tâm của hình chữ nhật
-            attackBoxSize,        // Kích thước (Rộng, Cao)
-            attackBoxAngle,       // Góc xoay
-            enemyLayers           // Lớp kẻ địch
+            attackPoint.position,
+            attackBoxSize,
+            attackBoxAngle,
+            enemyLayers
         );
 
         foreach (Collider2D obj in hitObjects)
         {
-            // Kiểm tra Kẻ địch
+            // 1. Kiểm tra Kẻ địch nhỏ
             EnemyAttack enemy = obj.GetComponent<EnemyAttack>();
             if (enemy != null)
             {
@@ -93,7 +91,15 @@ public class AttackMode : MonoBehaviour
                 continue;
             }
 
-            // Kiểm tra vật thể phá hủy (thùng, cây...)
+            // 2. KIỂM TRA BOSS (Đoạn này bị thiếu!)
+            BossAI boss = obj.GetComponent<BossAI>();
+            if (boss != null)
+            {
+                boss.TakeDamage(transform.position);
+                continue;
+            }
+
+            // 3. Kiểm tra vật thể phá hủy
             DestructibleObject destructible = obj.GetComponent<DestructibleObject>();
             if (destructible != null)
             {
