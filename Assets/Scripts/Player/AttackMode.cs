@@ -2,90 +2,75 @@
 
 public class AttackMode : MonoBehaviour
 {
-    [Header("Liên kết Dữ liệu")]
     public PlayerAttributes attributes;
-    private Rigidbody2D rb;
-    private Animator anim;
     private Vector3 startPosition;
+    private Rigidbody2D rb;
 
-    [Header("Cấu hình Hitbox (Hình Chữ Nhật)")]
-    // Điểm xuất phát của tâm hình chữ nhật
+    // [THÊM MỚI]: Khai báo biến Animator
+    private Animator anim;
+
+    [Header("Cấu hình đòn đánh")]
     public Transform attackPoint;
+    public float attackRange = 0.5f;
+    public LayerMask enemyLayers;
 
-    // SỬA TẠI ĐÂY: Dùng Vector2 để điều chỉnh Rộng (x) và Cao (y)
-    // Bạn có thể nhập (2.0, 1.0) để có hình chữ nhật dài trước mặt
-    public Vector2 attackBoxSize = new Vector2(2.0f, 1.0f);
-
-    // Góc xoay của hình chữ nhật (mặc định là 0)
-    public float attackBoxAngle = 0f;
-
-    public LayerMask enemyLayers;   // Lớp vật thể là kẻ địch
-
-    [Header("Thời gian hồi chiêu")]
+    [Header("Thời gian hồi chiêu (Số giây phải chờ)")]
     public float attackCooldown = 0.5f;
     private float nextAttackTime = 0f;
     private bool canAttack = true;
 
-    [Header("Cài đặt hồi Bamboo")]
+    [Header("Cài đặt hồi năng lượng")]
     public float bambooRegenRate = 5f;
     private float regenTimer;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        // [THÊM MỚI]: Lấy component Animator từ nhân vật
         anim = GetComponent<Animator>();
         startPosition = transform.position;
     }
 
     void Update()
     {
-        HandleBambooRegen();
+        RegenerateBamboo();
 
-        // Kiểm tra cooldown
-        if (Time.time >= nextAttackTime) canAttack = true;
+        if (Time.time >= nextAttackTime)
+        {
+            canAttack = true;
+        }
 
-        // BƯỚC 1: NHẬN INPUT - CHỈ KÍCH HOẠT HOẠT ẢNH
         if (Input.GetButtonDown("Fire1") && canAttack)
         {
-            StartAttackSequence();
+            ExecuteCombat();
         }
     }
 
-    void StartAttackSequence()
+    void ExecuteCombat()
     {
-        // Kiểm tra năng lượng trước khi vung kiếm
         if (attributes.currentBambooCount < attributes.burnBambooOnAttack) return;
 
         canAttack = false;
         nextAttackTime = Time.time + attackCooldown;
 
-        // Trừ năng lượng ngay khi quyết định vung kiếm
-        attributes.currentBambooCount -= attributes.burnBambooOnAttack;
-
-        // Kích hoạt animation Slash
+        // [THÊM MỚI]: Gửi tín hiệu Trigger có tên "Slash" sang Animator để phát hình ảnh chém
         if (anim != null)
         {
             anim.SetTrigger("Slash");
         }
+
+        Attack();
     }
 
-    // BƯỚC 2: GÂY SÁT THƯƠNG THỰC TẾ (ĐƯỢC GỌI BỞI ANIMATION EVENT)
-    // Bạn hãy gán hàm này vào frame đẹp nhất nhé!
-    public void TriggerDamage()
+    void Attack()
     {
-        Debug.Log("<color=lime>Anh Khoai đã chém trúng tầm đánh (Hình Chữ Nhật)!</color>");
+        attributes.currentBambooCount -= attributes.burnBambooOnAttack;
+        Debug.Log("Đã đánh! Cần chờ " + attackCooldown + " giây để đánh tiếp.");
 
-        // SỬA TẠI ĐÂY: Dùng OverlapBoxAll để quét hình chữ nhật
-        Collider2D[] hitObjects = Physics2D.OverlapBoxAll(
-            attackPoint.position, // Tâm của hình chữ nhật
-            attackBoxSize,        // Kích thước (Rộng, Cao)
-            attackBoxAngle,       // Góc xoay
-            enemyLayers           // Lớp kẻ địch
-        );
+        Collider2D[] hitObjects = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
 
         foreach (Collider2D obj in hitObjects)
         {
-            // Kiểm tra Kẻ địch
             EnemyAttack enemy = obj.GetComponent<EnemyAttack>();
             if (enemy != null)
             {
@@ -93,7 +78,6 @@ public class AttackMode : MonoBehaviour
                 continue;
             }
 
-            // Kiểm tra vật thể phá hủy (thùng, cây...)
             DestructibleObject destructible = obj.GetComponent<DestructibleObject>();
             if (destructible != null)
             {
@@ -102,7 +86,7 @@ public class AttackMode : MonoBehaviour
         }
     }
 
-    void HandleBambooRegen()
+    void RegenerateBamboo()
     {
         if (attributes.currentBambooCount < attributes.maxBambooCount)
         {
@@ -115,7 +99,6 @@ public class AttackMode : MonoBehaviour
         }
     }
 
-    // --- Các hàm hỗ trợ hệ thống ---
     public void Respawn()
     {
         transform.position = startPosition;
@@ -125,27 +108,15 @@ public class AttackMode : MonoBehaviour
         canAttack = true;
     }
 
-    public void UpdateCheckpoint(Vector3 newPos) => startPosition = newPos;
+    public void UpdateCheckpoint(Vector3 newPos)
+    {
+        startPosition = newPos;
+    }
 
-    // SỬA TẠI ĐÂY: Cập nhật Gizmos để vẽ hình chữ nhật
     private void OnDrawGizmosSelected()
     {
         if (attackPoint == null) return;
-
-        Gizmos.color = Color.cyan; // Đổi màu cho dễ phân biệt
-
-        // Lấy ma trận xoay của attackPoint để hình chữ nhật quay theo nhân vật
-        Matrix4x4 rotationMatrix = Matrix4x4.TRS(
-            attackPoint.position,
-            attackPoint.rotation,
-            Vector3.one
-        );
-        Gizmos.matrix = rotationMatrix;
-
-        // Vẽ hình chữ nhật rỗng
-        Gizmos.DrawWireCube(Vector3.zero, attackBoxSize);
-
-        // Khôi phục ma trận Gizmos về mặc định
-        Gizmos.matrix = Matrix4x4.identity;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
 }
