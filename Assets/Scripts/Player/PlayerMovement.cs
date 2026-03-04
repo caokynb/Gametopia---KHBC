@@ -103,7 +103,7 @@ public class PlayerMovement : MonoBehaviour
 
         isJumpHeld = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space);
 
-        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space))
             jumpBufferCounter = jumpBufferTime;
         else
             jumpBufferCounter -= Time.deltaTime;
@@ -251,6 +251,9 @@ public class PlayerMovement : MonoBehaviour
             float verticalSpeed = rb.linearVelocity.y;
             if (Mathf.Abs(verticalSpeed) < 0.05f) verticalSpeed = 0f;
             anim.SetFloat("vSpeed", verticalSpeed);
+
+            // Animator luôn phải cập nhật biến isAttackMode từ Manager mỗi khung hình
+            anim.SetBool("isAttackMode", PlayerModeManager.isAttackMode);
         }
     }
 
