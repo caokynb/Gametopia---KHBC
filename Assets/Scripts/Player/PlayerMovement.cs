@@ -24,7 +24,7 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask bambooLayer;
 
     [Header("Mở Khóa Kỹ Năng (Team Feature)")]
-    public bool canJumpOnBamboo = false;
+    public static bool canJumpOnBamboo = false;
     private bool isStandingOnBambooOnly;
     private bool hasUsedFloatingJump = false; // Token chống spam nhảy lơ lửng
 

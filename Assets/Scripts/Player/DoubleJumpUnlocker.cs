@@ -14,7 +14,8 @@ public class DoubleJumpUnlocker : MonoBehaviour
             if (player != null)
             {
                 // MỞ KHÓA DOUBLE JUMP!
-                player.canJumpOnBamboo = true;
+                //player.canJumpOnBamboo = true;
+                PlayerMovement.canJumpOnBamboo = true;
 
                 // Báo cáo ra Console để kiểm tra
                 Debug.Log("<color=green>ĐÃ MỞ KHÓA:</color> Kỹ năng Double Jump (Nhảy trên tre lơ lửng)!");
