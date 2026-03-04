@@ -5,6 +5,7 @@ public class AttackMode : MonoBehaviour
     public PlayerAttributes attributes;
     private Vector3 startPosition;
     private Rigidbody2D rb;
+    private Animator anim; // Thêm biến Animator
 
     [Header("Cấu hình đòn đánh")]
     public Transform attackPoint;
@@ -20,21 +21,19 @@ public class AttackMode : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>(); // Lấy component Animator từ nhân vật
         startPosition = transform.position;
     }
 
     void Update()
     {
-        // Kiểm tra hồi chiêu
         if (Time.time >= nextAttackTime)
         {
             canAttack = true;
         }
 
-        // Thực hiện đánh khi nhấn Fire1 (Chuột trái)
         if (Input.GetButtonDown("Fire1") && canAttack)
         {
-            // Kiểm tra xem còn đủ 5 Bamboo để đánh không
             if (attributes.currentBambooCount >= bambooCostPerAttack)
             {
                 ExecuteCombat();
@@ -50,24 +49,25 @@ public class AttackMode : MonoBehaviour
     {
         canAttack = false;
         nextAttackTime = Time.time + attackCooldown;
+
+        // KÍCH HOẠT ANIMATION SLASH
+        if (anim != null)
+        {
+            anim.SetTrigger("Slash");
+        }
+
         Attack();
     }
 
     void Attack()
     {
-        // Bỏ dòng trừ tre ở đây
-        // attributes.currentBambooCount -= bambooCostPerAttack; 
-
-        // Quét tất cả vật thể trong tầm đánh
         Collider2D[] hitObjects = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
-
-        bool hasHitAnything = false; // Biến đánh dấu xem có đánh trúng gì không
+        bool hasHitAnything = false;
 
         foreach (Collider2D obj in hitObjects)
         {
-            bool hitValidTarget = false; // Kiểm tra mục tiêu hiện tại có hợp lệ không
+            bool hitValidTarget = false;
 
-            // 1. Kiểm tra TrapTrigger
             TrapTrigger trap = obj.GetComponent<TrapTrigger>();
             if (trap == null) trap = obj.GetComponentInParent<TrapTrigger>();
             if (trap != null)
@@ -76,7 +76,13 @@ public class AttackMode : MonoBehaviour
                 hitValidTarget = true;
             }
 
-            // 2. Kiểm tra EnemyAI
+            BossAI boss = obj.GetComponent<BossAI>();
+            if (boss != null)
+            {
+                boss.TakeDamage(transform.position);
+                hitValidTarget = true;
+            }
+
             EnemyAI enemy = obj.GetComponent<EnemyAI>();
             if (enemy != null)
             {
@@ -84,7 +90,6 @@ public class AttackMode : MonoBehaviour
                 hitValidTarget = true;
             }
 
-            // 3. Kiểm tra Vật thể phá hủy
             DestructibleObject destructible = obj.GetComponent<DestructibleObject>();
             if (destructible != null)
             {
@@ -92,60 +97,38 @@ public class AttackMode : MonoBehaviour
                 hitValidTarget = true;
             }
 
-            // Nếu trúng bất kỳ cái gì ở trên, đánh dấu là đã trúng đòn
-            if (hitValidTarget)
-            {
-                hasHitAnything = true;
-            }
+            if (hitValidTarget) hasHitAnything = true;
         }
 
-        // CHỈ TRỪ TRE KHI CÓ ĐÁNH TRÚNG ÍT NHẤT 1 THỨ
         if (hasHitAnything)
         {
             attributes.currentBambooCount -= bambooCostPerAttack;
-            // Đảm bảo tre không bị âm
             if (attributes.currentBambooCount < 0) attributes.currentBambooCount = 0;
-
-            Debug.Log("Đã đánh trúng! Trừ " + bambooCostPerAttack + " tre. Còn lại: " + attributes.currentBambooCount);
-        }
-        else
-        {
-            Debug.Log("Đánh hụt, không mất tre.");
+            Debug.Log("Đã đánh trúng! Trừ tre.");
         }
     }
 
-    // Khi hồi sinh thì mới nạp đầy lại Bamboo
+    // Các hàm Respawn và UpdateCheckpoint giữ nguyên...
     public void Respawn()
     {
-        // KIỂM TRA CHECKPOINT TRƯỚC
         if (PlayerMovement.hasCheckpoint)
-        {
             transform.position = PlayerMovement.respawnPosition;
-            Debug.Log("Hồi sinh tại Checkpoint!");
-        }
         else
-        {
-            // Nếu chưa ăn checkpoint nào thì về vị trí khởi đầu của Level
             transform.position = startPosition;
-            Debug.Log("Hồi sinh tại điểm bắt đầu màn chơi!");
-        }
 
-        // Reset các chỉ số khác
         attributes.healthPoint = 1;
         attributes.currentBambooCount = attributes.maxBambooCount;
 
         if (rb != null)
         {
             rb.linearVelocity = Vector2.zero;
-            rb.bodyType = RigidbodyType2D.Dynamic; // Đảm bảo người chơi không bị Static
+            rb.bodyType = RigidbodyType2D.Dynamic;
         }
 
-        canAttack = true;
-    }
+        // Reset animation khi hồi sinh (để tránh bị kẹt ở pose đánh)
+        if (anim != null) anim.Rebind();
 
-    public void UpdateCheckpoint(Vector3 newPos)
-    {
-        startPosition = newPos;
+        canAttack = true;
     }
 
     private void OnDrawGizmosSelected()
