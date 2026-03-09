@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 267426715780009126}
   - component: {fileID: 6554712692733175876}
   - component: {fileID: -4754822388897032745}
+  - component: {fileID: -7510969544128861130}
   m_Layer: 7
   m_Name: Bamboo_Clone
   m_TagString: Untagged
@@ -138,3 +139,16 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.7380503, y: 0.2093454}
   m_EdgeRadius: 0
+--- !u!114 &-7510969544128861130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8308727168871446282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f3f7ccb83ab77040a7e716e7d45e3b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BambooSegment
+  health: 2

@@ -32,14 +32,17 @@ public class RockProjectile : MonoBehaviour
         // 2. Nếu trúng đốt tre (Bamboo)
         else if (collision.gameObject.layer == LayerMask.NameToLayer("Bamboo"))
         {
-            // Phá hủy chính đốt tre đó
-            Destroy(collision.gameObject);
-
-            // Chú ý: Nếu Loc thiết kế đốt tre có máu (ví dụ cần ném trúng 2-3 lần mới vỡ),
-            // bạn có thể đổi dòng Destroy ở trên thành gọi script của tre, ví dụ:
-            // collision.GetComponent<BambooScript>()?.TakeDamage(1);
-
-            Destroy(gameObject); // Đá vỡ sau khi phá tre
+            // TÌM SCRIPT VÀ GỌI HÀM TAKEDAMAGE
+            BambooSegment bamboo = collision.GetComponent<BambooSegment>();
+            if (bamboo != null)
+            {
+                bamboo.TakeDamage(1);
+            }
+            else
+            {
+                Debug.LogWarning("Không tìm thấy BambooSegment trên đốt tre!");
+            }
+            Destroy(gameObject); // Cục đá vỡ
         }
         // 3. Nếu trúng mặt đất (Ground) tường đá bình thường
         else if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
