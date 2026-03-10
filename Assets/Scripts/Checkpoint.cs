@@ -1,61 +1,97 @@
 ﻿using UnityEngine;
+using System.Collections.Generic; // Bắt buộc phải có để dùng List
 
 public class Checkpoint : MonoBehaviour
 {
-    private bool isPlayerNear = false;
+    // --- QUẢN LÝ TẬP TRUNG ---
+    // Danh sách tĩnh chứa tất cả các Miếu trong màn chơi
+    private static List<Checkpoint> allCheckpoints = new List<Checkpoint>();
 
-    // ĐÃ SỬA: Phải lấy PlayerMovement thay vì PlayerAttributes
+    private bool isPlayerNear = false;
     private PlayerMovement playerMovement;
     private ConstructionMode constructionScript;
+    private Animator anim; // Linh kiện Animator của Miếu
 
-    // --- NEW: Cờ đánh dấu Checkpoint đã được lưu ---
     private bool isActivated = false;
+
+    void Awake()
+    {
+        // Khi một Miếu sinh ra, nó tự ghi tên vào danh sách
+        allCheckpoints.Add(this);
+    }
+
+    void OnDestroy()
+    {
+        // Khi Miếu bị xóa (chuyển cảnh), nó tự xóa tên khỏi danh sách
+        allCheckpoints.Remove(this);
+    }
 
     void Start()
     {
-        // ĐÃ SỬA: Vì ConstructionMode nằm trên một object khác (ConstructionMode_Player),
-        // ta yêu cầu Unity tự tìm nó trong màn chơi ngay từ lúc bắt đầu!
+        anim = GetComponent<Animator>();
         constructionScript = Object.FindFirstObjectByType<ConstructionMode>();
+
+        // Kiểm tra xem đây có phải là Miếu cuối cùng người chơi đã lưu không (dành cho lúc hồi sinh)
+        if (PlayerMovement.hasCheckpoint && (Vector2)transform.position == PlayerMovement.respawnPosition)
+        {
+            SetCheckpointVisual(true);
+        }
     }
 
     void Update()
     {
-        // Khi người chơi đứng trong vùng Checkpoint và bấm phím F
         if (isPlayerNear && Input.GetKeyDown(KeyCode.F))
         {
-            // 1. Refill Bamboo (Trỏ qua stats của PlayerMovement)
-            playerMovement.stats.currentBambooCount = playerMovement.stats.maxBambooCount;
-            Debug.Log("Checkpoint Used! Bamboo refilled to: " + playerMovement.stats.currentBambooCount);
-
-            // 2. Dọn dẹp bản đồ
-            if (constructionScript != null)
-            {
-                constructionScript.ClearAllSpawnedBamboo();
-                Debug.Log("Bản đồ đã được dọn dẹp sạch sẽ!");
-            }
-
-            // 3. LƯU VỊ TRÍ HỒI SINH (Static Memory)
-            PlayerMovement.respawnPosition = transform.position;
-            PlayerMovement.hasCheckpoint = true;
-
-            if (!isActivated)
-            {
-                isActivated = true;
-                Debug.Log("<color=cyan>Checkpoint Activated!</color> Vị trí hồi sinh đã được lưu.");
-            }
+            ActivateThisCheckpoint();
         }
     }
 
+    void ActivateThisCheckpoint()
+    {
+        // 1. Bảo tất cả các Miếu khác TẮT hương
+        foreach (Checkpoint cp in allCheckpoints)
+        {
+            cp.SetCheckpointVisual(false);
+        }
+
+        // 2. BẬT hương cho riêng Miếu này
+        SetCheckpointVisual(true);
+
+        // 3. Logic nạp năng lượng và lưu vị trí
+        if (playerMovement != null)
+        {
+            playerMovement.stats.currentBambooCount = playerMovement.stats.maxBambooCount;
+        }
+
+        if (constructionScript != null)
+        {
+            constructionScript.ClearAllSpawnedBamboo();
+        }
+
+        PlayerMovement.respawnPosition = transform.position;
+        PlayerMovement.hasCheckpoint = true;
+
+        Debug.Log("<color=lime>Miếu đã được thắp hương!</color> Vị trí hồi sinh mới đã được lưu.");
+    }
+
+    // Hàm bổ trợ để điều khiển Animator
+    public void SetCheckpointVisual(bool active)
+    {
+        isActivated = active;
+        if (anim != null)
+        {
+            // Gửi tín hiệu bool "isSaved" sang Animator (Bạn cần tạo parameter này)
+            anim.SetBool("isSaved", active);
+        }
+    }
+
+    // --- XỬ LÝ VA CHẠM ---
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player"))
         {
             isPlayerNear = true;
-
-            // Lấy PlayerMovement từ nhân vật chạm vào
             playerMovement = collision.GetComponent<PlayerMovement>();
-
-            Debug.Log("Player is near the checkpoint. Press 'F' to rest!");
         }
     }
 
@@ -64,8 +100,6 @@ public class Checkpoint : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             isPlayerNear = false;
-
-            // Xóa bộ nhớ tạm để tránh lỗi
             playerMovement = null;
         }
     }

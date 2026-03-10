@@ -103,12 +103,12 @@ TextureImporter:
       name: HandPoint_CauCa_003_0
       rect:
         serializedVersion: 2
-        x: 162
+        x: 198
         y: 109
-        width: 287
+        width: 293
         height: 400
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 9e980affe09f10e439d45788284ac693
     internalID: 0
     vertices: []
     indices: 

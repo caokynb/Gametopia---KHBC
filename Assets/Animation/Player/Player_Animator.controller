@@ -235,9 +235,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
+  m_TransitionDuration: 0.024999924
   m_TransitionOffset: 0
-  m_ExitTime: 0.75
+  m_ExitTime: 0.015517011
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -310,9 +310,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.022766082
-  m_TransitionOffset: 0
-  m_ExitTime: 7.2886114e-10
+  m_TransitionDuration: 0.003770626
+  m_TransitionOffset: 0.010361158
+  m_ExitTime: 0.020722313
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -375,7 +375,7 @@ AnimatorStateMachine:
     m_Position: {x: 340, y: 80, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -6309497242950026884}
-    m_Position: {x: 50, y: 90, z: 0}
+    m_Position: {x: 50, y: 80, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -6709236660651435575}
     m_Position: {x: -80, y: 140, z: 0}
@@ -421,7 +421,7 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.0183908
+  m_TransitionDuration: 0.004597697
   m_TransitionOffset: 0
   m_ExitTime: 0
   m_HasExitTime: 0
@@ -527,7 +527,7 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.04655174
+  m_TransitionDuration: 0.021336231
   m_TransitionOffset: 0
   m_ExitTime: 0.0051721805
   m_HasExitTime: 0
@@ -552,9 +552,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
+  m_TransitionDuration: 0.23810886
   m_TransitionOffset: 0
-  m_ExitTime: 0.25
+  m_ExitTime: 0.021781584
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -844,9 +844,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.027768187
+  m_TransitionDuration: 0.010498871
   m_TransitionOffset: 0
-  m_ExitTime: 0.0000000020792497
+  m_ExitTime: 0.0000000010932917
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
