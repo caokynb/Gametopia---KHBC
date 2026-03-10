@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class EnemyAI : MonoBehaviour
 {
@@ -8,6 +9,10 @@ public class EnemyAI : MonoBehaviour
     public bool isTiger = false;
     [Tooltip("Tích vào đây nếu con quái này là Monkey (Đứng im & Ném đá)")]
     public bool isMonkey = false;
+    [Tooltip("Tích vào đây nếu con quái này là Bat (Treo trần & Bay lượn)")]
+    public bool isBat = false;
+    [Tooltip("Tích vào đây nếu là Rết khổng lồ (Bò theo điểm Waypoint)")]
+    public bool isCentipede = false;
 
     [Header("Chỉ số cơ bản")]
     public int health = 5;
@@ -26,12 +31,29 @@ public class EnemyAI : MonoBehaviour
     public float tigerAttackCooldown = 1.5f;
 
     [Header("Cấu hình Monkey Throw")]
-    public GameObject rockPrefab;       // Kéo Prefab viên đá vào đây
-    public Transform throwPoint;        // Vị trí ném (tay của khỉ)
-    public int rocksToThrow = 3;        // Số lượng đá ném mỗi đợt
-    public float delayBetweenRocks = 0.3f; // Thời gian giữa các viên đá
-    public float rockThrowForce = 8f;   // Lực ném
-    public float monkeyAttackCooldown = 2.5f; // Thời gian nghỉ giữa các đợt ném
+    public GameObject rockPrefab;
+    public Transform throwPoint;
+    public int rocksToThrow = 3;
+    public float delayBetweenRocks = 0.3f;
+    public float rockThrowForce = 8f;
+    public float monkeyAttackCooldown = 2.5f;
+
+    [Header("Cấu hình Bat Flight")]
+    public float batWobbleSpeed = 6f;
+    public float batWobbleAmount = 2f;
+    public float hoverHeight = 2.5f;
+    public float batDiveSpeed = 10f;
+    public float batDiveDelay = 0.4f;
+
+    private bool isHanging = true;
+    private bool isPreparingDive = false;
+    private bool isDiving = false;
+
+    [Header("Cấu hình Centipede (Waypoint)")]
+    public Transform[] waypoints; // Kéo các điểm (Point) vào đây
+    public float centipedeSpeed = 3f;
+    public float rotationSpeed = 10f; // Tốc độ xoay đầu khi đến góc cua
+    private int currentWaypointIndex = 0;
 
     [Header("Ground Detection")]
     public LayerMask groundLayer;
@@ -42,7 +64,7 @@ public class EnemyAI : MonoBehaviour
     private Transform player;
 
     private Vector3 homePosition;
-    private float attackTimer; // Dùng chung cho cả Tiger và Monkey
+    private float attackTimer;
     private bool isKnockbacked = false;
     private bool isWaiting = false;
     private bool movingRight = true;
@@ -58,10 +80,19 @@ public class EnemyAI : MonoBehaviour
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null) player = playerObj.transform;
 
-        // Nếu là Khỉ, khóa cứng hoàn toàn vị trí (X, Y) và góc xoay (Z)
         if (isMonkey)
         {
             rb.constraints = RigidbodyConstraints2D.FreezeAll;
+        }
+        else if (isBat)
+        {
+            rb.gravityScale = 0f;
+        }
+        else if (isCentipede)
+        {
+            // Rết bò trên background nên không cần trọng lực và không bị đẩy vật lý
+            rb.gravityScale = 0f;
+            rb.bodyType = RigidbodyType2D.Kinematic;
         }
     }
 
@@ -69,11 +100,39 @@ public class EnemyAI : MonoBehaviour
     {
         if (player == null || isKnockbacked || isWaiting) return;
 
-        if (attackTimer > 0) attackTimer -= Time.deltaTime;
-
         isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckLength, groundLayer);
-
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+
+        // ==========================================
+        // LOGIC RIÊNG CHO BAT
+        // ==========================================
+        if (isBat)
+        {
+            if (isHanging)
+            {
+                rb.linearVelocity = Vector2.zero;
+                if (distanceToPlayer <= detectionRange) isHanging = false;
+            }
+            else if (!isPreparingDive)
+            {
+                BatChasePlayer();
+            }
+            return;
+        }
+
+        // ==========================================
+        // LOGIC RIÊNG CHO CENTIPEDE
+        // ==========================================
+        if (isCentipede)
+        {
+            CentipedeMove();
+            return;
+        }
+
+        // ==========================================
+        // LOGIC CHO TIGER VÀ MONKEY
+        // ==========================================
+        if (attackTimer > 0) attackTimer -= Time.deltaTime;
 
         if (distanceToPlayer <= attackRange)
         {
@@ -83,7 +142,7 @@ public class EnemyAI : MonoBehaviour
         }
         else if (distanceToPlayer <= detectionRange)
         {
-            if (isMonkey) FacePlayer(); // Khỉ chỉ xoay mặt nhìn theo, không chạy
+            if (isMonkey) FacePlayer();
             else ChasePlayer();
         }
         else if (Vector2.Distance(transform.position, homePosition) > 0.5f)
@@ -96,14 +155,99 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    // --- HÀM XỬ LÝ CENTIPEDE BÒ THEO ĐIỂM ---
+    void CentipedeMove()
+    {
+        if (waypoints == null || waypoints.Length == 0) return;
+
+        // BÍ QUYẾT: Ép tất cả về Vector2 để loại bỏ hoàn toàn trục Z.
+        // Điều này ngăn con rết bị kẹt và xoay mòng mòng nếu các điểm bị lệch chiều sâu (Z).
+        Vector2 currentPos = transform.position;
+        Vector2 targetPos = waypoints[currentWaypointIndex].position;
+
+        // 1. Tính khoảng cách trong không gian 2D
+        float distance = Vector2.Distance(currentPos, targetPos);
+
+        // 2. Di chuyển tịnh tiến
+        transform.position = Vector2.MoveTowards(currentPos, targetPos, centipedeSpeed * Time.deltaTime);
+
+        // 3. Chỉ xoay đầu nếu khoảng cách đủ xa (tránh lỗi chia cho 0 làm quái giật cục)
+        if (distance > 0.05f)
+        {
+            Vector2 direction = (targetPos - currentPos).normalized;
+            float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+            // Nếu rết của bạn vẽ hướng đầu lên trên (thay vì hướng sang phải), 
+            // bạn có thể trừ đi 90 ở đây: targetAngle - 90f;
+            Quaternion targetRotation = Quaternion.Euler(0, 0, targetAngle);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        }
+
+        // 4. Nếu đã đến điểm đích, chuyển sang điểm tiếp theo
+        if (distance < 0.1f)
+        {
+            currentWaypointIndex++;
+            if (currentWaypointIndex >= waypoints.Length) currentWaypointIndex = 0;
+        }
+    }
+
+    // --- HÀM XỬ LÝ DƠI BAY ---
+    void BatChasePlayer()
+    {
+        if (isDiving)
+        {
+            Vector2 diveDirection = (player.position - transform.position).normalized;
+            rb.linearVelocity = diveDirection * batDiveSpeed;
+
+            if (rb.linearVelocity.x > 0 && !movingRight) Flip();
+            else if (rb.linearVelocity.x < 0 && movingRight) Flip();
+
+            if (isGrounded || transform.position.y < player.position.y - 0.5f)
+            {
+                isDiving = false;
+            }
+            return;
+        }
+
+        Vector3 targetPos = new Vector3(player.position.x, player.position.y + hoverHeight, player.position.z);
+
+        float wobbleY = Mathf.Sin(Time.time * batWobbleSpeed) * batWobbleAmount;
+        float extraChaosY = Mathf.Cos(Time.time * batWobbleSpeed * 1.3f) * (batWobbleAmount * 0.5f);
+        float wobbleX = Mathf.Sin(Time.time * batWobbleSpeed * 0.8f) * (batWobbleAmount * 0.5f);
+
+        if (Mathf.Abs(player.position.x - transform.position.x) < 2f && transform.position.y > player.position.y)
+        {
+            StartCoroutine(PrepareBatDive());
+            return;
+        }
+
+        Vector2 hoverDirection = (targetPos - transform.position).normalized;
+        float finalXVelocity = (hoverDirection.x * chaseSpeed) + wobbleX;
+        float finalYVelocity = (hoverDirection.y * chaseSpeed) + wobbleY + extraChaosY;
+
+        rb.linearVelocity = new Vector2(finalXVelocity, finalYVelocity);
+
+        if (rb.linearVelocity.x > 0 && !movingRight) Flip();
+        else if (rb.linearVelocity.x < 0 && movingRight) Flip();
+    }
+
+    private IEnumerator PrepareBatDive()
+    {
+        isPreparingDive = true;
+        rb.linearVelocity = new Vector2(0, 3f);
+        yield return new WaitForSeconds(batDiveDelay);
+        isPreparingDive = false;
+        isDiving = true;
+    }
+
     public void TakeDamage(Vector2 playerPosition)
     {
         health--;
         StopCoroutine("FlashRed");
         StartCoroutine(FlashRed());
 
-        // Chỉ áp dụng lực đẩy lùi nếu KHÔNG phải là Khỉ
-        if (!isMonkey)
+        // Rết và Khỉ không bị đẩy lùi
+        if (!isMonkey && !isCentipede)
         {
             StopCoroutine("ApplyKnockback");
             StartCoroutine(ApplyKnockback(playerPosition));
@@ -211,14 +355,14 @@ public class EnemyAI : MonoBehaviour
 
     void MonkeyAttack()
     {
-        FacePlayer(); // Khỉ luôn nhìn theo người chơi khi ném
+        FacePlayer();
         if (attackTimer <= 0 && !isThrowingRocks)
         {
             StartCoroutine(ThrowRocksRoutine());
         }
         else if (isGrounded)
         {
-            StopMoving(); // Đứng im tại chỗ
+            StopMoving();
         }
     }
 
@@ -230,15 +374,13 @@ public class EnemyAI : MonoBehaviour
         {
             if (rockPrefab != null && throwPoint != null && player != null)
             {
-                // Tạo viên đá
                 GameObject rock = Instantiate(rockPrefab, throwPoint.position, Quaternion.identity);
                 Rigidbody2D rockRb = rock.GetComponent<Rigidbody2D>();
 
                 if (rockRb != null)
                 {
-                    // Tính toán hướng ném thẳng vào Anh Khoai và thêm một chút độ cong (arc) lên trên
                     Vector2 throwDirection = (player.position - throwPoint.position).normalized;
-                    throwDirection.y += 0.25f; // Ném bổng lên một chút cho đẹp
+                    throwDirection.y += 0.25f;
 
                     rockRb.AddForce(throwDirection * rockThrowForce, ForceMode2D.Impulse);
                 }
@@ -251,13 +393,29 @@ public class EnemyAI : MonoBehaviour
         isThrowingRocks = false;
     }
 
-    void Die() { Destroy(gameObject); }
+    void Die()
+    {
+        Destroy(gameObject);
+    }
 
+    // --- XỬ LÝ SÁT THƯƠNG ---
+    // Dành cho quái xài Collider thường (Cọp, Dơi)
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Player") && !isMonkey) // Khỉ ném đá không cần gây sát thương khi chạm vào người
+        if (collision.gameObject.CompareTag("Player") && !isMonkey)
         {
-            collision.gameObject.GetComponent<AttackMode>()?.Respawn();
+            PlayerMovement player = collision.gameObject.GetComponent<PlayerMovement>();
+            if (player != null) player.TakeDamage(1);
+        }
+    }
+
+    // Dành cho quái xài Is Trigger (Rết bò ở Background)
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player") && !isMonkey)
+        {
+            PlayerMovement player = collision.GetComponent<PlayerMovement>();
+            if (player != null) player.TakeDamage(1);
         }
     }
 
