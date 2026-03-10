@@ -1,37 +1,26 @@
 ﻿using UnityEngine;
-using System.Collections.Generic; // Bắt buộc phải có để dùng List
+using System.Collections.Generic;
+using System.Collections; // Cần thêm cái này để dùng Coroutine
 
 public class Checkpoint : MonoBehaviour
 {
-    // --- QUẢN LÝ TẬP TRUNG ---
-    // Danh sách tĩnh chứa tất cả các Miếu trong màn chơi
     private static List<Checkpoint> allCheckpoints = new List<Checkpoint>();
-
     private bool isPlayerNear = false;
     private PlayerMovement playerMovement;
     private ConstructionMode constructionScript;
-    private Animator anim; // Linh kiện Animator của Miếu
-
+    private Animator anim;
     private bool isActivated = false;
 
-    void Awake()
-    {
-        // Khi một Miếu sinh ra, nó tự ghi tên vào danh sách
-        allCheckpoints.Add(this);
-    }
+    // --- NEW: Biến để tránh người chơi bấm F liên tục khi đang chạy anim ---
+    private bool isProcessing = false;
 
-    void OnDestroy()
-    {
-        // Khi Miếu bị xóa (chuyển cảnh), nó tự xóa tên khỏi danh sách
-        allCheckpoints.Remove(this);
-    }
+    void Awake() { allCheckpoints.Add(this); }
+    void OnDestroy() { allCheckpoints.Remove(this); }
 
     void Start()
     {
         anim = GetComponent<Animator>();
         constructionScript = Object.FindFirstObjectByType<ConstructionMode>();
-
-        // Kiểm tra xem đây có phải là Miếu cuối cùng người chơi đã lưu không (dành cho lúc hồi sinh)
         if (PlayerMovement.hasCheckpoint && (Vector2)transform.position == PlayerMovement.respawnPosition)
         {
             SetCheckpointVisual(true);
@@ -40,24 +29,41 @@ public class Checkpoint : MonoBehaviour
 
     void Update()
     {
-        if (isPlayerNear && Input.GetKeyDown(KeyCode.F))
+        // Kiểm tra thêm !isProcessing
+        if (isPlayerNear && Input.GetKeyDown(KeyCode.F) && !isProcessing && !isActivated)
         {
-            ActivateThisCheckpoint();
+            StartCoroutine(ProcessCheckpointActivation());
         }
     }
 
-    void ActivateThisCheckpoint()
+    IEnumerator ProcessCheckpointActivation()
     {
-        // 1. Bảo tất cả các Miếu khác TẮT hương
+        isProcessing = true;
+        float animDuration = 1.0f; // Độ dài hoạt ảnh thắp hương (bạn hãy chỉnh theo giây)
+
+        // 1. Gọi Anh Khoai diễn hoạt ảnh thắp hương
+        if (playerMovement != null)
+        {
+            playerMovement.TriggerWishAnimation(animDuration);
+        }
+
+        // 2. Chạy hoạt ảnh "Saving" trên Miếu (Nếu bạn có Trigger riêng)
+        if (anim != null)
+        {
+            anim.SetTrigger("StartSaving");
+        }
+
+        // 3. CHỜ hoạt ảnh chạy hết 1 vòng
+        yield return new WaitForSeconds(animDuration);
+
+        // 4. THỰC HIỆN LƯU (Logic cũ của bạn)
         foreach (Checkpoint cp in allCheckpoints)
         {
             cp.SetCheckpointVisual(false);
         }
 
-        // 2. BẬT hương cho riêng Miếu này
         SetCheckpointVisual(true);
 
-        // 3. Logic nạp năng lượng và lưu vị trí
         if (playerMovement != null)
         {
             playerMovement.stats.currentBambooCount = playerMovement.stats.maxBambooCount;
@@ -71,21 +77,20 @@ public class Checkpoint : MonoBehaviour
         PlayerMovement.respawnPosition = transform.position;
         PlayerMovement.hasCheckpoint = true;
 
-        Debug.Log("<color=lime>Miếu đã được thắp hương!</color> Vị trí hồi sinh mới đã được lưu.");
+        isProcessing = false;
+        Debug.Log("<color=lime>Checkpoint chính thức được lưu sau khi thắp hương!</color>");
     }
 
-    // Hàm bổ trợ để điều khiển Animator
     public void SetCheckpointVisual(bool active)
     {
         isActivated = active;
         if (anim != null)
         {
-            // Gửi tín hiệu bool "isSaved" sang Animator (Bạn cần tạo parameter này)
             anim.SetBool("isSaved", active);
         }
     }
 
-    // --- XỬ LÝ VA CHẠM ---
+    // --- VA CHẠM GIỮ NGUYÊN ---
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player"))
