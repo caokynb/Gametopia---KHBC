@@ -5,14 +5,11 @@ using UnityEngine.SceneManagement;
 public class EnemyAI : MonoBehaviour
 {
     [Header("Loại Quái")]
-    [Tooltip("Tích vào đây nếu con quái này là Tiger (Bám đuổi & Nhảy vồ)")]
     public bool isTiger = false;
-    [Tooltip("Tích vào đây nếu con quái này là Monkey (Đứng im & Ném đá)")]
     public bool isMonkey = false;
-    [Tooltip("Tích vào đây nếu con quái này là Bat (Treo trần & Bay lượn)")]
     public bool isBat = false;
-    [Tooltip("Tích vào đây nếu là Rết khổng lồ (Bò theo điểm Waypoint)")]
-    public bool isCentipede = false;
+    [Tooltip("Tích vào đây nếu là Cậu Bé Cưỡi Trâu (Chạy ngang, quay đầu khi đụng tường)")]
+    public bool isBoyOnBuffalo = false;
 
     [Header("Chỉ số cơ bản")]
     public int health = 5;
@@ -49,11 +46,10 @@ public class EnemyAI : MonoBehaviour
     private bool isPreparingDive = false;
     private bool isDiving = false;
 
-    [Header("Cấu hình Centipede (Waypoint)")]
-    public Transform[] waypoints; // Kéo các điểm (Point) vào đây
-    public float centipedeSpeed = 3f;
-    public float rotationSpeed = 10f; // Tốc độ xoay đầu khi đến góc cua
-    private int currentWaypointIndex = 0;
+    [Header("Cấu hình Cậu Bé Cưỡi Trâu")]
+    public float buffaloChargeSpeed = 8f;
+    [Tooltip("Khoảng cách tia laser dò tường phía trước")]
+    public float buffaloWallCheckDist = 1f;
 
     [Header("Ground Detection")]
     public LayerMask groundLayer;
@@ -88,11 +84,20 @@ public class EnemyAI : MonoBehaviour
         {
             rb.gravityScale = 0f;
         }
-        else if (isCentipede)
+        else if (isBoyOnBuffalo)
         {
-            // Rết bò trên background nên không cần trọng lực và không bị đẩy vật lý
             rb.gravityScale = 0f;
             rb.bodyType = RigidbodyType2D.Kinematic;
+            Collider2D col = GetComponent<Collider2D>();
+            if (col != null) col.isTrigger = true;
+
+            // --- TỰ ĐỘNG BÁM ĐẤT ---
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 30f, groundLayer);
+            if (hit.collider != null)
+            {
+                float bottomOffset = col != null ? col.bounds.extents.y : 0.5f;
+                transform.position = new Vector3(transform.position.x, hit.point.y + bottomOffset, transform.position.z);
+            }
         }
     }
 
@@ -104,7 +109,7 @@ public class EnemyAI : MonoBehaviour
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
         // ==========================================
-        // LOGIC RIÊNG CHO BAT
+        // LOGIC CHO BAT
         // ==========================================
         if (isBat)
         {
@@ -113,19 +118,28 @@ public class EnemyAI : MonoBehaviour
                 rb.linearVelocity = Vector2.zero;
                 if (distanceToPlayer <= detectionRange) isHanging = false;
             }
-            else if (!isPreparingDive)
-            {
-                BatChasePlayer();
-            }
+            else if (!isPreparingDive) BatChasePlayer();
             return;
         }
 
         // ==========================================
-        // LOGIC RIÊNG CHO CENTIPEDE
+        // LOGIC CHO CẬU BÉ CƯỠI TRÂU
         // ==========================================
-        if (isCentipede)
+        if (isBoyOnBuffalo)
         {
-            CentipedeMove();
+            float direction = movingRight ? 1f : -1f;
+
+            // Bắn tia laser về phía trước để tìm tường
+            RaycastHit2D wallHit = Physics2D.Raycast(transform.position, new Vector2(direction, 0f), buffaloWallCheckDist, groundLayer);
+
+            // Nếu đụng phải GroundLayer (tường) -> Quay đầu!
+            if (wallHit.collider != null)
+            {
+                Flip();
+                direction = movingRight ? 1f : -1f; // Cập nhật lại hướng sau khi quay đầu
+            }
+
+            rb.linearVelocity = new Vector2(direction * buffaloChargeSpeed, 0f);
             return;
         }
 
@@ -155,43 +169,20 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    // --- HÀM XỬ LÝ CENTIPEDE BÒ THEO ĐIỂM ---
-    void CentipedeMove()
+    public void SetChargeDirection(bool faceRight)
     {
-        if (waypoints == null || waypoints.Length == 0) return;
+        if (faceRight && !movingRight) Flip();
+        else if (!faceRight && movingRight) Flip();
+    }
 
-        // BÍ QUYẾT: Ép tất cả về Vector2 để loại bỏ hoàn toàn trục Z.
-        // Điều này ngăn con rết bị kẹt và xoay mòng mòng nếu các điểm bị lệch chiều sâu (Z).
-        Vector2 currentPos = transform.position;
-        Vector2 targetPos = waypoints[currentWaypointIndex].position;
-
-        // 1. Tính khoảng cách trong không gian 2D
-        float distance = Vector2.Distance(currentPos, targetPos);
-
-        // 2. Di chuyển tịnh tiến
-        transform.position = Vector2.MoveTowards(currentPos, targetPos, centipedeSpeed * Time.deltaTime);
-
-        // 3. Chỉ xoay đầu nếu khoảng cách đủ xa (tránh lỗi chia cho 0 làm quái giật cục)
-        if (distance > 0.05f)
+    private void OnBecameInvisible()
+    {
+        if (isBoyOnBuffalo)
         {
-            Vector2 direction = (targetPos - currentPos).normalized;
-            float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-
-            // Nếu rết của bạn vẽ hướng đầu lên trên (thay vì hướng sang phải), 
-            // bạn có thể trừ đi 90 ở đây: targetAngle - 90f;
-            Quaternion targetRotation = Quaternion.Euler(0, 0, targetAngle);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-        }
-
-        // 4. Nếu đã đến điểm đích, chuyển sang điểm tiếp theo
-        if (distance < 0.1f)
-        {
-            currentWaypointIndex++;
-            if (currentWaypointIndex >= waypoints.Length) currentWaypointIndex = 0;
+            Destroy(gameObject); // Vẫn tự hủy khi ra ngoài màn hình
         }
     }
 
-    // --- HÀM XỬ LÝ DƠI BAY ---
     void BatChasePlayer()
     {
         if (isDiving)
@@ -202,15 +193,11 @@ public class EnemyAI : MonoBehaviour
             if (rb.linearVelocity.x > 0 && !movingRight) Flip();
             else if (rb.linearVelocity.x < 0 && movingRight) Flip();
 
-            if (isGrounded || transform.position.y < player.position.y - 0.5f)
-            {
-                isDiving = false;
-            }
+            if (isGrounded || transform.position.y < player.position.y - 0.5f) isDiving = false;
             return;
         }
 
         Vector3 targetPos = new Vector3(player.position.x, player.position.y + hoverHeight, player.position.z);
-
         float wobbleY = Mathf.Sin(Time.time * batWobbleSpeed) * batWobbleAmount;
         float extraChaosY = Mathf.Cos(Time.time * batWobbleSpeed * 1.3f) * (batWobbleAmount * 0.5f);
         float wobbleX = Mathf.Sin(Time.time * batWobbleSpeed * 0.8f) * (batWobbleAmount * 0.5f);
@@ -222,10 +209,7 @@ public class EnemyAI : MonoBehaviour
         }
 
         Vector2 hoverDirection = (targetPos - transform.position).normalized;
-        float finalXVelocity = (hoverDirection.x * chaseSpeed) + wobbleX;
-        float finalYVelocity = (hoverDirection.y * chaseSpeed) + wobbleY + extraChaosY;
-
-        rb.linearVelocity = new Vector2(finalXVelocity, finalYVelocity);
+        rb.linearVelocity = new Vector2((hoverDirection.x * chaseSpeed) + wobbleX, (hoverDirection.y * chaseSpeed) + wobbleY + extraChaosY);
 
         if (rb.linearVelocity.x > 0 && !movingRight) Flip();
         else if (rb.linearVelocity.x < 0 && movingRight) Flip();
@@ -246,8 +230,7 @@ public class EnemyAI : MonoBehaviour
         StopCoroutine("FlashRed");
         StartCoroutine(FlashRed());
 
-        // Rết và Khỉ không bị đẩy lùi
-        if (!isMonkey && !isCentipede)
+        if (!isMonkey && !isBoyOnBuffalo)
         {
             StopCoroutine("ApplyKnockback");
             StartCoroutine(ApplyKnockback(playerPosition));
@@ -276,59 +259,22 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    void ChasePlayer()
-    {
-        if (!isGrounded) return;
-        MoveTowards(player.position.x, chaseSpeed);
-    }
-
-    void FacePlayer()
-    {
-        float direction = (player.position.x > transform.position.x) ? 1 : -1;
-        if (direction > 0 && !movingRight) Flip();
-        else if (direction < 0 && movingRight) Flip();
-    }
-
-    void MoveTowards(float targetX, float speed)
-    {
-        float direction = (targetX > transform.position.x) ? 1 : -1;
-        rb.linearVelocity = new Vector2(direction * speed, rb.linearVelocity.y);
-        if (direction > 0 && !movingRight) Flip();
-        else if (direction < 0 && movingRight) Flip();
-    }
-
-    void StopMoving()
-    {
-        rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
-    }
-
-    void Flip()
-    {
-        movingRight = !movingRight;
-        transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
-    }
+    void ChasePlayer() { if (isGrounded) MoveTowards(player.position.x, chaseSpeed); }
+    void FacePlayer() { float direction = (player.position.x > transform.position.x) ? 1 : -1; if (direction > 0 && !movingRight) Flip(); else if (direction < 0 && movingRight) Flip(); }
+    void MoveTowards(float targetX, float speed) { float direction = (targetX > transform.position.x) ? 1 : -1; rb.linearVelocity = new Vector2(direction * speed, rb.linearVelocity.y); if (direction > 0 && !movingRight) Flip(); else if (direction < 0 && movingRight) Flip(); }
+    void StopMoving() { rb.linearVelocity = new Vector2(0, rb.linearVelocity.y); }
+    void Flip() { movingRight = !movingRight; transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z); }
 
     IEnumerator WaitAndGoHome()
     {
-        isWaiting = true;
-        StopMoving();
-        yield return new WaitForSeconds(3f);
-
-        float stopDistance = 0.2f;
-        while (Mathf.Abs(transform.position.x - homePosition.x) > stopDistance)
+        isWaiting = true; StopMoving(); yield return new WaitForSeconds(3f);
+        while (Mathf.Abs(transform.position.x - homePosition.x) > 0.2f)
         {
-            if (isKnockbacked || (player != null && Vector2.Distance(transform.position, player.position) <= detectionRange))
-            {
-                isWaiting = false;
-                yield break;
-            }
+            if (isKnockbacked || (player != null && Vector2.Distance(transform.position, player.position) <= detectionRange)) { isWaiting = false; yield break; }
             if (isGrounded) MoveTowards(homePosition.x, returnSpeed);
             yield return null;
         }
-
-        StopMoving();
-        transform.position = new Vector3(homePosition.x, transform.position.y, transform.position.z);
-        isWaiting = false;
+        StopMoving(); transform.position = new Vector3(homePosition.x, transform.position.y, transform.position.z); isWaiting = false;
     }
 
     void AttackPlayer() { StopMoving(); }
@@ -337,85 +283,60 @@ public class EnemyAI : MonoBehaviour
     {
         if (isGrounded && attackTimer <= 0)
         {
-            attackTimer = tigerAttackCooldown;
-            rb.linearVelocity = Vector2.zero;
+            attackTimer = tigerAttackCooldown; rb.linearVelocity = Vector2.zero;
             float direction = (player.position.x > transform.position.x) ? 1 : -1;
-
-            if (direction > 0 && !movingRight) Flip();
-            else if (direction < 0 && movingRight) Flip();
-
-            Vector2 jumpForce = new Vector2(direction * tigerJumpForwardForce, tigerJumpUpwardForce);
-            rb.AddForce(jumpForce, ForceMode2D.Impulse);
+            if (direction > 0 && !movingRight) Flip(); else if (direction < 0 && movingRight) Flip();
+            rb.AddForce(new Vector2(direction * tigerJumpForwardForce, tigerJumpUpwardForce), ForceMode2D.Impulse);
         }
-        else if (isGrounded && attackTimer > 0 && attackTimer < tigerAttackCooldown - 0.2f)
-        {
-            StopMoving();
-        }
+        else if (isGrounded && attackTimer > 0 && attackTimer < tigerAttackCooldown - 0.2f) StopMoving();
     }
 
     void MonkeyAttack()
     {
         FacePlayer();
-        if (attackTimer <= 0 && !isThrowingRocks)
-        {
-            StartCoroutine(ThrowRocksRoutine());
-        }
-        else if (isGrounded)
-        {
-            StopMoving();
-        }
+        if (attackTimer <= 0 && !isThrowingRocks) StartCoroutine(ThrowRocksRoutine());
+        else if (isGrounded) StopMoving();
     }
 
     private IEnumerator ThrowRocksRoutine()
     {
         isThrowingRocks = true;
-
         for (int i = 0; i < rocksToThrow; i++)
         {
             if (rockPrefab != null && throwPoint != null && player != null)
             {
                 GameObject rock = Instantiate(rockPrefab, throwPoint.position, Quaternion.identity);
                 Rigidbody2D rockRb = rock.GetComponent<Rigidbody2D>();
-
-                if (rockRb != null)
-                {
-                    Vector2 throwDirection = (player.position - throwPoint.position).normalized;
-                    throwDirection.y += 0.25f;
-
-                    rockRb.AddForce(throwDirection * rockThrowForce, ForceMode2D.Impulse);
-                }
+                if (rockRb != null) { Vector2 throwDir = (player.position - throwPoint.position).normalized; throwDir.y += 0.25f; rockRb.AddForce(throwDir * rockThrowForce, ForceMode2D.Impulse); }
             }
-
             yield return new WaitForSeconds(delayBetweenRocks);
         }
-
-        attackTimer = monkeyAttackCooldown;
-        isThrowingRocks = false;
+        attackTimer = monkeyAttackCooldown; isThrowingRocks = false;
     }
 
-    void Die()
-    {
-        Destroy(gameObject);
-    }
+    void Die() { Destroy(gameObject); }
 
-    // --- XỬ LÝ SÁT THƯƠNG ---
-    // Dành cho quái xài Collider thường (Cọp, Dơi)
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Player") && !isMonkey)
         {
-            PlayerMovement player = collision.gameObject.GetComponent<PlayerMovement>();
-            if (player != null) player.TakeDamage(1);
+            PlayerMovement playerMovement = collision.gameObject.GetComponent<PlayerMovement>();
+            if (playerMovement != null) playerMovement.TakeDamage(1);
         }
     }
 
-    // Dành cho quái xài Is Trigger (Rết bò ở Background)
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player") && !isMonkey)
         {
-            PlayerMovement player = collision.GetComponent<PlayerMovement>();
-            if (player != null) player.TakeDamage(1);
+            PlayerMovement playerMovement = collision.GetComponent<PlayerMovement>();
+            if (playerMovement != null) playerMovement.TakeDamage(1);
+        }
+
+        if (isBoyOnBuffalo)
+        {
+            DestructibleObject bamboo = collision.GetComponent<DestructibleObject>();
+            if (bamboo != null) bamboo.TakeDamage();
         }
     }
 
@@ -423,5 +344,13 @@ public class EnemyAI : MonoBehaviour
     {
         Gizmos.color = Color.green;
         Gizmos.DrawLine(transform.position, transform.position + Vector3.down * groundCheckLength);
+
+        // Vẽ tia dò tường của Trâu để dễ căn chỉnh trong Scene
+        if (isBoyOnBuffalo)
+        {
+            Gizmos.color = Color.blue;
+            float dir = movingRight ? 1f : -1f;
+            Gizmos.DrawLine(transform.position, transform.position + new Vector3(dir * buffaloWallCheckDist, 0f, 0f));
+        }
     }
 }
