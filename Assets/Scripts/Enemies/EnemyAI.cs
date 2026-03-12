@@ -8,8 +8,9 @@ public class EnemyAI : MonoBehaviour
     public bool isTiger = false;
     public bool isMonkey = false;
     public bool isBat = false;
-    [Tooltip("Tích vào đây nếu là Cậu Bé Cưỡi Trâu (Chạy ngang, quay đầu khi đụng tường)")]
     public bool isBoyOnBuffalo = false;
+    [Tooltip("Tích vào đây nếu là Bọ Ngựa (Đi tuần & Lướt chém tàng hình 3 lần)")]
+    public bool isMantis = false;
 
     [Header("Chỉ số cơ bản")]
     public int health = 5;
@@ -41,15 +42,25 @@ public class EnemyAI : MonoBehaviour
     public float hoverHeight = 2.5f;
     public float batDiveSpeed = 10f;
     public float batDiveDelay = 0.4f;
-
     private bool isHanging = true;
     private bool isPreparingDive = false;
     private bool isDiving = false;
 
     [Header("Cấu hình Cậu Bé Cưỡi Trâu")]
     public float buffaloChargeSpeed = 8f;
-    [Tooltip("Khoảng cách tia laser dò tường phía trước")]
     public float buffaloWallCheckDist = 1f;
+
+    [Header("Cấu hình Mantis (Bọ Ngựa)")]
+    [Tooltip("Khoảng cách tối đa Bọ Ngựa được phép đi tuần khỏi vị trí ban đầu")]
+    public float mantisPatrolRange = 3f;
+    public float mantisDashSpeed = 16f;
+    public float mantisWindupTime = 0.3f;
+    public float mantisDashDuration = 0.2f;
+    public float mantisVanishDuration = 0.4f;
+    public float mantisTeleportDist = 4.5f;
+    public float mantisAttackCooldown = 2.5f;
+    private bool isMantisAttacking = false;
+    private bool isDashingMantis = false;
 
     [Header("Ground Detection")]
     public LayerMask groundLayer;
@@ -71,7 +82,7 @@ public class EnemyAI : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
-        homePosition = transform.position;
+        homePosition = transform.position; // Lưu lại vị trí xuất phát để làm tâm đi tuần
 
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null) player = playerObj.transform;
@@ -91,7 +102,6 @@ public class EnemyAI : MonoBehaviour
             Collider2D col = GetComponent<Collider2D>();
             if (col != null) col.isTrigger = true;
 
-            // --- TỰ ĐỘNG BÁM ĐẤT ---
             RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 30f, groundLayer);
             if (hit.collider != null)
             {
@@ -128,18 +138,58 @@ public class EnemyAI : MonoBehaviour
         if (isBoyOnBuffalo)
         {
             float direction = movingRight ? 1f : -1f;
-
-            // Bắn tia laser về phía trước để tìm tường
             RaycastHit2D wallHit = Physics2D.Raycast(transform.position, new Vector2(direction, 0f), buffaloWallCheckDist, groundLayer);
-
-            // Nếu đụng phải GroundLayer (tường) -> Quay đầu!
             if (wallHit.collider != null)
             {
                 Flip();
-                direction = movingRight ? 1f : -1f; // Cập nhật lại hướng sau khi quay đầu
+                direction = movingRight ? 1f : -1f;
+            }
+            rb.linearVelocity = new Vector2(direction * buffaloChargeSpeed, 0f);
+            return;
+        }
+
+        // ==========================================
+        // LOGIC CHO MANTIS (BỌ NGỰA)
+        // ==========================================
+        if (isMantis)
+        {
+            if (attackTimer > 0) attackTimer -= Time.deltaTime;
+
+            if (isMantisAttacking)
+            {
+                if (isDashingMantis)
+                {
+                    float direction = movingRight ? 1f : -1f;
+                    rb.linearVelocity = new Vector2(direction * mantisDashSpeed, 0f);
+                }
+                return;
             }
 
-            rb.linearVelocity = new Vector2(direction * buffaloChargeSpeed, 0f);
+            if (distanceToPlayer <= detectionRange && attackTimer <= 0 && Mathf.Abs(player.position.y - transform.position.y) < 1.5f)
+            {
+                StartCoroutine(MantisComboRoutine());
+            }
+            else
+            {
+                // TRẠNG THÁI IDLE: Đi tuần trong giới hạn
+                float direction = movingRight ? 1f : -1f;
+                rb.linearVelocity = new Vector2(direction * chaseSpeed, rb.linearVelocity.y);
+
+                Vector2 frontPos = (Vector2)transform.position + new Vector2(direction * 0.6f, 0f);
+                bool wallAhead = Physics2D.Raycast(transform.position, new Vector2(direction, 0f), 1f, groundLayer);
+                bool groundAhead = Physics2D.Raycast(frontPos, Vector2.down, groundCheckLength, groundLayer);
+
+                // Kiểm tra xem đã đi ra khỏi vùng an toàn chưa
+                bool outOfRange = Mathf.Abs(transform.position.x - homePosition.x) > mantisPatrolRange;
+                // Đảm bảo chỉ quay đầu khi đang hướng ra ngoài (tránh lỗi kẹt quay đầu liên tục)
+                bool movingAway = (transform.position.x > homePosition.x && movingRight) || (transform.position.x < homePosition.x && !movingRight);
+
+                // Quay đầu nếu: Gặp tường OR hết đường (vực) OR đi quá xa khỏi nhà
+                if (wallAhead || !groundAhead || (outOfRange && movingAway))
+                {
+                    Flip();
+                }
+            }
             return;
         }
 
@@ -169,6 +219,48 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    private IEnumerator MantisComboRoutine()
+    {
+        isMantisAttacking = true;
+        rb.linearVelocity = Vector2.zero;
+
+        for (int i = 0; i < 3; i++)
+        {
+            if (i > 0)
+            {
+                if (sr != null) sr.enabled = false;
+
+                float randomSide = (Random.value > 0.5f) ? 1f : -1f;
+                Vector3 newPos = new Vector3(player.position.x + (randomSide * mantisTeleportDist), transform.position.y, transform.position.z);
+                transform.position = newPos;
+
+                yield return new WaitForSeconds(mantisVanishDuration);
+
+                if (sr != null) sr.enabled = true;
+            }
+
+            FacePlayer();
+            if (sr != null) sr.color = Color.green;
+
+            yield return new WaitForSeconds(mantisWindupTime);
+
+            if (sr != null) sr.color = Color.white;
+            isDashingMantis = true;
+
+            float oldGravity = rb.gravityScale;
+            rb.gravityScale = 0f;
+
+            yield return new WaitForSeconds(mantisDashDuration);
+
+            isDashingMantis = false;
+            rb.gravityScale = oldGravity;
+            rb.linearVelocity = Vector2.zero;
+        }
+
+        isMantisAttacking = false;
+        attackTimer = mantisAttackCooldown;
+    }
+
     public void SetChargeDirection(bool faceRight)
     {
         if (faceRight && !movingRight) Flip();
@@ -177,10 +269,7 @@ public class EnemyAI : MonoBehaviour
 
     private void OnBecameInvisible()
     {
-        if (isBoyOnBuffalo)
-        {
-            Destroy(gameObject); // Vẫn tự hủy khi ra ngoài màn hình
-        }
+        if (isBoyOnBuffalo) Destroy(gameObject);
     }
 
     void BatChasePlayer()
@@ -226,11 +315,13 @@ public class EnemyAI : MonoBehaviour
 
     public void TakeDamage(Vector2 playerPosition)
     {
+        if (isMantis && sr != null && !sr.enabled) return;
+
         health--;
         StopCoroutine("FlashRed");
         StartCoroutine(FlashRed());
 
-        if (!isMonkey && !isBoyOnBuffalo)
+        if (!isMonkey && !isBoyOnBuffalo && !(isMantis && isDashingMantis))
         {
             StopCoroutine("ApplyKnockback");
             StartCoroutine(ApplyKnockback(playerPosition));
@@ -323,6 +414,15 @@ public class EnemyAI : MonoBehaviour
             PlayerMovement playerMovement = collision.gameObject.GetComponent<PlayerMovement>();
             if (playerMovement != null) playerMovement.TakeDamage(1);
         }
+
+        if (isMantis && isDashingMantis)
+        {
+            if (((1 << collision.gameObject.layer) & groundLayer) != 0 || collision.gameObject.GetComponent<DestructibleObject>() != null)
+            {
+                isDashingMantis = false;
+                rb.linearVelocity = Vector2.zero;
+            }
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -345,12 +445,27 @@ public class EnemyAI : MonoBehaviour
         Gizmos.color = Color.green;
         Gizmos.DrawLine(transform.position, transform.position + Vector3.down * groundCheckLength);
 
-        // Vẽ tia dò tường của Trâu để dễ căn chỉnh trong Scene
         if (isBoyOnBuffalo)
         {
             Gizmos.color = Color.blue;
             float dir = movingRight ? 1f : -1f;
             Gizmos.DrawLine(transform.position, transform.position + new Vector3(dir * buffaloWallCheckDist, 0f, 0f));
+        }
+
+        // Vẽ giới hạn tuần tra của Bọ Ngựa (Màu Vàng)
+        if (isMantis)
+        {
+            Gizmos.color = Color.yellow;
+            Vector3 leftLimit = Application.isPlaying ? homePosition : transform.position;
+            leftLimit.x -= mantisPatrolRange;
+            Vector3 rightLimit = Application.isPlaying ? homePosition : transform.position;
+            rightLimit.x += mantisPatrolRange;
+
+            // Vẽ 2 đường thẳng giới hạn trái phải
+            Gizmos.DrawLine(leftLimit + Vector3.up * 0.5f, leftLimit + Vector3.down * 0.5f);
+            Gizmos.DrawLine(rightLimit + Vector3.up * 0.5f, rightLimit + Vector3.down * 0.5f);
+            // Vẽ đường nối
+            Gizmos.DrawLine(leftLimit, rightLimit);
         }
     }
 }
