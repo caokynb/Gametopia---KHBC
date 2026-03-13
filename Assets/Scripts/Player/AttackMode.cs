@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
+using System.Collections.Generic; // BẮT BUỘC THÊM DÒNG NÀY ĐỂ DÙNG LIST
 
 public class AttackMode : MonoBehaviour
 {
     public PlayerAttributes attributes;
     private Vector3 startPosition;
     private Rigidbody2D rb;
-    private Animator anim; // Thêm biến Animator
+    private Animator anim;
 
     [Header("Cấu hình đòn đánh")]
     public Transform attackPoint;
@@ -21,7 +22,7 @@ public class AttackMode : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        anim = GetComponent<Animator>(); // Lấy component Animator từ nhân vật
+        anim = GetComponent<Animator>();
         startPosition = transform.position;
     }
 
@@ -50,7 +51,6 @@ public class AttackMode : MonoBehaviour
         canAttack = false;
         nextAttackTime = Time.time + attackCooldown;
 
-        // KÍCH HOẠT ANIMATION SLASH
         if (anim != null)
         {
             anim.SetTrigger("Slash");
@@ -61,7 +61,16 @@ public class AttackMode : MonoBehaviour
 
     void Attack()
     {
-        Collider2D[] hitObjects = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
+        // 1. TẠO BỘ LỌC ĐỂ BẮT BUỘC CHÉM TRÚNG TRIGGER (CON RẾT)
+        ContactFilter2D filter = new ContactFilter2D();
+        filter.SetLayerMask(enemyLayers);
+        filter.useLayerMask = true;
+        filter.useTriggers = true; // DÒNG QUAN TRỌNG NHẤT: Cho phép chém trúng Trigger!
+
+        // 2. DÙNG BỘ LỌC ĐỂ QUÉT QUÁI
+        List<Collider2D> hitObjects = new List<Collider2D>();
+        Physics2D.OverlapCircle(attackPoint.position, attackRange, filter, hitObjects);
+
         bool hasHitAnything = false;
 
         foreach (Collider2D obj in hitObjects)
@@ -108,7 +117,6 @@ public class AttackMode : MonoBehaviour
         }
     }
 
-    // Các hàm Respawn và UpdateCheckpoint giữ nguyên...
     public void Respawn()
     {
         if (PlayerMovement.hasCheckpoint)
@@ -125,7 +133,6 @@ public class AttackMode : MonoBehaviour
             rb.bodyType = RigidbodyType2D.Dynamic;
         }
 
-        // Reset animation khi hồi sinh (để tránh bị kẹt ở pose đánh)
         if (anim != null) anim.Rebind();
 
         canAttack = true;

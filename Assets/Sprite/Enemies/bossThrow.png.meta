@@ -1,10 +1,19 @@
 fileFormatVersion: 2
-guid: 55e0529a8fac9474abc11cdad9be40fe
+guid: ca2e3ad4d7ab33a49be5f0d5bd223b40
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1259018314302218025
-    second: bossSlam_0
+      213: 2499240371415653476
+    second: bossThrow_0
+  - first:
+      213: -5920055137943095568
+    second: bossThrow_1
+  - first:
+      213: 5368384673046222202
+    second: bossThrow_2
+  - first:
+      213: -952030335800855416
+    second: bossThrow_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +60,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 200
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -100,12 +109,12 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: bossSlam_0
+      name: bossThrow_0
       rect:
         serializedVersion: 2
         x: 202
         y: 34
-        width: 322
+        width: 320
         height: 473
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -115,8 +124,74 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7d02e428381178ee0800000000000000
-      internalID: -1259018314302218025
+      spriteID: 46c9b8250e51fa220800000000000000
+      internalID: 2499240371415653476
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bossThrow_1
+      rect:
+        serializedVersion: 2
+        x: 515
+        y: 369
+        width: 27
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f6fc24c73db7dda0800000000000000
+      internalID: -5920055137943095568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bossThrow_2
+      rect:
+        serializedVersion: 2
+        x: 525
+        y: 326
+        width: 23
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a75529eca65508a40800000000000000
+      internalID: 5368384673046222202
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bossThrow_3
+      rect:
+        serializedVersion: 2
+        x: 511
+        y: 293
+        width: 21
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 884b1332475b9c2f0800000000000000
+      internalID: -952030335800855416
       vertices: []
       indices: 
       edges: []
@@ -135,7 +210,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      bossSlam_0: -1259018314302218025
+      bossThrow_0: 2499240371415653476
+      bossThrow_1: -5920055137943095568
+      bossThrow_2: 5368384673046222202
+      bossThrow_3: -952030335800855416
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

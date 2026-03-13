@@ -314,4 +314,28 @@ public class PlayerMovement : MonoBehaviour
     }
 
     void RestartLevel() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
+    /* // ==========================================
+    // ZONE 8: DEBUG & GIZMOS
+    // ==========================================
+    private void OnDrawGizmosSelected()
+    {
+        BoxCollider2D collider = GetComponent<BoxCollider2D>();
+        if (collider == null) return;
+
+        Vector2 center = collider.bounds.center;
+        float rayLength = collider.bounds.extents.y + groundCheckDistance;
+
+        Gizmos.color = Color.red; // Màu tia laser
+
+        // Vẽ chính xác các tia raycast đang được dùng trong CheckGroundedBambooAndSlope
+        for (int i = 0; i < groundCheckRayCount; i++)
+        {
+            float xOffset = Mathf.Lerp(-groundCheckWidth / 2, groundCheckWidth / 2, (float)i / (groundCheckRayCount - 1));
+            Vector2 rayOrigin = new Vector2(center.x + xOffset, center.y);
+
+            // Vẽ đường thẳng từ chân xuống đất
+            Gizmos.DrawLine(rayOrigin, rayOrigin + Vector2.down * rayLength);
+        }
+    } */
 }
