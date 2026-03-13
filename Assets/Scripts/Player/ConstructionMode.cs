@@ -15,51 +15,71 @@ public class ConstructionMode : MonoBehaviour
     [SerializeField] float spawnDelay = 0.5f;
     private float nextSpawnTime = 0f;
 
-    [Header("Prefabs Cây Tre (4 Loại)")]
-    [SerializeField] GameObject singleBambooPrefab; // Dùng khi chỉ có 1 đốt
-    [SerializeField] GameObject startBambooPrefab;  // Đốt đầu (Gốc)
-    [SerializeField] GameObject middleBambooPrefab; // Đốt giữa (Thân)
-    [SerializeField] GameObject endBambooPrefab;    // Đốt cuối (Ngọn)
+    [Header("Prefabs Cây Tre")]
+    [SerializeField] GameObject singleBambooPrefab;
+    [SerializeField] GameObject startBambooPrefab;
+    [SerializeField] GameObject middleBambooPrefab;
+    [SerializeField] GameObject endBambooPrefab;
 
     [Header("Hệ thống")]
     [SerializeField] GameObject chunkBambooPrefab;
     [SerializeField] LayerMask groundLayer;
+    [SerializeField] LayerMask dirtLayer;
     [SerializeField] Vector2 checkSize = new Vector2(0.9f, 0.15f);
 
     private Vector2 dragStartPos;
     private bool isDragging = false;
+
     private List<GameObject> activePreviews = new List<GameObject>();
     private List<GameObject> spawnedChunks = new List<GameObject>();
 
-    private void Start() => stats = GetComponent<PlayerAttributes>();
+    private void Start()
+    {
+        // Lấy script quản lý chỉ số nhân vật
+        stats = GetComponent<PlayerAttributes>();
+    }
 
-    void Update() => HandleConstructionInput();
+    void Update()
+    {
+        HandleConstructionInput();
+    }
 
     void HandleConstructionInput()
     {
+        // Kiểm tra thời gian chờ giữa mỗi lần xây
         if (Time.time < nextSpawnTime) return;
 
-        if (Input.GetMouseButtonDown(1) && isDragging) { CancelDragging(); return; }
+        // Hủy quá trình kéo bằng chuột phải
+        if (Input.GetMouseButtonDown(1) && isDragging)
+        {
+            CancelDragging();
+            return;
+        }
 
+        // Bắt đầu kéo
         if (Input.GetMouseButtonDown(0))
         {
             dragStartPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             isDragging = true;
         }
 
+        // Đang kéo
         if (Input.GetMouseButton(0) && isDragging)
         {
             Vector2 currentMousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             UpdatePreview(dragStartPos, currentMousePos);
         }
 
+        // Thả chuột để xây
         if (Input.GetMouseButtonUp(0) && isDragging)
         {
             Vector2 finalMousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
             if (SpawnSolidBamboo(dragStartPos, finalMousePos))
             {
                 nextSpawnTime = Time.time + spawnDelay;
             }
+
             ClearPreviews();
             isDragging = false;
         }
@@ -68,11 +88,16 @@ public class ConstructionMode : MonoBehaviour
     void UpdatePreview(Vector2 start, Vector2 end)
     {
         ClearPreviews();
+
         Vector2 direction = end - start;
         float distance = direction.magnitude;
         int segmentCount = Mathf.FloorToInt(distance / segmentLength);
 
         if (segmentCount == 0) return;
+
+        // KIỂM TRA DIRT ĐỂ ĐỔI MÀU PREVIEW
+        Collider2D hitDirt = Physics2D.OverlapPoint(start, dirtLayer);
+        bool isPreviewOnDirt = hitDirt != null;
 
         direction.Normalize();
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
@@ -81,21 +106,39 @@ public class ConstructionMode : MonoBehaviour
         for (int i = 0; i < segmentCount; i++)
         {
             Vector2 pos = start + direction * (i * segmentLength + segmentLength / 2f);
+
+            // Kiểm tra xem đốt tre có bị vướng vào địa hình không
             if (!Physics2D.OverlapBox(pos, checkSize, angle, groundLayer))
             {
                 GameObject prefabToUse = GetBambooPrefab(i, segmentCount);
                 GameObject preview = Instantiate(prefabToUse, pos, rotation);
 
-                // Làm mờ Preview 
-                var renderer = preview.GetComponent<SpriteRenderer>();
-                if (renderer != null) renderer.color = new Color(1, 1, 1, 0.4f);
-
-                // SỬA TẠI ĐÂY: Tắt toàn bộ va chạm (Collider) của bản Preview
-                Collider2D[] colliders = preview.GetComponentsInChildren<Collider2D>();
-                foreach (Collider2D col in colliders)
+                // Thiết lập màu sắc hiển thị
+                SpriteRenderer renderer = preview.GetComponent<SpriteRenderer>();
+                if (renderer != null)
                 {
-                    col.enabled = false;
+                    // ƯU TIÊN MÀU SẮC KHI CÓ NGỌC GIẢM GIÁ
+                    if (stats.isHalfCostActive)
+                    {
+                        // Màu xanh lá nhạt báo hiệu đang được buff giảm giá
+                        renderer.color = new Color(0f, 1f, 0f, 0.4f);
+                    }
+                    else if (isPreviewOnDirt)
+                    {
+                        // Màu cam báo hiệu tốn gấp đôi (màu cam nhạt)
+                        renderer.color = new Color(1f, 0.6f, 0f, 0.4f);
+                    }
+                    else
+                    {
+                        // Màu trắng bình thường
+                        renderer.color = new Color(1f, 1f, 1f, 0.4f);
+                    }
                 }
+
+                // Tắt Collider của Preview để không va chạm vật lý
+                Collider2D[] cols = preview.GetComponentsInChildren<Collider2D>();
+                foreach (Collider2D c in cols)
+                    c.enabled = false;
 
                 activePreviews.Add(preview);
             }
@@ -110,59 +153,122 @@ public class ConstructionMode : MonoBehaviour
 
         if (segmentCount == 0) return false;
 
+        // 1. XÁC ĐỊNH LOẠI ĐẤT
+        Collider2D hitDirt = Physics2D.OverlapPoint(start, dirtLayer);
+        bool isOnDirt = hitDirt != null;
+
+        // 2. TÍNH TOÁN GIÁ TIỀN CƠ BẢN
+        int baseCost = isOnDirt ? (costPerSegment * 2) : costPerSegment;
+
+        // 3. KIỂM TRA NGỌC GIẢM GIÁ (HALF COST)
+        int finalCostPerSegment = baseCost;
+        if (stats.isHalfCostActive)
+        {
+            // Giảm 1 nửa chi phí, dùng Mathf.Max để đảm bảo không bị miễn phí (tối thiểu là 1)
+            finalCostPerSegment = Mathf.Max(1, baseCost / 2);
+        }
+
         direction.Normalize();
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         Quaternion rotation = Quaternion.Euler(0, 0, angle);
 
         GameObject currentChunk = null;
-        int totalCost = 0;
+        int bambooCreatedCount = 0;
+        int actualTotalCost = 0;
 
+        // 4. VÒNG LẶP TẠO TRE
         for (int i = 0; i < segmentCount; i++)
         {
             Vector2 pos = start + direction * (i * segmentLength + segmentLength / 2f);
+
+            // Chỉ tạo nếu vị trí không bị vướng vật cản Ground
             if (!Physics2D.OverlapBox(pos, checkSize, angle, groundLayer))
             {
-                if (stats.currentBambooCount < totalCost + costPerSegment) break;
+                // Kiểm tra xem nhân vật còn đủ tiền để tạo đốt tiếp theo không
+                // Sử dụng finalCostPerSegment đã được tính toán qua ngọc
+                if (stats.currentBambooCount < (actualTotalCost + finalCostPerSegment))
+                {
+                    break; // Ngừng tạo nếu hết tiền
+                }
 
+                // Khởi tạo Chunk (vật chứa) cho cây tre nếu chưa có
                 if (currentChunk == null)
                 {
                     currentChunk = Instantiate(chunkBambooPrefab, Vector3.zero, Quaternion.identity);
-                    currentChunk.GetComponent<Rigidbody2D>().gravityScale = gravityScale;
+                    Rigidbody2D rb = currentChunk.GetComponent<Rigidbody2D>();
+                    if (rb != null)
+                    {
+                        rb.gravityScale = gravityScale;
+                    }
+
+                    // Nếu trồng trên Dirt, gắn khớp nối để tre đứng vững
+                    if (isOnDirt)
+                    {
+                        FixedJoint2D joint = currentChunk.AddComponent<FixedJoint2D>();
+                        joint.autoConfigureConnectedAnchor = false;
+                        joint.anchor = currentChunk.transform.InverseTransformPoint(start);
+
+                        // Kết nối với Rigidbody của Dirt nếu có
+                        if (hitDirt.attachedRigidbody != null)
+                        {
+                            joint.connectedBody = hitDirt.attachedRigidbody;
+                        }
+
+                        joint.connectedAnchor = start;
+                        joint.breakForce = Mathf.Infinity; // Tre đứng vững vĩnh viễn
+                    }
                     spawnedChunks.Add(currentChunk);
                 }
 
-                // CHỌN LOẠI ĐỐT TRE DỰA TRÊN VỊ TRÍ
-                GameObject prefabToUse = GetBambooPrefab(i, segmentCount);
-
-                GameObject segment = Instantiate(prefabToUse, pos, rotation);
+                // Tạo đốt tre thật
+                GameObject segment = Instantiate(GetBambooPrefab(i, segmentCount), pos, rotation);
                 segment.transform.SetParent(currentChunk.transform);
-                totalCost += costPerSegment;
+
+                // Cộng dồn chi phí thực tế (đã bao gồm giảm giá nếu có)
+                actualTotalCost += finalCostPerSegment;
+                bambooCreatedCount++;
             }
-            else { currentChunk = null; }
         }
 
-        if (totalCost > 0)
+        // 5. TRỪ TIỀN VÀ XÁC NHẬN XÂY XONG
+        if (bambooCreatedCount > 0)
         {
-            stats.currentBambooCount -= totalCost;
+            stats.currentBambooCount -= actualTotalCost;
             return true;
         }
+
         return false;
     }
 
-    // --- LOGIC CHỌN ĐỐT TRE (Theo yêu cầu của Loc) ---
     GameObject GetBambooPrefab(int index, int total)
     {
-        if (total == 1) return singleBambooPrefab;             // Chỉ vẽ được 1 đốt
-        if (index == 0) return startBambooPrefab;               // Đốt đầu tiên (chuột nhấn)
-        if (index == total - 1) return endBambooPrefab;         // Đốt cuối cùng (nhả chuột)
-        return middleBambooPrefab;                              // Các đốt ở giữa
+        if (total == 1) return singleBambooPrefab;
+        if (index == 0) return startBambooPrefab;
+        if (index == total - 1) return endBambooPrefab;
+        return middleBambooPrefab;
     }
 
-    void ClearPreviews() { foreach (var p in activePreviews) Destroy(p); activePreviews.Clear(); }
-    void CancelDragging() { isDragging = false; ClearPreviews(); }
+    void ClearPreviews()
+    {
+        foreach (var p in activePreviews)
+        {
+            if (p != null) Destroy(p);
+        }
+        activePreviews.Clear();
+    }
+
+    void CancelDragging()
+    {
+        isDragging = false;
+        ClearPreviews();
+    }
+
     public void ClearAllSpawnedBamboo()
     {
-        foreach (var c in spawnedChunks) if (c != null) Destroy(c);
+        foreach (var c in spawnedChunks)
+        {
+            if (c != null) Destroy(c);
+        }
         spawnedChunks.Clear();
     }
 }
