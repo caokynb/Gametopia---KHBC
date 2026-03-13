@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using System.Collections; // Bắt buộc thêm để dùng Coroutine
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(BoxCollider2D))]
-[RequireComponent(typeof(Animator))] // Bắt buộc phải có Animator
+[RequireComponent(typeof(Animator))]
 public class PlayerMovement : MonoBehaviour
 {
     // ==========================================
@@ -23,10 +24,10 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask groundLayer;
     public LayerMask bambooLayer;
 
-    [Header("Mở Khóa Kỹ Năng (Team Feature)")]
+    [Header("Mở Khóa Kỹ Năng")]
     public static bool canJumpOnBamboo = false;
     private bool isStandingOnBambooOnly;
-    private bool hasUsedFloatingJump = false; // Token chống spam nhảy lơ lửng
+    private bool hasUsedFloatingJump = false;
 
     [Header("Cài đặt Dốc (Slope)")]
     public float maxSlopeAngle = 60f;
@@ -50,7 +51,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Giao diện & Hiệu ứng")]
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
-    private Animator anim; // Linh kiện Animator từ code của bạn
+    private Animator anim;
 
     private bool isFacingRight = true;
     private Rigidbody2D rb;
@@ -60,6 +61,9 @@ public class PlayerMovement : MonoBehaviour
     private float currentSpeed;
     private bool isJumpHeld;
     private bool isDead = false;
+
+    // --- NEW: Biến khóa trạng thái khi đang thắp hương ---
+    private bool isInteracting = false;
 
     private bool isGrounded;
     private bool isOnSlope;
@@ -78,7 +82,7 @@ public class PlayerMovement : MonoBehaviour
         stats = GetComponent<PlayerAttributes>();
         rb = GetComponent<Rigidbody2D>();
         cc = GetComponent<BoxCollider2D>();
-        anim = GetComponent<Animator>(); // Lấy Animator
+        anim = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
 
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
@@ -94,7 +98,9 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         if (stats.currentBambooCount <= 0 && !isDead) Die();
-        if (isDead) return;
+
+        // CHỈNH SỬA: Nếu đang chết HOẶC đang thắp hương thì không nhận Input
+        if (isDead || isInteracting) return;
 
         moveInput = Input.GetAxisRaw("Horizontal");
 
@@ -103,7 +109,7 @@ public class PlayerMovement : MonoBehaviour
 
         isJumpHeld = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space);
 
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.Space))
             jumpBufferCounter = jumpBufferTime;
         else
             jumpBufferCounter -= Time.deltaTime;
@@ -114,18 +120,24 @@ public class PlayerMovement : MonoBehaviour
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * jumpCutMultiplier);
         }
 
-        // Cập nhật Animation mỗi frame (Từ code của bạn)
         UpdateAnimations();
     }
 
     void FixedUpdate()
     {
+        // Nếu đang thắp hương, dừng mọi vật lý di chuyển ngang
+        if (isInteracting)
+        {
+            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+            return;
+        }
+
         CheckGroundedBambooAndSlope();
         ApplyMovement();
     }
 
     // ==========================================
-    // ZONE 4: SENSORS (Team Logic + Grounded Fix)
+    // ZONE 4: SENSORS & PHYSICS (Giữ nguyên logic cũ)
     // ==========================================
     void CheckGroundedBambooAndSlope()
     {
@@ -165,7 +177,6 @@ public class PlayerMovement : MonoBehaviour
                 {
                     touchingBamboo = true;
                     if (!touchingGround) validHit = hit;
-
                     Rigidbody2D bambooRB = hit.collider.attachedRigidbody;
                     if (IsBambooChainGrounded(bambooRB)) touchingGround = true;
                 }
@@ -173,7 +184,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         isStandingOnBambooOnly = touchingBamboo && !touchingGround;
-        if (touchingGround) hasUsedFloatingJump = false; // Reset token khi chạm đất an toàn
+        if (touchingGround) hasUsedFloatingJump = false;
 
         if (isGrounded)
         {
@@ -187,27 +198,20 @@ public class PlayerMovement : MonoBehaviour
             else { isOnSlope = isSteepSlope = false; }
         }
 
-        // Kiểm tra quyền nhảy (Team Logic)
         bool hasJumpPermission = !isSteepSlope && (!isStandingOnBambooOnly || (canJumpOnBamboo && !hasUsedFloatingJump));
-
         if (isGrounded && hasJumpPermission)
             coyoteTimeCounter = coyoteTime;
         else
             coyoteTimeCounter -= Time.fixedDeltaTime;
     }
 
-    // ==========================================
-    // ZONE 5: MOVEMENT (Combined Logic)
-    // ==========================================
     void ApplyMovement()
     {
         if (jumpBufferCounter > 0f && coyoteTimeCounter > 0f && !isSteepSlope)
         {
             if (isStandingOnBambooOnly) hasUsedFloatingJump = true;
-
-            rb.gravityScale = stats.normalGravity; // Reset gravity khi nhảy (Code của bạn)
+            rb.gravityScale = stats.normalGravity;
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, stats.jumpForce);
-
             jumpBufferCounter = 0f;
             coyoteTimeCounter = 0f;
             lastJumpTime = Time.time;
@@ -227,7 +231,6 @@ public class PlayerMovement : MonoBehaviour
         }
         else if (isGrounded && moveInput == 0f && Mathf.Abs(currentSpeed) < 0.1f && !isOnSlope)
         {
-            // Fix đứng yên không bị trượt (Code của bạn)
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
             rb.gravityScale = 0f;
         }
@@ -239,7 +242,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ==========================================
-    // ZONE 6: ANIMATION SYSTEM (From your code)
+    // ZONE 6: ANIMATION SYSTEM
     // ==========================================
     void UpdateAnimations()
     {
@@ -247,19 +250,39 @@ public class PlayerMovement : MonoBehaviour
         {
             anim.SetFloat("Speed", Mathf.Abs(rb.linearVelocity.x));
             anim.SetBool("isGrounded", isGrounded);
-
             float verticalSpeed = rb.linearVelocity.y;
             if (Mathf.Abs(verticalSpeed) < 0.05f) verticalSpeed = 0f;
             anim.SetFloat("vSpeed", verticalSpeed);
-
-            // Animator luôn phải cập nhật biến isAttackMode từ Manager mỗi khung hình
             anim.SetBool("isAttackMode", PlayerModeManager.isAttackMode);
         }
     }
 
     // ==========================================
-    // ZONE 7: HELPERS & COMBAT (Team Features)
+    // ZONE 7: INTERACTION & HELPERS
     // ==========================================
+
+    // Hàm gọi từ Checkpoint.cs
+    public void TriggerWishAnimation(float duration)
+    {
+        StartCoroutine(WishSequence(duration));
+    }
+
+    private IEnumerator WishSequence(float duration)
+    {
+        isInteracting = true;
+        // Dừng vận tốc ngang ngay lập tức
+        rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+
+        if (anim != null)
+        {
+            // Kích hoạt Trigger Wish trong Animator
+            anim.SetTrigger("Wish");
+        }
+
+        yield return new WaitForSeconds(duration);
+        isInteracting = false;
+    }
+
     void Flip()
     {
         isFacingRight = !isFacingRight;
@@ -273,7 +296,7 @@ public class PlayerMovement : MonoBehaviour
         if (stats.healthPoint <= 0) Die();
     }
 
-    private IEnumerator<WaitForSeconds> FlashRedEffect()
+    private IEnumerator FlashRedEffect()
     {
         spriteRenderer.color = Color.red;
         yield return new WaitForSeconds(0.15f);
@@ -292,11 +315,9 @@ public class PlayerMovement : MonoBehaviour
         if (visited.Contains(currentRB)) return false;
         visited.Add(currentRB);
         if (currentRB.IsTouchingLayers(groundLayer)) return true;
-
         List<Collider2D> contacts = new List<Collider2D>();
         ContactFilter2D filter = new ContactFilter2D { useLayerMask = true, layerMask = bambooLayer };
         currentRB.GetContacts(filter, contacts);
-
         foreach (var contact in contacts)
         {
             Rigidbody2D neighbor = contact.attachedRigidbody;

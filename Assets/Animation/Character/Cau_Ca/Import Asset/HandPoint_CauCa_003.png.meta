@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: b56a200cd2cf1d24d9e1fccdcfc4773d
+guid: 70199031a0f7b3141b8104f643d52834
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3717910382853106942
-    second: MieuSaved_001_0
+      213: 334512250486074458
+    second: HandPoint_CauCa_003_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 190
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -100,23 +100,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: MieuSaved_001_0
+      name: HandPoint_CauCa_003_0
       rect:
         serializedVersion: 2
-        x: 116
-        y: 110
-        width: 370
-        height: 396
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 198
+        y: 109
+        width: 293
+        height: 400
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 203dd438434576cc0800000000000000
-      internalID: -3717910382853106942
+      spriteID: a5c2d379e1d64a400800000000000000
+      internalID: 334512250486074458
       vertices: []
       indices: 
       edges: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 9e980affe09f10e439d45788284ac693
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      MieuSaved_001_0: -3717910382853106942
+      HandPoint_CauCa_003_0: 334512250486074458
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
