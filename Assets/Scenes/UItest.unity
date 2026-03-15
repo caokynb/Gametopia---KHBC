@@ -412,11 +412,11 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
-  field of view: 60
+  near clip plane: 0.1
+  far clip plane: 5000
+  field of view: 40
   orthographic: 1
-  orthographic size: 8
+  orthographic size: 5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -441,7 +441,7 @@ Transform:
   m_GameObject: {fileID: 225041386}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.67, y: -1.33, z: -10}
+  m_LocalPosition: {x: 0.0000072688104, y: -1, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1930,6 +1930,7 @@ MonoBehaviour:
   currentBambooCount: 100
   burnBambooOnAttack: 0
   burnBambooPerUnit: 0
+  maxHealth: 4
   healthPoint: 2147483647
   moveSpeed: 8
   jumpForce: 14

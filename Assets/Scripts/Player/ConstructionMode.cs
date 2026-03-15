@@ -31,7 +31,7 @@ public class ConstructionMode : MonoBehaviour
     private List<GameObject> activePreviews = new List<GameObject>();
     private List<GameObject> spawnedChunks = new List<GameObject>();
 
-    private void Start() => stats = GetComponent<PlayerAttributes>();
+    private void Start() => stats = GetComponent<PlayerMovement>().stats;
 
     void Update() => HandleConstructionInput();
 

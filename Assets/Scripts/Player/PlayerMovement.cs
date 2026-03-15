@@ -77,16 +77,25 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     // ZONE 2: INITIALIZATION
     // ==========================================
-    void Start()
+    void Awake()
     {
-        stats = GetComponent<PlayerAttributes>();
+        // Đưa toàn bộ GetComponent lên Awake để lấy dữ liệu ngay giây 0
         rb = GetComponent<Rigidbody2D>();
         cc = GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+    }
 
+    void Start()
+    {
+        // Start chỉ dùng để cài đặt thông số sau khi Component đã lấy xong
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-        rb.gravityScale = stats.normalGravity;
+
+        // Thêm an toàn: Kiểm tra stats trước khi gán để chống crash cục bộ
+        if (stats != null)
+        {
+            rb.gravityScale = stats.normalGravity;
+        }
 
         if (hasCheckpoint) transform.position = respawnPosition;
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
