@@ -12,8 +12,8 @@ public class TrapManager : MonoBehaviour
     public int targetBowl2 = 12;
     public int targetBowl3 = 6;
 
-    [Header("Vật rơi sẵn trong scene")]
-    public Rigidbody2D fallingObject;
+    [Header("Vật thể sẽ bị phá hủy")]
+    public GameObject objectToDestroy; // Đổi từ Rigidbody2D sang GameObject
 
     private bool trapTriggered = false;
 
@@ -26,20 +26,19 @@ public class TrapManager : MonoBehaviour
 
     void CheckResult()
     {
-        // Sai số lượng -> reset
+        // Sai số lượng (vượt quá) -> reset
         if (bowl1.currentBamboo > targetBowl1 ||
             bowl2.currentBamboo > targetBowl2 ||
             bowl3.currentBamboo > targetBowl3)
         {
-            Debug.Log("Sai số lượng! Reset.");
-
+            Debug.Log("Sai số lượng! Các bát đã bị reset.");
             bowl1.ResetBowl();
             bowl2.ResetBowl();
             bowl3.ResetBowl();
             return;
         }
 
-        // Đúng hoàn toàn
+        // Đúng hoàn toàn số lượng ở cả 3 bát
         if (bowl1.currentBamboo == targetBowl1 &&
             bowl2.currentBamboo == targetBowl2 &&
             bowl3.currentBamboo == targetBowl3)
@@ -52,14 +51,15 @@ public class TrapManager : MonoBehaviour
     {
         trapTriggered = true;
 
-        Debug.Log("Đúng! Vật rơi xuống.");
+        Debug.Log("Đúng số lượng! Vật thể đã bị phá hủy.");
 
-        if (fallingObject != null)
+        if (objectToDestroy != null)
         {
-            fallingObject.bodyType = RigidbodyType2D.Dynamic;
-            fallingObject.gravityScale = 3f;
+            // Phá hủy vật thể ngay lập tức
+            Destroy(objectToDestroy);
         }
 
+        // Tắt script này để tránh chạy Update thừa
         enabled = false;
     }
 }
