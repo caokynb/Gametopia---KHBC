@@ -58,8 +58,15 @@ public class PlayerModeManager : MonoBehaviour
         // 3. Cập nhật Parameter cho Animator
         if (anim != null)
         {
-            // Báo cho Animator biết để chuyển bộ Animation (Idle, Run, Jump...)
             anim.SetBool("isAttackMode", isAttackMode);
+        }
+
+        // --- 4. CẬP NHẬT GIAO DIỆN HUD TẠI ĐÂY ---
+        HUDManager hud = Object.FindFirstObjectByType<HUDManager>();
+        if (hud != null)
+        {
+            // Truyền biến isAttackMode thẳng vào HUDManager
+            hud.ChangeModeAppearance(isAttackMode);
         }
     }
 }

@@ -339,8 +339,32 @@ public class PlayerMovement : MonoBehaviour
     {
         isDead = true;
         rb.linearVelocity = Vector2.zero;
-        rb.simulated = false;
-        Invoke(nameof(RestartLevel), restartDelay);
+        rb.simulated = false; // Tắt vật lý để không rơi xuyên đất
+
+        // --- 1. KÍCH HOẠT ANIMATION CHẾT ---
+        if (anim != null)
+        {
+            // Xóa dòng anim.speed = 0f đi để nhân vật được cử động
+            anim.SetTrigger("Die");
+        }
+
+        // --- 2. HẸN GIỜ LÀM MỜ MÀN HÌNH ---
+        // Cho Anh Khoai 1 giây để diễn cảnh ngã xuống, sau đó mới gọi hàm làm đen màn hình
+        Invoke(nameof(CallFader), 0.1f);
+    }
+
+    // Hàm phụ trợ để gọi tấm màn đen sau khi đã diễn xong animation
+    void CallFader()
+    {
+        SceneFader fader = Object.FindFirstObjectByType<SceneFader>();
+        if (fader != null)
+        {
+            fader.FadeOutAndRestart();
+        }
+        else
+        {
+            RestartLevel();
+        }
     }
 
     void RestartLevel() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
