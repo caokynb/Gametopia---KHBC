@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Collections; // Cần thêm cái này để dùng Coroutine
+using System.Collections;
+using UnityEngine.SceneManagement; // BẮT BUỘC THÊM DÒNG NÀY ĐỂ LƯU TÊN MAP
 
 public class Checkpoint : MonoBehaviour
 {
@@ -11,7 +12,7 @@ public class Checkpoint : MonoBehaviour
     private Animator anim;
     private bool isActivated = false;
 
-    // --- NEW: Biến để tránh người chơi bấm F liên tục khi đang chạy anim ---
+    // --- Biến để tránh người chơi bấm F liên tục khi đang chạy anim ---
     private bool isProcessing = false;
 
     void Awake() { allCheckpoints.Add(this); }
@@ -39,7 +40,7 @@ public class Checkpoint : MonoBehaviour
     IEnumerator ProcessCheckpointActivation()
     {
         isProcessing = true;
-        float animDuration = 1.0f; // Độ dài hoạt ảnh thắp hương (bạn hãy chỉnh theo giây)
+        float animDuration = 1.0f; // Độ dài hoạt ảnh thắp hương 
 
         // 1. Gọi Anh Khoai diễn hoạt ảnh thắp hương
         if (playerMovement != null)
@@ -47,7 +48,7 @@ public class Checkpoint : MonoBehaviour
             playerMovement.TriggerWishAnimation(animDuration);
         }
 
-        // 2. Chạy hoạt ảnh "Saving" trên Miếu (Nếu bạn có Trigger riêng)
+        // 2. Chạy hoạt ảnh "Saving" trên Miếu 
         if (anim != null)
         {
             anim.SetTrigger("StartSaving");
@@ -56,7 +57,7 @@ public class Checkpoint : MonoBehaviour
         // 3. CHỜ hoạt ảnh chạy hết 1 vòng
         yield return new WaitForSeconds(animDuration);
 
-        // 4. THỰC HIỆN LƯU (Logic cũ của bạn)
+        // 4. Đặt lại toàn bộ Checkpoint khác thành chưa kích hoạt
         foreach (Checkpoint cp in allCheckpoints)
         {
             cp.SetCheckpointVisual(false);
@@ -64,6 +65,7 @@ public class Checkpoint : MonoBehaviour
 
         SetCheckpointVisual(true);
 
+        // 5. Hồi phục Tre và Dọn dẹp map
         if (playerMovement != null)
         {
             playerMovement.stats.currentBambooCount = playerMovement.stats.maxBambooCount;
@@ -74,11 +76,17 @@ public class Checkpoint : MonoBehaviour
             constructionScript.ClearAllSpawnedBamboo();
         }
 
+        // 6. LƯU VỊ TRÍ HỒI SINH TẠM THỜI (Soft Save)
         PlayerMovement.respawnPosition = transform.position;
         PlayerMovement.hasCheckpoint = true;
 
+        // 7. LƯU TIẾN ĐỘ VÀO Ổ CỨNG (Hard Save cho Main Menu)
+        string currentScene = SceneManager.GetActiveScene().name;
+        PlayerPrefs.SetString("SavedLevel", currentScene);
+        PlayerPrefs.Save();
+
         isProcessing = false;
-        Debug.Log("<color=lime>Checkpoint chính thức được lưu sau khi thắp hương!</color>");
+        Debug.Log("<color=lime>Checkpoint chính thức được lưu sau khi thắp hương!</color> Đã lưu Map: " + currentScene);
     }
 
     public void SetCheckpointVisual(bool active)
