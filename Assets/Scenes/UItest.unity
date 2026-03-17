@@ -823,7 +823,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_TargetDisplay: 0
 --- !u!224 &1021294494
 RectTransform:
@@ -1837,7 +1837,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0115acd91ec1244ba6aa4e5a2ca9530, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackMode
-  attributes: {fileID: 1865170978}
   attackPoint: {fileID: 1798355874}
   attackRange: 0.5
   enemyLayers:
@@ -1845,6 +1844,7 @@ MonoBehaviour:
     m_Bits: 8
   bambooCostPerAttack: 2
   attackCooldown: 0.3
+  hitVFXPrefab: {fileID: 0}
 --- !u!114 &1865170975
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1873,7 +1873,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00348287ada67bc4ca28c92df50a93eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  stats: {fileID: 0}
+  stats:
+    maxBambooCount: 100
+    currentBambooCount: 100
+    burnBambooOnAttack: 0
+    burnBambooPerUnit: 0
+    maxHealth: 4
+    healthPoint: 4
+    moveSpeed: 8
+    jumpForce: 15
+    normalGravity: 3
   groundCheckWidth: 0.5
   groundCheckRayCount: 3
   groundCheckDistance: 0.15
@@ -1883,6 +1892,7 @@ MonoBehaviour:
   bambooLayer:
     serializedVersion: 2
     m_Bits: 128
+  iFrameDuration: 1.5
   maxSlopeAngle: 60
   steepSlideSpeed: 12
   gentleSlideForce: 3
@@ -1926,15 +1936,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ded4c11d7df1d640aa02a748c8c3f25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttributes
-  maxBambooCount: 100
-  currentBambooCount: 100
-  burnBambooOnAttack: 0
-  burnBambooPerUnit: 0
-  maxHealth: 4
-  healthPoint: 2147483647
-  moveSpeed: 8
-  jumpForce: 14
-  normalGravity: 3
 --- !u!50 &1865170979
 Rigidbody2D:
   serializedVersion: 5

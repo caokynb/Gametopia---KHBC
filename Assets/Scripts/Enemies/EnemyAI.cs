@@ -206,6 +206,9 @@ public class EnemyAI : MonoBehaviour
             }
             else
             {
+                // [ĐÃ THÊM] Đóng băng hướng nhìn và hành động nếu đang bị hất tung trên không
+                if (!isGrounded) return;
+
                 float direction = movingRight ? 1f : -1f;
                 rb.linearVelocity = new Vector2(direction * chaseSpeed, rb.linearVelocity.y);
 
@@ -521,7 +524,6 @@ public class EnemyAI : MonoBehaviour
 
         if (isBoyOnBuffalo)
         {
-            // [ĐÃ SỬA] Đổi từ DestructibleObject sang BambooSegment
             BambooSegment bamboo = collision.GetComponent<BambooSegment>();
             if (bamboo != null) bamboo.TakeDamage(999);
         }
