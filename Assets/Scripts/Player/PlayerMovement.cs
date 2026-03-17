@@ -24,6 +24,11 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask groundLayer;
     public LayerMask bambooLayer;
 
+    [Header("Cài đặt iFrames")]
+    public float iFrameDuration = 1.5f;
+    private bool isInvincible = false;
+
+
     [Header("Mở Khóa Kỹ Năng")]
     public static bool canJumpOnBamboo = false;
     private bool isStandingOnBambooOnly;
@@ -300,9 +305,45 @@ public class PlayerMovement : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        // Nếu đang bất tử hoặc đã chết thì không nhận thêm sát thương
+        if (isInvincible || isDead) return;
+
         stats.healthPoint -= damage;
-        if (spriteRenderer != null) StartCoroutine(FlashRedEffect());
-        if (stats.healthPoint <= 0) Die();
+
+        if (stats.healthPoint <= 0)
+        {
+            Die();
+        }
+        else
+        {
+            // Bật trạng thái bất tử và bắt đầu nhấp nháy
+            StartCoroutine(InvincibilityRoutine());
+        }
+    }
+
+    // --- COROUTINE NHẤP NHÁY KIỂU TERRARIA ---
+    private IEnumerator InvincibilityRoutine()
+    {
+        isInvincible = true;
+        float elapsed = 0f;
+        float blinkInterval = 0.1f; // Tốc độ chớp tắt
+
+        while (elapsed < iFrameDuration)
+        {
+            // Tắt hình
+            spriteRenderer.enabled = false;
+            yield return new WaitForSeconds(blinkInterval);
+
+            // Bật hình
+            spriteRenderer.enabled = true;
+            yield return new WaitForSeconds(blinkInterval);
+
+            elapsed += (blinkInterval * 2);
+        }
+
+        // Đảm bảo hiện hình 100% khi hết thời gian
+        spriteRenderer.enabled = true;
+        isInvincible = false;
     }
 
     private IEnumerator FlashRedEffect()
