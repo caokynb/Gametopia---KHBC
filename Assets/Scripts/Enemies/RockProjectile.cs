@@ -7,6 +7,9 @@ public class RockProjectile : MonoBehaviour
     public int damage = 1;
     public float lifeTime = 3f;
 
+    [Header("Tên Layer của Tre")]
+    public string bambooLayerName = "Bamboo"; // <--- Nhớ đổi tên này thành Layer Tre của bạn trong Unity
+
     void Start()
     {
         // Tự hủy sau 3 giây để tránh làm nặng game
@@ -19,43 +22,51 @@ public class RockProjectile : MonoBehaviour
         transform.Translate(Vector3.left * speed * Time.deltaTime);
     }
 
-    // ---------------------------------------------------
-    // TRƯỜNG HỢP 1: NẾU VIÊN ĐÁ LÀ "IS TRIGGER" (Xuyên thấu)
-    // ---------------------------------------------------
     private void OnTriggerEnter2D(Collider2D collision)
     {
         CheckHit(collision.gameObject);
     }
 
-    // ---------------------------------------------------
-    // TRƯỜNG HỢP 2: NẾU VIÊN ĐÁ LÀ VẬT THỂ CỨNG (Không bật Trigger)
-    // ---------------------------------------------------
     private void OnCollisionEnter2D(Collision2D collision)
     {
         CheckHit(collision.gameObject);
     }
 
-    // --- Hàm xử lý trừ máu chung ---
+    // --- Hàm xử lý va chạm ---
     void CheckHit(GameObject hitObject)
     {
-        // Nếu chạm vào Anh Khoai
+        // 1. Nếu chạm vào Anh Khoai
         if (hitObject.CompareTag("Player"))
         {
             PlayerMovement player = hitObject.GetComponent<PlayerMovement>();
-
             if (player != null)
             {
-                // GỌI HÀM TAKEDAMAGE CỦA BẠN THAY VÌ TỰ TRỪ SỐ!
                 player.TakeDamage(damage);
                 Debug.Log("💥 ÁU! Khỉ ném trúng rồi!");
             }
-
-            Destroy(gameObject); // Vỡ vụn
-        }
-        // Nếu đập vào Đất/Tường
-        else if (hitObject.layer == LayerMask.NameToLayer("Ground"))
-        {
             Destroy(gameObject);
+            return;
         }
+
+        // 2. [MỚI] Nếu chạm vào Layer Tre
+        if (hitObject.layer == LayerMask.NameToLayer(bambooLayerName))
+        {
+            Debug.Log("💥 Đá khỉ đã đập trúng Layer Tre!");
+
+            // Tìm script BambooSegment gắn trên đốt tre bị ném trúng
+            BambooSegment bamboo = hitObject.GetComponent<BambooSegment>();
+
+            if (bamboo != null)
+            {
+                // Gọi hàm TakeDamage của đốt tre và truyền lượng damage của viên đá vào
+                bamboo.TakeDamage(damage);
+            }
+
+            // Dù tre chưa vỡ thì viên đá đập vào cũng phải vỡ vụn
+            Destroy(gameObject);
+            return;
+        }
+
+        
     }
 }
