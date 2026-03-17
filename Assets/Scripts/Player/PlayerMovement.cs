@@ -111,6 +111,16 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     void Update()
     {
+        if (DialogueManager.instance != null && DialogueManager.instance.isDialogueActive)
+        {
+            // Dừng hẳn nhân vật lại (Dùng linearVelocity vì bạn đang dùng Unity bản mới)
+            GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
+
+            // Nếu bạn có Animator, bỏ comment dòng dưới để set tốc độ về 0 (đứng im)
+            // GetComponent<Animator>().SetFloat("Speed", 0f); 
+
+            return; // Lệnh return này sẽ ngăn các dòng code di chuyển bên dưới chạy!
+        }
         if (stats.currentBambooCount <= 0 && !isDead) Die();
 
         // CHỈNH SỬA: Nếu đang chết HOẶC đang thắp hương thì không nhận Input
