@@ -179,7 +179,7 @@ MonoBehaviour:
   hoverHeight: 2.5
   batDiveSpeed: 10
   batDiveDelay: 0.4
-  buffaloChargeSpeed: 5
+  buffaloChargeSpeed: 30
   buffaloWallCheckDist: 1
   mantisPatrolRange: 3
   mantisDashSpeed: 16
