@@ -19,12 +19,8 @@ public class EnemyAI : MonoBehaviour
     public float detectionRange = 5f;
     public float attackRange = 1.2f;
 
-    // ==========================================
-    // [MỚI] HỆ THỐNG RADAR SÁT THƯƠNG
-    // ==========================================
     [Header("Cảm biến Chạm (Đi xuyên)")]
-    public float touchDamageRadius = 0.8f; // Khoảng cách quét trúng Anh Khoai
-    private float touchCooldownTimer = 0f; // Bộ đếm giờ để không cắn liên tục 60 lần/giây
+    private float touchCooldownTimer = 0f;
 
     [Header("Cấu hình Đẩy lùi")]
     public float knockbackForce = 12f;
@@ -76,8 +72,7 @@ public class EnemyAI : MonoBehaviour
     private SpriteRenderer sr;
     private Transform player;
 
-    private Collider2D myCol;
-    private Collider2D playerCol;
+    private Animator anim;
 
     private Vector3 homePosition;
     private float attackTimer;
@@ -87,10 +82,15 @@ public class EnemyAI : MonoBehaviour
     private bool isGrounded;
     private bool isThrowingRocks = false;
 
+    private Collider2D myCol;
+    private Collider2D playerCol;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
+
         homePosition = transform.position;
 
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
@@ -98,26 +98,23 @@ public class EnemyAI : MonoBehaviour
         {
             player = playerObj.transform;
 
-            // ==========================================
-            // [MỚI] LỆNH ÉP QUÁI VÀ PLAYER ĐI XUYÊN QUA NHAU
-            // ==========================================
-            myCol = GetComponent<Collider2D>();
-            playerCol = playerObj.GetComponent<Collider2D>();
+            Collider2D[] myCols = GetComponents<Collider2D>();
+            Collider2D[] playerCols = playerObj.GetComponents<Collider2D>();
 
-            if (myCol != null && playerCol != null)
+            foreach (var mCol in myCols)
             {
-                Physics2D.IgnoreCollision(myCol, playerCol, true);
+                foreach (var pCol in playerCols)
+                {
+                    Physics2D.IgnoreCollision(mCol, pCol, true);
+                }
             }
+
+            if (myCols.Length > 0) myCol = myCols[0];
+            if (playerCols.Length > 0) playerCol = playerCols[0];
         }
 
-        if (isMonkey)
-        {
-            rb.constraints = RigidbodyConstraints2D.FreezeAll;
-        }
-        else if (isBat)
-        {
-            rb.gravityScale = 0f;
-        }
+        if (isMonkey) rb.constraints = RigidbodyConstraints2D.FreezeAll;
+        else if (isBat) rb.gravityScale = 0f;
         else if (isBoyOnBuffalo)
         {
             rb.gravityScale = 0f;
@@ -138,29 +135,31 @@ public class EnemyAI : MonoBehaviour
     {
         if (player == null || isKnockbacked || isWaiting) return;
 
+        if (anim != null)
+        {
+            float currentSpeed = isBat ? rb.linearVelocity.magnitude : Mathf.Abs(rb.linearVelocity.x);
+            anim.SetFloat("Speed", currentSpeed);
+        }
+
         isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckLength, groundLayer);
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
-        // ==========================================
-        // [CẬP NHẬT] TỰ ĐỘNG GÂY SÁT THƯƠNG
-        // ==========================================
-        // Xóa dòng check touchCooldownTimer cũ
+        if (touchCooldownTimer > 0) touchCooldownTimer -= Time.deltaTime;
+
         if (myCol != null && playerCol != null)
         {
-            if (myCol.bounds.Intersects(playerCol.bounds) && !isMonkey)
+            if (myCol.bounds.Intersects(playerCol.bounds) && !isMonkey && touchCooldownTimer <= 0)
             {
                 PlayerMovement pm = player.GetComponent<PlayerMovement>();
                 if (pm != null)
                 {
-                    // Gọi hàm sát thương. PlayerMovement sẽ tự lo việc bất tử (iFrames)
                     pm.TakeDamage(1);
+                    touchCooldownTimer = 1.5f;
                 }
             }
         }
 
-        // ==========================================
-        // LOGIC CHO BAT
-        // ==========================================
+        // --- Logic Bat ---
         if (isBat)
         {
             if (isHanging)
@@ -172,9 +171,7 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        // ==========================================
-        // LOGIC CHO CẬU BÉ CƯỠI TRÂU
-        // ==========================================
+        // --- Logic Buffalo ---
         if (isBoyOnBuffalo)
         {
             float direction = movingRight ? 1f : -1f;
@@ -188,9 +185,7 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        // ==========================================
-        // LOGIC CHO MANTIS (BỌ NGỰA)
-        // ==========================================
+        // --- Logic Mantis ---
         if (isMantis)
         {
             if (attackTimer > 0) attackTimer -= Time.deltaTime;
@@ -221,17 +216,12 @@ public class EnemyAI : MonoBehaviour
                 bool outOfRange = Mathf.Abs(transform.position.x - homePosition.x) > mantisPatrolRange;
                 bool movingAway = (transform.position.x > homePosition.x && movingRight) || (transform.position.x < homePosition.x && !movingRight);
 
-                if (wallAhead || !groundAhead || (outOfRange && movingAway))
-                {
-                    Flip();
-                }
+                if (wallAhead || !groundAhead || (outOfRange && movingAway)) Flip();
             }
             return;
         }
 
-        // ==========================================
-        // LOGIC CHO TIGER VÀ MONKEY
-        // ==========================================
+        // --- Logic Tiger/Monkey ---
         if (attackTimer > 0) attackTimer -= Time.deltaTime;
 
         if (distanceToPlayer <= attackRange)
@@ -266,8 +256,7 @@ public class EnemyAI : MonoBehaviour
             {
                 if (sr != null) sr.enabled = false;
                 float randomSide = (Random.value > 0.5f) ? 1f : -1f;
-                Vector3 newPos = new Vector3(player.position.x + (randomSide * mantisTeleportDist), transform.position.y, transform.position.z);
-                transform.position = newPos;
+                transform.position = new Vector3(player.position.x + (randomSide * mantisTeleportDist), transform.position.y, transform.position.z);
                 yield return new WaitForSeconds(mantisVanishDuration);
                 if (sr != null) sr.enabled = true;
             }
@@ -278,6 +267,8 @@ public class EnemyAI : MonoBehaviour
 
             if (sr != null) sr.color = Color.white;
             isDashingMantis = true;
+
+            if (anim != null) anim.SetTrigger("Attack");
 
             float oldGravity = rb.gravityScale;
             rb.gravityScale = 0f;
@@ -296,11 +287,6 @@ public class EnemyAI : MonoBehaviour
     {
         if (faceRight && !movingRight) Flip();
         else if (!faceRight && movingRight) Flip();
-    }
-
-    private void OnBecameInvisible()
-    {
-        if (isBoyOnBuffalo) Destroy(gameObject);
     }
 
     void BatChasePlayer()
@@ -339,6 +325,9 @@ public class EnemyAI : MonoBehaviour
     {
         isPreparingDive = true;
         rb.linearVelocity = new Vector2(0, 3f);
+
+        if (anim != null) anim.SetTrigger("Attack");
+
         yield return new WaitForSeconds(batDiveDelay);
         isPreparingDive = false;
         isDiving = true;
@@ -349,6 +338,9 @@ public class EnemyAI : MonoBehaviour
         if (isMantis && sr != null && !sr.enabled) return;
 
         health--;
+
+        if (anim != null) anim.SetTrigger("Hurt");
+
         StopCoroutine("FlashRed");
         StartCoroutine(FlashRed());
 
@@ -405,7 +397,11 @@ public class EnemyAI : MonoBehaviour
     {
         if (isGrounded && attackTimer <= 0)
         {
-            attackTimer = tigerAttackCooldown; rb.linearVelocity = Vector2.zero;
+            attackTimer = tigerAttackCooldown;
+            rb.linearVelocity = Vector2.zero;
+
+            if (anim != null) anim.SetTrigger("Attack");
+
             float direction = (player.position.x > transform.position.x) ? 1 : -1;
             if (direction > 0 && !movingRight) Flip(); else if (direction < 0 && movingRight) Flip();
             rb.AddForce(new Vector2(direction * tigerJumpForwardForce, tigerJumpUpwardForce), ForceMode2D.Impulse);
@@ -416,34 +412,72 @@ public class EnemyAI : MonoBehaviour
     void MonkeyAttack()
     {
         FacePlayer();
-        if (attackTimer <= 0 && !isThrowingRocks) StartCoroutine(ThrowRocksRoutine());
-        else if (isGrounded) StopMoving();
-    }
 
-    private IEnumerator ThrowRocksRoutine()
-    {
-        isThrowingRocks = true;
-        for (int i = 0; i < rocksToThrow; i++)
+        if (attackTimer <= 0 && !isThrowingRocks)
         {
-            if (rockPrefab != null && throwPoint != null && player != null)
+            isThrowingRocks = true;
+
+            if (anim != null)
             {
-                GameObject rock = Instantiate(rockPrefab, throwPoint.position, Quaternion.identity);
-                Rigidbody2D rockRb = rock.GetComponent<Rigidbody2D>();
-                if (rockRb != null) { Vector2 throwDir = (player.position - throwPoint.position).normalized; throwDir.y += 0.25f; rockRb.AddForce(throwDir * rockThrowForce, ForceMode2D.Impulse); }
+                anim.SetTrigger("Attack");
             }
-            yield return new WaitForSeconds(delayBetweenRocks);
         }
-        attackTimer = monkeyAttackCooldown; isThrowingRocks = false;
+        else if (isGrounded)
+        {
+            StopMoving();
+        }
     }
 
-    void Die() { Destroy(gameObject); }
+    public void SpawnRockEvent()
+    {
+        if (rockPrefab != null && throwPoint != null && player != null)
+        {
+            GameObject rock = Instantiate(rockPrefab, throwPoint.position, Quaternion.identity);
+            Rigidbody2D rockRb = rock.GetComponent<Rigidbody2D>();
 
+            if (rockRb != null)
+            {
+                Vector3 targetPosition = player.position;
+                targetPosition.y -= 0.5f;
+
+                Vector2 throwDir = (targetPosition - throwPoint.position).normalized;
+                rockRb.AddForce(throwDir * rockThrowForce, ForceMode2D.Impulse);
+            }
+        }
+    }
+
+    public void FinishAttackEvent()
+    {
+        attackTimer = monkeyAttackCooldown;
+        isThrowingRocks = false;
+    }
+
+    void Die()
+    {
+        if (anim != null)
+        {
+            anim.SetTrigger("Die");
+            if (myCol != null) myCol.enabled = false;
+            rb.linearVelocity = Vector2.zero;
+            rb.gravityScale = 0f;
+            this.enabled = false;
+
+            Destroy(gameObject, 1f);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    // ==========================================
+    // TRƯỜNG HỢP 1: VA CHẠM CỨNG (Không bật Is Trigger)
+    // ==========================================
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Player") && !isMonkey)
         {
             PlayerMovement playerMovement = collision.gameObject.GetComponent<PlayerMovement>();
-            // CHỈ GỌI TAKEDAMAGE NẾU TIMER CHO PHÉP (Dự phòng va chạm)
             if (playerMovement != null && touchCooldownTimer <= 0)
             {
                 playerMovement.TakeDamage(1);
@@ -459,14 +493,25 @@ public class EnemyAI : MonoBehaviour
                 rb.linearVelocity = Vector2.zero;
             }
         }
+
+        if (isBoyOnBuffalo)
+        {
+            BambooSegment bamboo = collision.gameObject.GetComponent<BambooSegment>();
+            if (bamboo != null)
+            {
+                bamboo.TakeDamage(999);
+            }
+        }
     }
 
+    // ==========================================
+    // TRƯỜNG HỢP 2: ĐI XUYÊN (Có bật Is Trigger)
+    // ==========================================
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player") && !isMonkey)
         {
             PlayerMovement playerMovement = collision.GetComponent<PlayerMovement>();
-            // CHỈ GỌI TAKEDAMAGE NẾU TIMER CHO PHÉP (Dự phòng va chạm)
             if (playerMovement != null && touchCooldownTimer <= 0)
             {
                 playerMovement.TakeDamage(1);
@@ -476,38 +521,15 @@ public class EnemyAI : MonoBehaviour
 
         if (isBoyOnBuffalo)
         {
-            DestructibleObject bamboo = collision.GetComponent<DestructibleObject>();
-            if (bamboo != null) bamboo.TakeDamage();
+            // [ĐÃ SỬA] Đổi từ DestructibleObject sang BambooSegment
+            BambooSegment bamboo = collision.GetComponent<BambooSegment>();
+            if (bamboo != null) bamboo.TakeDamage(999);
         }
     }
 
     private void OnDrawGizmosSelected()
     {
-        // [MỚI] Vẽ vòng tròn đỏ vùng cắn để bạn dễ căn chỉnh ngoài Scene
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, touchDamageRadius);
-
         Gizmos.color = Color.green;
         Gizmos.DrawLine(transform.position, transform.position + Vector3.down * groundCheckLength);
-
-        if (isBoyOnBuffalo)
-        {
-            Gizmos.color = Color.blue;
-            float dir = movingRight ? 1f : -1f;
-            Gizmos.DrawLine(transform.position, transform.position + new Vector3(dir * buffaloWallCheckDist, 0f, 0f));
-        }
-
-        if (isMantis)
-        {
-            Gizmos.color = Color.yellow;
-            Vector3 leftLimit = Application.isPlaying ? homePosition : transform.position;
-            leftLimit.x -= mantisPatrolRange;
-            Vector3 rightLimit = Application.isPlaying ? homePosition : transform.position;
-            rightLimit.x += mantisPatrolRange;
-
-            Gizmos.DrawLine(leftLimit + Vector3.up * 0.5f, leftLimit + Vector3.down * 0.5f);
-            Gizmos.DrawLine(rightLimit + Vector3.up * 0.5f, rightLimit + Vector3.down * 0.5f);
-            Gizmos.DrawLine(leftLimit, rightLimit);
-        }
     }
 }
