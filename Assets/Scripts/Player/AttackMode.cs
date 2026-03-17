@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
-using System.Collections.Generic; // BẮT BUỘC THÊM DÒNG NÀY ĐỂ DÙNG LIST
+using System.Collections.Generic;
 
 public class AttackMode : MonoBehaviour
 {
-    public PlayerAttributes attributes;
+    // [CẬP NHẬT] Đổi từ việc dùng biến attributes riêng sang lấy thẳng từ PlayerMovement
+    private PlayerMovement playerMovement;
+
     private Vector3 startPosition;
     private Rigidbody2D rb;
     private Animator anim;
@@ -19,10 +21,17 @@ public class AttackMode : MonoBehaviour
     private float nextAttackTime = 0f;
     private bool canAttack = true;
 
+    [Header("Hiệu ứng (VFX)")]
+    public GameObject hitVFXPrefab;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+
+        // Tìm túi tre chính chủ của Anh Khoai để dùng chung
+        playerMovement = GetComponent<PlayerMovement>();
+
         startPosition = transform.position;
     }
 
@@ -35,7 +44,8 @@ public class AttackMode : MonoBehaviour
 
         if (Input.GetButtonDown("Fire1") && canAttack)
         {
-            if (attributes.currentBambooCount >= bambooCostPerAttack)
+            // Kiểm tra túi tre chính
+            if (playerMovement.stats.currentBambooCount >= bambooCostPerAttack)
             {
                 ExecuteCombat();
             }
@@ -61,13 +71,11 @@ public class AttackMode : MonoBehaviour
 
     void Attack()
     {
-        // 1. TẠO BỘ LỌC ĐỂ BẮT BUỘC CHÉM TRÚNG TRIGGER (CON RẾT)
         ContactFilter2D filter = new ContactFilter2D();
         filter.SetLayerMask(enemyLayers);
         filter.useLayerMask = true;
-        filter.useTriggers = true; // DÒNG QUAN TRỌNG NHẤT: Cho phép chém trúng Trigger!
+        filter.useTriggers = true;
 
-        // 2. DÙNG BỘ LỌC ĐỂ QUÉT QUÁI
         List<Collider2D> hitObjects = new List<Collider2D>();
         Physics2D.OverlapCircle(attackPoint.position, attackRange, filter, hitObjects);
 
@@ -106,14 +114,22 @@ public class AttackMode : MonoBehaviour
                 hitValidTarget = true;
             }
 
-            if (hitValidTarget) hasHitAnything = true;
+            if (hitValidTarget)
+            {
+                hasHitAnything = true;
+                if (hitVFXPrefab != null)
+                {
+                    Instantiate(hitVFXPrefab, obj.transform.position, Quaternion.identity);
+                }
+            }
         }
 
         if (hasHitAnything)
         {
-            attributes.currentBambooCount -= bambooCostPerAttack;
-            if (attributes.currentBambooCount < 0) attributes.currentBambooCount = 0;
-            Debug.Log("Đã đánh trúng! Trừ tre.");
+            // TRỪ VÀO TÚI TRE CHÍNH
+            playerMovement.stats.currentBambooCount -= bambooCostPerAttack;
+            if (playerMovement.stats.currentBambooCount < 0) playerMovement.stats.currentBambooCount = 0;
+            Debug.Log("Đã đánh trúng! Số tre hiện tại: " + playerMovement.stats.currentBambooCount);
         }
     }
 
@@ -124,8 +140,9 @@ public class AttackMode : MonoBehaviour
         else
             transform.position = startPosition;
 
-        attributes.healthPoint = 1;
-        attributes.currentBambooCount = attributes.maxBambooCount;
+        // RESET VÀO TÚI TRE CHÍNH
+        playerMovement.stats.healthPoint = 1;
+        playerMovement.stats.currentBambooCount = playerMovement.stats.maxBambooCount;
 
         if (rb != null)
         {

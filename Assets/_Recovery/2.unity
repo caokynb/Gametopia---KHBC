@@ -2388,67 +2388,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1001 &756171461
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 753869440117285787, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
-      propertyPath: health
-      value: 9999
-      objectReference: {fileID: 0}
-    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -6.64
-      objectReference: {fileID: 0}
-    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -2.08
-      objectReference: {fileID: 0}
-    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6059794969232019801, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7893483424004481895, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
-      propertyPath: m_Name
-      value: BuNhinRom
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: bfa2313138a68cb458a7fe2c5f646701, type: 3}
 --- !u!1 &824430031
 GameObject:
   m_ObjectHideFlags: 0
@@ -4488,67 +4427,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1807024094}
   m_CullTransparentMesh: 1
---- !u!1001 &1824357504
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1123709566072937787, guid: f4318572fb75b164396c04b16e9ed9a2, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 32.46
-      objectReference: {fileID: 0}
-    - target: {fileID: 1123709566072937787, guid: f4318572fb75b164396c04b16e9ed9a2, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -1.6
-      objectReference: {fileID: 0}
-    - target: {fileID: 1123709566072937787, guid: f4318572fb75b164396c04b16e9ed9a2, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1123709566072937787, guid: f4318572fb75b164396c04b16e9ed9a2, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1123709566072937787, guid: f4318572fb75b164396c04b16e9ed9a2, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1123709566072937787, guid: f4318572fb75b164396c04b16e9ed9a2, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1123709566072937787, guid: f4318572fb75b164396c04b16e9ed9a2, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1123709566072937787, guid: f4318572fb75b164396c04b16e9ed9a2, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1123709566072937787, guid: f4318572fb75b164396c04b16e9ed9a2, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1123709566072937787, guid: f4318572fb75b164396c04b16e9ed9a2, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7357075774351512328, guid: f4318572fb75b164396c04b16e9ed9a2, type: 3}
-      propertyPath: m_Name
-      value: Mantis
-      objectReference: {fileID: 0}
-    - target: {fileID: 7357075774351512328, guid: f4318572fb75b164396c04b16e9ed9a2, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: f4318572fb75b164396c04b16e9ed9a2, type: 3}
 --- !u!1 &1835100084
 GameObject:
   m_ObjectHideFlags: 0
@@ -4684,7 +4562,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConstructionMode
   segmentLength: 0.7
-  costPerSegment: 1
+  costPerSegment: 5
   gravityScale: 2
   spawnDelay: 0.5
   singleBambooPrefab: {fileID: 6595069276853952041, guid: 889c7dddde920664cb4dd3319f57c9dd, type: 3}
@@ -4708,14 +4586,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0115acd91ec1244ba6aa4e5a2ca9530, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackMode
+  attributes:
+    maxBambooCount: 100
+    currentBambooCount: 100
+    burnBambooOnAttack: 0
+    burnBambooPerUnit: 0
+    maxHealth: 4
+    healthPoint: 4
+    moveSpeed: 8
+    jumpForce: 15
+    normalGravity: 3
   attackPoint: {fileID: 129051972}
   attackRange: 0.5
   enemyLayers:
     serializedVersion: 2
     m_Bits: 8
-  bambooCostPerAttack: 1
-  attackCooldown: 0.4
-  hitVFXPrefab: {fileID: 6960770736249994957, guid: ae26ffdc40df98743898a1215c8d9727, type: 3}
+  bambooCostPerAttack: 5
+  attackCooldown: 0.3
 --- !u!114 &1844862349
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4763,7 +4650,7 @@ MonoBehaviour:
   bambooLayer:
     serializedVersion: 2
     m_Bits: 128
-  iFrameDuration: 1
+  iFrameDuration: 1.5
   maxSlopeAngle: 60
   steepSlideSpeed: 12
   gentleSlideForce: 3
@@ -5507,8 +5394,6 @@ SceneRoots:
   - {fileID: 1314646452110591191}
   - {fileID: 700381255}
   - {fileID: 1348321252}
-  - {fileID: 1824357504}
-  - {fileID: 756171461}
   - {fileID: 341572852}
   - {fileID: 225773768}
   - {fileID: 1597555268}
