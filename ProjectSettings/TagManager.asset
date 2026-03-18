@@ -14,7 +14,7 @@ TagManager:
   - UI
   - Ground
   - Bamboo
-  - 
+  - Dirt
   - 
   - 
   - 
@@ -47,6 +47,15 @@ TagManager:
     locked: 0
   - name: Midground
     uniqueID: 2854830393
+    locked: 0
+  - name: Midground (Costumes)
+    uniqueID: 3252267747
+    locked: 0
+  - name: 'Interactive - Soft Soil '
+    uniqueID: 2724514103
+    locked: 0
+  - name: Interactive - Soft Soil (Costumes)
+    uniqueID: 562800591
     locked: 0
   - name: Player
     uniqueID: 3163980835
