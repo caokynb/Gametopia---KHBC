@@ -39,32 +39,35 @@ TagManager:
   - 
   - 
   m_SortingLayers:
-  - name: Interactive (Background)
-    uniqueID: 2890300037
+  - name: Background
+    uniqueID: 3884794389
     locked: 0
-  - name: BambooFront
-    uniqueID: 2239494745
+  - name: Background1
+    uniqueID: 2890300037
     locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Objs
-    uniqueID: 3733780035
-    locked: 0
   - name: Midground
     uniqueID: 2854830393
     locked: 0
-  - name: Midground (Costumes)
+  - name: Midground1
     uniqueID: 3252267747
     locked: 0
-  - name: 'Interactive - Soft Soil '
+  - name: Midground2
     uniqueID: 2724514103
     locked: 0
-  - name: Interactive - Soft Soil (Costumes)
-    uniqueID: 562800591
+  - name: Objs
+    uniqueID: 3733780035
     locked: 0
   - name: Player
     uniqueID: 3163980835
+    locked: 0
+  - name: Foreground
+    uniqueID: 2239494745
+    locked: 0
+  - name: Foreground1
+    uniqueID: 3756915439
     locked: 0
   m_RenderingLayers:
   - Default
