@@ -1,0 +1,533 @@
+fileFormatVersion: 2
+guid: 30ccac8c433853c428e0db447222b094
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6583270355252848031
+    second: Grass_Trash_001_0
+  - first:
+      213: 247380174248471072
+    second: Grass_Trash_001_1
+  - first:
+      213: 8208741512874124443
+    second: Grass_Trash_001_2
+  - first:
+      213: -99281676642750897
+    second: Grass_Trash_001_3
+  - first:
+      213: 6531618355628543789
+    second: Grass_Trash_001_4
+  - first:
+      213: -5347355943821071968
+    second: Grass_Trash_001_5
+  - first:
+      213: -1747588720974954873
+    second: Grass_Trash_001_6
+  - first:
+      213: -4666044713400560764
+    second: Grass_Trash_001_7
+  - first:
+      213: 8823203050030601583
+    second: Grass_Trash_001_8
+  - first:
+      213: 6260447949702166808
+    second: Grass_Trash_001_9
+  - first:
+      213: 555035635259929778
+    second: Grass_Trash_001_10
+  - first:
+      213: -8493806517953507138
+    second: Grass_Trash_001_11
+  - first:
+      213: -2934986547291790085
+    second: Grass_Trash_001_12
+  - first:
+      213: 4110444903243097796
+    second: Grass_Trash_001_13
+  - first:
+      213: -4317632457251816628
+    second: Grass_Trash_001_14
+  - first:
+      213: 2026127131858890081
+    second: Grass_Trash_001_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Grass_Trash_001_0
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 0
+        width: 280
+        height: 462
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f95a43922897c5b50800000000000000
+      internalID: 6583270355252848031
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Grass_Trash_001_1
+      rect:
+        serializedVersion: 2
+        x: 394
+        y: 366
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02aed8235fede6300800000000000000
+      internalID: 247380174248471072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Grass_Trash_001_2
+      rect:
+        serializedVersion: 2
+        x: 543
+        y: 0
+        width: 498
+        height: 407
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b946dd70aee4be170800000000000000
+      internalID: 8208741512874124443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Grass_Trash_001_3
+      rect:
+        serializedVersion: 2
+        x: 1141
+        y: 0
+        width: 288
+        height: 394
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f4ee00357d74f9ef0800000000000000
+      internalID: -99281676642750897
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Grass_Trash_001_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 25
+        width: 11
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d2f09a7d948f4aa50800000000000000
+      internalID: 6531618355628543789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Grass_Trash_001_5
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 0
+        width: 43
+        height: 130
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a9a8f0c9106ac5b0800000000000000
+      internalID: -5347355943821071968
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Grass_Trash_001_6
+      rect:
+        serializedVersion: 2
+        x: 55
+        y: 0
+        width: 107
+        height: 326
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78efec041515fb7e0800000000000000
+      internalID: -1747588720974954873
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Grass_Trash_001_7
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 0
+        width: 62
+        height: 152
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4839baf0e01ee3fb0800000000000000
+      internalID: -4666044713400560764
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Grass_Trash_001_8
+      rect:
+        serializedVersion: 2
+        x: 462
+        y: 0
+        width: 95
+        height: 273
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f65973a3d60527a70800000000000000
+      internalID: 8823203050030601583
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Grass_Trash_001_9
+      rect:
+        serializedVersion: 2
+        x: 1052
+        y: 0
+        width: 40
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 819f1d0bd3491e650800000000000000
+      internalID: 6260447949702166808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Grass_Trash_001_10
+      rect:
+        serializedVersion: 2
+        x: 1054
+        y: 18
+        width: 45
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b4f95538f1e3b700800000000000000
+      internalID: 555035635259929778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Grass_Trash_001_11
+      rect:
+        serializedVersion: 2
+        x: 1103
+        y: 0
+        width: 107
+        height: 236
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb0db7a59ffef1a80800000000000000
+      internalID: -8493806517953507138
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Grass_Trash_001_12
+      rect:
+        serializedVersion: 2
+        x: 1436
+        y: 0
+        width: 70
+        height: 275
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf46f141945d447d0800000000000000
+      internalID: -2934986547291790085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Grass_Trash_001_13
+      rect:
+        serializedVersion: 2
+        x: 1512
+        y: 0
+        width: 50
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c6ae968cdb3b0930800000000000000
+      internalID: 4110444903243097796
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Grass_Trash_001_14
+      rect:
+        serializedVersion: 2
+        x: 1579
+        y: 0
+        width: 36
+        height: 130
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4bfecae720b414c0800000000000000
+      internalID: -4317632457251816628
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Grass_Trash_001_15
+      rect:
+        serializedVersion: 2
+        x: 1035
+        y: 0
+        width: 21
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 16dea3c34ef3e1c10800000000000000
+      internalID: 2026127131858890081
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Grass_Trash_001_0: 6583270355252848031
+      Grass_Trash_001_1: 247380174248471072
+      Grass_Trash_001_10: 555035635259929778
+      Grass_Trash_001_11: -8493806517953507138
+      Grass_Trash_001_12: -2934986547291790085
+      Grass_Trash_001_13: 4110444903243097796
+      Grass_Trash_001_14: -4317632457251816628
+      Grass_Trash_001_15: 2026127131858890081
+      Grass_Trash_001_2: 8208741512874124443
+      Grass_Trash_001_3: -99281676642750897
+      Grass_Trash_001_4: 6531618355628543789
+      Grass_Trash_001_5: -5347355943821071968
+      Grass_Trash_001_6: -1747588720974954873
+      Grass_Trash_001_7: -4666044713400560764
+      Grass_Trash_001_8: 8823203050030601583
+      Grass_Trash_001_9: 6260447949702166808
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
