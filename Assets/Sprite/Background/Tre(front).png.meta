@@ -1,0 +1,481 @@
+fileFormatVersion: 2
+guid: 6535f60c344c82d4e8b40667328bd66d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6621759053803689778
+    second: Tre(front)_0
+  - first:
+      213: -796044777938346249
+    second: Tre(front)_1
+  - first:
+      213: -3047239672881549809
+    second: Tre(front)_2
+  - first:
+      213: -3967890564171125589
+    second: Tre(front)_3
+  - first:
+      213: 6544197648602893580
+    second: Tre(front)_4
+  - first:
+      213: -5350182938795011809
+    second: Tre(front)_5
+  - first:
+      213: -2734247261881717465
+    second: Tre(front)_6
+  - first:
+      213: -93237212639024850
+    second: Tre(front)_7
+  - first:
+      213: -6315453288451834109
+    second: Tre(front)_8
+  - first:
+      213: -2007325274568419424
+    second: Tre(front)_9
+  - first:
+      213: 8467834152548078163
+    second: Tre(front)_10
+  - first:
+      213: -4209871441745367932
+    second: Tre(front)_11
+  - first:
+      213: -591172384262042657
+    second: Tre(front)_12
+  - first:
+      213: -5684273879874768786
+    second: Tre(front)_13
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Tre(front)_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 3745
+        height: 2160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 237123e96c635eb50800000000000000
+      internalID: 6621759053803689778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tre(front)_1
+      rect:
+        serializedVersion: 2
+        x: 228
+        y: 160
+        width: 194
+        height: 2000
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7fe1ea9fd71e3f4f0800000000000000
+      internalID: -796044777938346249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tre(front)_2
+      rect:
+        serializedVersion: 2
+        x: 543
+        y: 41
+        width: 127
+        height: 2119
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0eea6899a706b5d0800000000000000
+      internalID: -3047239672881549809
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tre(front)_3
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 285
+        width: 184
+        height: 1875
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: baca4fefd883fe8c0800000000000000
+      internalID: -3967890564171125589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tre(front)_4
+      rect:
+        serializedVersion: 2
+        x: 1081
+        y: 110
+        width: 141
+        height: 2050
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0d0ce8b619a1da50800000000000000
+      internalID: 6544197648602893580
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tre(front)_5
+      rect:
+        serializedVersion: 2
+        x: 1312
+        y: 0
+        width: 127
+        height: 2160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1194c1b6f450c5b0800000000000000
+      internalID: -5350182938795011809
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tre(front)_6
+      rect:
+        serializedVersion: 2
+        x: 1919
+        y: 13
+        width: 144
+        height: 2147
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72da47b1a900e0ad0800000000000000
+      internalID: -2734247261881717465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tre(front)_7
+      rect:
+        serializedVersion: 2
+        x: 2274
+        y: 353
+        width: 105
+        height: 1807
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e29adc4cf31c4bef0800000000000000
+      internalID: -93237212639024850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tre(front)_8
+      rect:
+        serializedVersion: 2
+        x: 2484
+        y: 82
+        width: 193
+        height: 2078
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30f7142e1b00b58a0800000000000000
+      internalID: -6315453288451834109
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tre(front)_9
+      rect:
+        serializedVersion: 2
+        x: 2800
+        y: 0
+        width: 125
+        height: 2160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a79fac4c4c8424e0800000000000000
+      internalID: -2007325274568419424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tre(front)_10
+      rect:
+        serializedVersion: 2
+        x: 3071
+        y: 208
+        width: 191
+        height: 1952
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3529c871c4ac38570800000000000000
+      internalID: 8467834152548078163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tre(front)_11
+      rect:
+        serializedVersion: 2
+        x: 3333
+        y: 32
+        width: 144
+        height: 2128
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48ca4b48a388395c0800000000000000
+      internalID: -4209871441745367932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tre(front)_12
+      rect:
+        serializedVersion: 2
+        x: 3570
+        y: 0
+        width: 125
+        height: 2160
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fdb4a0349dbbbc7f0800000000000000
+      internalID: -591172384262042657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tre(front)_13
+      rect:
+        serializedVersion: 2
+        x: 3808
+        y: 22
+        width: 32
+        height: 653
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e607808d5076d11b0800000000000000
+      internalID: -5684273879874768786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 9820f5d139426b94ea617f9340346e39
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Tre(front)_0: 6621759053803689778
+      Tre(front)_1: -796044777938346249
+      Tre(front)_10: 8467834152548078163
+      Tre(front)_11: -4209871441745367932
+      Tre(front)_12: -591172384262042657
+      Tre(front)_13: -5684273879874768786
+      Tre(front)_2: -3047239672881549809
+      Tre(front)_3: -3967890564171125589
+      Tre(front)_4: 6544197648602893580
+      Tre(front)_5: -5350182938795011809
+      Tre(front)_6: -2734247261881717465
+      Tre(front)_7: -93237212639024850
+      Tre(front)_8: -6315453288451834109
+      Tre(front)_9: -2007325274568419424
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

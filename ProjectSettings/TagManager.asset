@@ -39,17 +39,20 @@ TagManager:
   - 
   - 
   m_SortingLayers:
-  - name: Default
-    uniqueID: 0
-    locked: 0
   - name: Interactive (Background)
     uniqueID: 2890300037
+    locked: 0
+  - name: Default
+    uniqueID: 0
     locked: 0
   - name: Midground
     uniqueID: 2854830393
     locked: 0
   - name: Player
     uniqueID: 3163980835
+    locked: 0
+  - name: BambooFront
+    uniqueID: 2239494745
     locked: 0
   m_RenderingLayers:
   - Default
