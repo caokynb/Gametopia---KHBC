@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 public class AttackMode : MonoBehaviour
 {
-    // [CẬP NHẬT] Đổi từ việc dùng biến attributes riêng sang lấy thẳng từ PlayerMovement
     private PlayerMovement playerMovement;
 
     private Vector3 startPosition;
@@ -35,6 +34,17 @@ public class AttackMode : MonoBehaviour
         startPosition = transform.position;
     }
 
+    // --- HÀM TÍNH TIỀN MỚI ---
+    // Tự động kiểm tra xem Anh Khoai có đang sở hữu Buff vĩnh viễn không
+    private int GetActualAttackCost()
+    {
+        if (PlayerMovement.hasDiscountBuff)
+        {
+            return Mathf.CeilToInt(bambooCostPerAttack / 2f); // Có Buff -> Cưa đôi giá trị và làm tròn lên
+        }
+        return bambooCostPerAttack; // Không có Buff -> Giữ nguyên giá gốc
+    }
+
     void Update()
     {
         if (Time.time >= nextAttackTime)
@@ -44,14 +54,17 @@ public class AttackMode : MonoBehaviour
 
         if (Input.GetButtonDown("Fire1") && canAttack)
         {
-            // Kiểm tra túi tre chính
-            if (playerMovement.stats.currentBambooCount >= bambooCostPerAttack)
+            // Lấy giá thực tế sau khi đã tính Buff
+            int actualCost = GetActualAttackCost();
+
+            // Kiểm tra túi tre chính với cái giá thực tế đó
+            if (playerMovement.stats.currentBambooCount >= actualCost)
             {
                 ExecuteCombat();
             }
             else
             {
-                Debug.Log("Hết Bamboo rồi, không thể đánh!");
+                Debug.Log($"Hết Bamboo rồi! Cần {actualCost} tre để đánh.");
             }
         }
     }
@@ -126,10 +139,14 @@ public class AttackMode : MonoBehaviour
 
         if (hasHitAnything)
         {
+            // Lấy giá thực tế sau khi đã tính Buff để trừ tiền
+            int actualCost = GetActualAttackCost();
+
             // TRỪ VÀO TÚI TRE CHÍNH
-            playerMovement.stats.currentBambooCount -= bambooCostPerAttack;
+            playerMovement.stats.currentBambooCount -= actualCost;
             if (playerMovement.stats.currentBambooCount < 0) playerMovement.stats.currentBambooCount = 0;
-            Debug.Log("Đã đánh trúng! Số tre hiện tại: " + playerMovement.stats.currentBambooCount);
+
+            Debug.Log($"Đã đánh trúng! Tiêu hao {actualCost} tre. Số tre hiện tại: {playerMovement.stats.currentBambooCount}");
         }
     }
 
@@ -141,7 +158,7 @@ public class AttackMode : MonoBehaviour
             transform.position = startPosition;
 
         // RESET VÀO TÚI TRE CHÍNH
-        playerMovement.stats.healthPoint = 1;
+        playerMovement.stats.healthPoint = 1; // Hoặc maxHealth tùy logic game của bạn
         playerMovement.stats.currentBambooCount = playerMovement.stats.maxBambooCount;
 
         if (rb != null)

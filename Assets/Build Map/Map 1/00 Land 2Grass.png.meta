@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 78bd4ba5f20d411448298c45b2d007ce
+guid: 813fc26f368afac49b073e40b2c3cce6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5776342428550090284
-    second: 00 Land 1 (Noborder)_0
+      213: 2747551148874999318
+    second: 00 Land 2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 00 Land 1 (Noborder)_0
+      name: 00 Land 2_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 722
-        width: 804
-        height: 194
+        y: 718
+        width: 904
+        height: 199
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4d131456a2f46dfa0800000000000000
-      internalID: -5776342428550090284
+      spriteID: 61629e67633412620800000000000000
+      internalID: 2747551148874999318
       vertices: []
       indices: 
       edges: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: dba9c812eadb56c4db59f1c7ea2803dd
+    spriteID: a16fa8003e5cedc46afff260089cf2e9
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      00 Land 1 (Noborder)_0: -5776342428550090284
+      00 Land 2_0: 2747551148874999318
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

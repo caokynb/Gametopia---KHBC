@@ -117,12 +117,20 @@ public class ConstructionMode : MonoBehaviour
         GameObject currentChunk = null;
         int totalCost = 0;
 
+        // BÍ MẬT NẰM Ở ĐÂY: Tính giá tiền của 1 đốt tre. Nếu có buff thì cưa đôi giá!
+        int actualCostPerSegment = costPerSegment;
+        if (PlayerMovement.hasDiscountBuff)
+        {
+            actualCostPerSegment = Mathf.CeilToInt(costPerSegment / 2f);
+        }
+
         for (int i = 0; i < segmentCount; i++)
         {
             Vector2 pos = start + direction * (i * segmentLength + segmentLength / 2f);
             if (!Physics2D.OverlapBox(pos, checkSize, angle, groundLayer))
             {
-                if (stats.currentBambooCount < totalCost + costPerSegment) break;
+                // Dùng giá thực tế đã được sale để kiểm tra xem có đủ tiền xây không
+                if (stats.currentBambooCount < totalCost + actualCostPerSegment) break;
 
                 if (currentChunk == null)
                 {
@@ -131,12 +139,12 @@ public class ConstructionMode : MonoBehaviour
                     spawnedChunks.Add(currentChunk);
                 }
 
-                // CHỌN LOẠI ĐỐT TRE DỰA TRÊN VỊ TRÍ
                 GameObject prefabToUse = GetBambooPrefab(i, segmentCount);
-
                 GameObject segment = Instantiate(prefabToUse, pos, rotation);
                 segment.transform.SetParent(currentChunk.transform);
-                totalCost += costPerSegment;
+
+                // Cộng dồn chi phí đã sale
+                totalCost += actualCostPerSegment;
             }
             else { currentChunk = null; }
         }

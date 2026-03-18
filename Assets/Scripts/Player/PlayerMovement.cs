@@ -30,6 +30,7 @@ public class PlayerMovement : MonoBehaviour
 
 
     [Header("Mở Khóa Kỹ Năng")]
+    public static bool hasDiscountBuff = false;
     public static bool canJumpOnBamboo = false;
     private bool isStandingOnBambooOnly;
     private bool hasUsedFloatingJump = false;
