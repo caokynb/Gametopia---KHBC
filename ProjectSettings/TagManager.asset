@@ -48,6 +48,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Objs
+    uniqueID: 3733780035
+    locked: 0
   - name: Midground
     uniqueID: 2854830393
     locked: 0
