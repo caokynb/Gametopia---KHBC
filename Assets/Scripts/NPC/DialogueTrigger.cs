@@ -1,11 +1,34 @@
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 public class DialogueTrigger : MonoBehaviour
 {
-    [Header("Cài đặt Chế độ")]
+    [Header("Cài đặt Chế độ Kích hoạt")]
     [Tooltip("Tích vào đây nếu muốn hộp thoại tự bật khi đi ngang qua (Unskippable)")]
     public bool isAutoTrigger = false;
-    public GameObject glowEffect; // [MỚI] Biến chứa vầng sáng
+    public GameObject glowEffect; 
+
+    [Header("Cài đặt Xuất hiện (VD: Ông Bụt hiện lên)")]
+    [Tooltip("Tích vào đây để nhân vật tàng hình lúc đầu và hiện dần lên khi kích hoạt")]
+    public bool fadeInOnTrigger = false;
+    [Tooltip("Thời gian hiện dần lên (giây)")]
+    public float fadeInDuration = 1f;
+
+    [Header("Cài đặt Sau Hội Thoại")]
+    [Tooltip("Tích vào đây để nhân vật biến mất sau khi nói chuyện xong")]
+    public bool disappearAfterDialogue = false;
+    [Tooltip("Thời gian mờ dần trước khi biến mất (giây)")]
+    public float fadeDuration = 1.5f;
+    [Tooltip("Prefab hiệu ứng khói/phép thuật khi biến mất (Tùy chọn)")]
+    public GameObject poofEffectPrefab;
+
+    // --- BÍ KÍP TA NẰM Ở ĐÂY: HỆ THỐNG LƯU TRỮ ---
+    [Header("Lưu Trữ Vĩnh Viễn (Chống lặp lại)")]
+    [Tooltip("Tích vào đây để game nhớ và xóa vĩnh viễn NPC này sau khi đã nói chuyện xong")]
+    public bool saveState = false;
+    [Tooltip("BẮT BUỘC ĐIỀN TÊN KHÁC NHAU cho mỗi NPC (VD: OngBut_Map1_KhuA)")]
+    public string uniqueID = "OngBut_01";
 
     [Header("Nội dung cuộc trò chuyện")]
     public DialogueLine[] dialogueLines;
@@ -14,35 +37,67 @@ public class DialogueTrigger : MonoBehaviour
     private DialogueManager manager;
     private float interactCooldown = 0f;
 
-    // [MỚI] Đảm bảo Auto Trigger chỉ chạy 1 lần duy nhất, tránh kẹt loop
     private bool hasTriggeredAuto = false;
+
+    private SpriteRenderer[] renderers;
+    private Collider2D[] colliders;
+    private bool isAppearing = false; 
+    private bool hasAppeared = false; 
 
     void Start()
     {
+        // --- 1. KIỂM TRA BỘ NHỚ LƯU TRỮ ---
+        // Nếu có đánh dấu lưu trạng thái, và bộ nhớ báo là đã xóa (value = 1)
+        if (saveState && PlayerPrefs.GetInt(uniqueID, 0) == 1)
+        {
+            Destroy(gameObject); // Xóa ngay từ frame đầu tiên trước khi người chơi kịp thấy
+            return;
+        }
+
         manager = FindFirstObjectByType<DialogueManager>();
+
+        renderers = GetComponentsInChildren<SpriteRenderer>();
+        colliders = GetComponentsInChildren<Collider2D>();
+
+        if (fadeInOnTrigger)
+        {
+            SetRenderersAlpha(0f);
+            SetCollidersState(false, false); 
+            if (glowEffect != null) glowEffect.SetActive(false);
+        }
+        else
+        {
+            hasAppeared = true;
+        }
     }
 
     void Update()
     {
         if (interactCooldown > 0) interactCooldown -= Time.deltaTime;
 
-        if (glowEffect != null)
+        if (glowEffect != null && hasAppeared && !isAppearing)
         {
-            // Logic: Bật sáng KHI VÀ CHỈ KHI Anh Khoai ở gần + Không phải Auto + Hộp thoại đang TẮT
             bool shouldGlow = playerInRange && !isAutoTrigger && (manager != null && !manager.dialogueBox.activeInHierarchy);
 
-            // Cập nhật trạng thái của Glow cho khớp với logic trên
             if (glowEffect.activeSelf != shouldGlow)
             {
                 glowEffect.SetActive(shouldGlow);
             }
         }
-        // Nếu là NPC bình thường (Không phải Auto), mới cho phép bấm F
+
         if (!isAutoTrigger && playerInRange && Input.GetKeyDown(KeyCode.F) && interactCooldown <= 0f)
         {
             if (manager != null && !manager.dialogueBox.activeInHierarchy)
             {
-                manager.StartDialogue(dialogueLines, false); // false = Manual Mode
+                if (fadeInOnTrigger && !hasAppeared && !isAppearing)
+                {
+                    StartCoroutine(AppearAndStartDialogue(false));
+                }
+                else if (hasAppeared) 
+                {
+                    manager.StartDialogue(dialogueLines, false);
+                    CheckAndHandleDisappear();
+                }
                 interactCooldown = 0.5f;
             }
         }
@@ -54,16 +109,24 @@ public class DialogueTrigger : MonoBehaviour
         {
             playerInRange = true;
 
-            // [MỚI] Nếu là Auto Trigger và chưa từng chạy -> Tự động bật luôn
             if (isAutoTrigger && !hasTriggeredAuto)
             {
                 if (manager != null && !manager.dialogueBox.activeInHierarchy)
                 {
-                    manager.StartDialogue(dialogueLines, true); // true = Auto Mode
-                    hasTriggeredAuto = true; // Đánh dấu là đã chạy
+                    hasTriggeredAuto = true; 
+
+                    if (fadeInOnTrigger && !hasAppeared && !isAppearing)
+                    {
+                        StartCoroutine(AppearAndStartDialogue(true));
+                    }
+                    else 
+                    {
+                        manager.StartDialogue(dialogueLines, true);
+                        CheckAndHandleDisappear();
+                    }
                 }
             }
-            else if (!isAutoTrigger)
+            else if (!isAutoTrigger && hasAppeared)
             {
                 Debug.Log("Anh Khoai đã tới gần. Bấm F để nói chuyện!");
             }
@@ -75,6 +138,120 @@ public class DialogueTrigger : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             playerInRange = false;
+        }
+    }
+
+    private void CheckAndHandleDisappear()
+    {
+        if (disappearAfterDialogue)
+        {
+            StartCoroutine(WaitAndDisappear());
+        }
+    }
+
+    private IEnumerator AppearAndStartDialogue(bool autoMode)
+    {
+        isAppearing = true;
+
+        if (glowEffect != null) glowEffect.SetActive(false);
+
+        Color[] startColors = new Color[renderers.Length];
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            startColors[i] = renderers[i].color;
+        }
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < fadeInDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float alpha = Mathf.Lerp(0f, 1f, elapsedTime / fadeInDuration);
+
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                Color newColor = startColors[i];
+                newColor.a = alpha;
+                renderers[i].color = newColor;
+            }
+            yield return null;
+        }
+
+        SetRenderersAlpha(1f);
+        SetCollidersState(true, true);
+
+        isAppearing = false;
+        hasAppeared = true; 
+
+        manager.StartDialogue(dialogueLines, autoMode);
+        CheckAndHandleDisappear();
+    }
+
+    private IEnumerator WaitAndDisappear()
+    {
+        yield return new WaitForEndOfFrame();
+        yield return new WaitUntil(() => !manager.dialogueBox.activeInHierarchy);
+
+        if (poofEffectPrefab != null)
+        {
+            Instantiate(poofEffectPrefab, transform.position, Quaternion.identity);
+        }
+
+        SetCollidersState(false, true);
+
+        Color[] startColors = new Color[renderers.Length];
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            startColors[i] = renderers[i].color;
+        }
+
+        float elapsedTime = 0f;
+        while (elapsedTime < fadeDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, elapsedTime / fadeDuration);
+
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                Color newColor = startColors[i];
+                newColor.a = alpha;
+                renderers[i].color = newColor;
+            }
+            yield return null;
+        }
+
+        // --- 2. LƯU LẠI VÀ PHÁ HỦY ---
+        if (saveState)
+        {
+            // Lưu giá trị 1 (đã biến mất) vào bộ nhớ
+            PlayerPrefs.SetInt(uniqueID, 1);
+            PlayerPrefs.Save(); 
+        }
+
+        Destroy(gameObject);
+    }
+
+    private void SetRenderersAlpha(float alpha)
+    {
+        if (renderers == null) return;
+        foreach (SpriteRenderer ren in renderers)
+        {
+            Color c = ren.color;
+            c.a = alpha;
+            ren.color = c;
+        }
+    }
+
+    private void SetCollidersState(bool state, bool affectTriggers)
+    {
+        if (colliders == null) return;
+        foreach (Collider2D col in colliders)
+        {
+            if (!affectTriggers && col.isTrigger) 
+            {
+                continue; 
+            }
+            col.enabled = state;
         }
     }
 }

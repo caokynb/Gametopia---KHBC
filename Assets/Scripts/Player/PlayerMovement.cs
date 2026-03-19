@@ -23,7 +23,7 @@ public class PlayerMovement : MonoBehaviour
     public float groundCheckDistance = 0.5f;
     public LayerMask groundLayer;
     public LayerMask bambooLayer;
-    public LayerMask dirtLayer; // Đã thêm Đất mềm
+    public LayerMask dirtLayer;
 
     [Header("Cài đặt iFrames")]
     public float iFrameDuration = 1.5f;
@@ -79,6 +79,8 @@ public class PlayerMovement : MonoBehaviour
     private float lastJumpTime;
     private float jumpCooldown = 0.1f;
 
+    private DialogueManager dialogueManager;
+
     // ==========================================
     // ZONE 2: INITIALIZATION
     // ==========================================
@@ -101,6 +103,19 @@ public class PlayerMovement : MonoBehaviour
 
         if (hasCheckpoint) transform.position = respawnPosition;
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
+
+        dialogueManager = Object.FindFirstObjectByType<DialogueManager>();
+    }
+
+    // --- BÍ KÍP TA: HÀM KHÓA TỔNG ---
+    // Gom tất cả các lý do không được di chuyển vào 1 hàm để dễ quản lý
+    private bool IsMovementLocked()
+    {
+        if (isDead) return true;
+        if (isInteracting) return true;
+        if (dialogueManager != null && dialogueManager.dialogueBox != null && dialogueManager.dialogueBox.activeInHierarchy) return true;
+
+        return false;
     }
 
     // ==========================================
@@ -108,19 +123,21 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     void Update()
     {
-        // Ghi chú: Nếu bạn đang dùng hệ thống Dialogue thì bỏ comment ở dưới
-        /*
-        if (DialogueManager.instance != null && DialogueManager.instance.isDialogueActive)
+        // 1. KIỂM TRA KHÓA
+        if (IsMovementLocked())
         {
-            GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
-            return; 
+            // Triệt tiêu hoàn toàn quán tính và phím bấm
+            moveInput = 0f;
+            currentSpeed = 0f;
+            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+
+            if (anim != null) anim.SetFloat("Speed", 0f);
+            return; // Chặn không cho code bên dưới chạy
         }
-        */
 
         if (stats.currentBambooCount <= 0 && !isDead) Die();
 
-        if (isDead || isInteracting) return;
-
+        // 2. NHẬN NÚT BẤM (Chỉ chạy khi không bị khóa)
         moveInput = Input.GetAxisRaw("Horizontal");
 
         if (moveInput > 0 && !isFacingRight) Flip();
@@ -144,7 +161,8 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (isInteracting)
+        // Chặn không cho xử lý vật lý nếu đang bị khóa
+        if (IsMovementLocked())
         {
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
             return;
@@ -362,18 +380,13 @@ public class PlayerMovement : MonoBehaviour
         if (visited.Contains(currentRB)) return false;
         visited.Add(currentRB);
 
-        // --- BÍ KÍP TA NẰM Ở ĐÂY ---
-        // 1. Kiểm tra va chạm thông thường
         if (currentRB.IsTouchingLayers(groundLayer) || currentRB.IsTouchingLayers(dirtLayer)) return true;
 
-        // 2. CỨU CÁNH: Nếu bị lỗi khoảng hở (Micro-gap) nhưng tre có Khớp Nối (FixedJoint2D), 
-        // thì chắc chắn 100% nó đang được cắm trên Đất Mềm (DirtLayer).
         if (currentRB.GetComponent<FixedJoint2D>() != null)
         {
             return true;
         }
 
-        // 3. Quét dọc thân tre để tìm rễ
         List<Collider2D> contacts = new List<Collider2D>();
         ContactFilter2D filter = new ContactFilter2D { useLayerMask = true, layerMask = bambooLayer };
         currentRB.GetContacts(filter, contacts);
