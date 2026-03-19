@@ -113,10 +113,10 @@ MonoBehaviour:
   isBoyOnBuffalo: 0
   isMantis: 0
   health: 2
-  chaseSpeed: 6
+  chaseSpeed: 4
   returnSpeed: 2
   detectionRange: 10
-  attackRange: 1.2
+  attackRange: 0.5
   knockbackForce: 12
   knockbackDuration: 0.25
   tigerJumpForwardForce: 6
@@ -131,7 +131,7 @@ MonoBehaviour:
   batWobbleSpeed: 6
   batWobbleAmount: 6
   hoverHeight: 6
-  batDiveSpeed: 14
+  batDiveSpeed: 10
   batDiveDelay: 0.5
   buffaloChargeSpeed: 8
   buffaloWallCheckDist: 1
