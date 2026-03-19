@@ -115,37 +115,17 @@ public class ConstructionMode : MonoBehaviour
             }
         }
 
-        if (validSegmentCount == 0) return;
+        int totalProjectedCost = validSegmentCount * finalCostPerSegment;
 
-        // --- BÍ KÍP TA: CẮT BẢN NHÁP VỪA KHÍT VỚI SỐ TIỀN ---
-        int maxAffordable = stats.currentBambooCount / finalCostPerSegment;
-        int actualBuildCount = Mathf.Min(validSegmentCount, maxAffordable);
-        bool willDieIfBuild = false;
-
-        // Xử lý ngoại lệ: Không đủ tiền mua dù chỉ 1 đốt
-        if (actualBuildCount == 0)
-        {
-            actualBuildCount = 1; // Ép vẽ 1 đốt
-            willDieIfBuild = true; // Chắc chắn bị đỏ
-        }
-        else
-        {
-            int totalActualCost = actualBuildCount * finalCostPerSegment;
-            willDieIfBuild = (stats.currentBambooCount - totalActualCost) <= 0;
-        }
-
-        int builtCount = 0; // Biến đếm số đốt thực tế được vẽ ra
+        // Vẫn giữ cảnh báo Đỏ nếu thả chuột ra là chết (Tre <= 0)
+        bool willDieIfBuild = (stats.currentBambooCount - totalProjectedCost) <= 0;
 
         for (int i = 0; i < segmentCount; i++)
         {
             Vector2 pos = start + direction * (i * segmentLength + segmentLength / 2f);
             if (!Physics2D.OverlapBox(pos, checkSize, angle, groundLayer))
             {
-                // Nếu đã vẽ chạm giới hạn tiền -> Ngừng vẽ các phần kéo dư
-                if (builtCount >= actualBuildCount) break;
-
-                // Tự động dùng đúng Prefab Khởi đầu / Thân / Kết thúc dựa trên độ dài đã cắt
-                GameObject prefabToUse = GetBambooPrefab(builtCount, actualBuildCount);
+                GameObject prefabToUse = GetBambooPrefab(i, segmentCount);
                 GameObject preview = Instantiate(prefabToUse, pos, rotation);
 
                 var renderer = preview.GetComponent<SpriteRenderer>();
@@ -170,7 +150,6 @@ public class ConstructionMode : MonoBehaviour
                 }
 
                 activePreviews.Add(preview);
-                builtCount++; // Cộng dồn
             }
         }
     }
@@ -201,27 +180,25 @@ public class ConstructionMode : MonoBehaviour
             }
         }
 
-        if (validSegmentCount == 0) return false;
+        int totalCostRequired = validSegmentCount * actualCostPerSegment;
 
-        // --- CẮT GIỚI HẠN XÂY THEO TÚI TIỀN ---
-        int maxAffordable = stats.currentBambooCount / actualCostPerSegment;
-        int actualBuildCount = Mathf.Min(validSegmentCount, maxAffordable);
-
-        // Thật sự nghèo không mua nổi 1 đốt -> Hủy lệnh
-        if (actualBuildCount == 0) return false;
+        // --- SỬA TẠI ĐÂY: Tháo đai an toàn ---
+        // Đổi <= thành <. Bây giờ chỉ khi thật sự KHÔNG ĐỦ TIỀN mới cấm xây.
+        // Còn nếu tiền vừa đủ để về 0, vẫn cho xây bình thường!
+        if (validSegmentCount == 0 || stats.currentBambooCount < totalCostRequired)
+        {
+            Debug.Log("<color=red>Hủy lệnh xây:</color> Cần thêm tre mới xây được dải này!");
+            return false;
+        }
 
         GameObject currentChunk = null;
         int totalCost = 0;
-        int builtCount = 0;
 
         for (int i = 0; i < segmentCount; i++)
         {
             Vector2 pos = start + direction * (i * segmentLength + segmentLength / 2f);
             if (!Physics2D.OverlapBox(pos, checkSize, angle, groundLayer))
             {
-                // Vắt kiệt tiền rồi thì dừng lại, không xây thêm đoạn kéo dư nữa
-                if (builtCount >= actualBuildCount) break;
-
                 if (currentChunk == null)
                 {
                     currentChunk = Instantiate(chunkBambooPrefab, Vector3.zero, Quaternion.identity);
@@ -243,13 +220,11 @@ public class ConstructionMode : MonoBehaviour
                     spawnedChunks.Add(currentChunk);
                 }
 
-                // Dùng actualBuildCount để chốt ngọn tre chuẩn xác
-                GameObject prefabToUse = GetBambooPrefab(builtCount, actualBuildCount);
+                GameObject prefabToUse = GetBambooPrefab(i, segmentCount);
                 GameObject segment = Instantiate(prefabToUse, pos, rotation);
                 segment.transform.SetParent(currentChunk.transform);
 
                 totalCost += actualCostPerSegment;
-                builtCount++;
             }
             else { currentChunk = null; }
         }

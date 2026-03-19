@@ -14,6 +14,10 @@ public class PlayerMovement : MonoBehaviour
     public static Vector2 respawnPosition;
     public static bool hasCheckpoint = false;
 
+    [Header("Cài đặt Bước chân")]
+    public float stepRate = 0.45f;
+    private float stepTimer;
+
     [Header("Dữ liệu Nhân vật")]
     public PlayerAttributes stats;
 
@@ -60,8 +64,8 @@ public class PlayerMovement : MonoBehaviour
     private Animator anim;
 
     [Header("Âm thanh (SFX)")]
-    public AudioClip hurtSound;       // Tiếng Anh Khoai kêu "Á!"
-    private AudioSource audioSource;  // Cái loa
+    public AudioClip hurtSound;
+    private AudioSource audioSource;
 
     private bool isFacingRight = true;
     private Rigidbody2D rb;
@@ -73,6 +77,7 @@ public class PlayerMovement : MonoBehaviour
     private bool isDead = false;
 
     private bool isInteracting = false;
+    private DialogueManager dialogueManager; // Thêm từ file 11
 
     private bool isGrounded;
     private bool isOnSlope;
@@ -82,8 +87,6 @@ public class PlayerMovement : MonoBehaviour
 
     private float lastJumpTime;
     private float jumpCooldown = 0.1f;
-
-    private DialogueManager dialogueManager;
 
     // ==========================================
     // ZONE 2: INITIALIZATION
@@ -107,10 +110,18 @@ public class PlayerMovement : MonoBehaviour
 
         if (hasCheckpoint) transform.position = respawnPosition;
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
+
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        // Tìm DialogueManager từ file 11
+        dialogueManager = Object.FindFirstObjectByType<DialogueManager>();
     }
 
-    // --- BÍ KÍP TA: HÀM KHÓA TỔNG ---
-    // Gom tất cả các lý do không được di chuyển vào 1 hàm để dễ quản lý
+    // --- HÀM KHÓA TỔNG (Từ file 11) ---
     private bool IsMovementLocked()
     {
         if (isDead) return true;
@@ -125,21 +136,22 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     void Update()
     {
-        // 1. KIỂM TRA KHÓA
+        // 1. KIỂM TRA KHÓA (Gộp cơ chế từ file 11)
         if (IsMovementLocked())
         {
-            // Triệt tiêu hoàn toàn quán tính và phím bấm
             moveInput = 0f;
             currentSpeed = 0f;
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
 
             if (anim != null) anim.SetFloat("Speed", 0f);
-            return; // Chặn không cho code bên dưới chạy
+            return;
         }
 
         if (stats.currentBambooCount <= 0 && !isDead) Die();
 
-        // 2. NHẬN NÚT BẤM (Chỉ chạy khi không bị khóa)
+        // 2. XỬ LÝ BƯỚC CHÂN (Từ file gốc)
+        HandleFootsteps();
+
         moveInput = Input.GetAxisRaw("Horizontal");
 
         if (moveInput > 0 && !isFacingRight) Flip();
@@ -163,7 +175,7 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Chặn không cho xử lý vật lý nếu đang bị khóa
+        // Chặn vật lý nếu bị khóa (Từ file 11)
         if (IsMovementLocked())
         {
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
@@ -322,116 +334,6 @@ public class PlayerMovement : MonoBehaviour
 
     void Flip()
     {
-        isFacingRight = !isFacingRight;
-        transform.localScale = new Vector3(transform.localScale.x * -1, transform.localScale.y, 1);
-    }
-
-    public void TakeDamage(int damage)
-    {
-        if (isInvincible || isDead) return;
-
-        stats.healthPoint -= damage;
-
-        // THÊM Ở ĐÂY: Phát tiếng kêu đau
-        if (hurtSound != null && audioSource != null)
-        {
-            audioSource.PlayOneShot(hurtSound);
-        }
-
-        if (stats.healthPoint <= 0)
-        {
-            Die();
-        }
-        else
-        {
-            StartCoroutine(InvincibilityRoutine());
-        }
-    }
-
-    private IEnumerator InvincibilityRoutine()
-    {
-        isInvincible = true;
-        float elapsed = 0f;
-        float blinkInterval = 0.1f;
-
-        while (elapsed < iFrameDuration)
-        {
-            spriteRenderer.enabled = false;
-            yield return new WaitForSeconds(blinkInterval);
-
-            spriteRenderer.enabled = true;
-            yield return new WaitForSeconds(blinkInterval);
-
-            elapsed += (blinkInterval * 2);
-        }
-
-        spriteRenderer.enabled = true;
-        isInvincible = false;
-    }
-
-    private IEnumerator FlashRedEffect()
-    {
-        spriteRenderer.color = Color.red;
-        yield return new WaitForSeconds(0.15f);
-        spriteRenderer.color = originalColor;
-    }
-
-    private bool IsBambooChainGrounded(Rigidbody2D startRB)
-    {
-        if (startRB == null) return false;
-        List<Rigidbody2D> visited = new List<Rigidbody2D>();
-        return CheckBambooNodeRB(startRB, visited);
-    }
-
-    private bool CheckBambooNodeRB(Rigidbody2D currentRB, List<Rigidbody2D> visited)
-    {
-        if (visited.Contains(currentRB)) return false;
-        visited.Add(currentRB);
-
-        if (currentRB.IsTouchingLayers(groundLayer) || currentRB.IsTouchingLayers(dirtLayer)) return true;
-
-        if (currentRB.GetComponent<FixedJoint2D>() != null)
-        {
-            return true;
-        }
-
-        List<Collider2D> contacts = new List<Collider2D>();
-        ContactFilter2D filter = new ContactFilter2D { useLayerMask = true, layerMask = bambooLayer };
-        currentRB.GetContacts(filter, contacts);
-        foreach (var contact in contacts)
-        {
-            Rigidbody2D neighbor = contact.attachedRigidbody;
-            if (neighbor != null && neighbor != currentRB && CheckBambooNodeRB(neighbor, visited)) return true;
-        }
-        return false;
-    }
-
-    void Die()
-    {
-        isDead = true;
-        rb.linearVelocity = Vector2.zero;
-        rb.simulated = false;
-
-        if (anim != null)
-        {
-            anim.SetTrigger("Die");
-        }
-
-        Invoke(nameof(CallFader), 0.1f);
-    }
-
-    void CallFader()
-    {
-        SceneFader fader = Object.FindFirstObjectByType<SceneFader>();
-        if (fader != null)
-        {
-            fader.FadeOutAndRestart();
-        }
-        else
-        {
-            RestartLevel();
-        }
-    }
-
-    void RestartLevel() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        isFacingRight = !isFacingRight
+            }
 }
