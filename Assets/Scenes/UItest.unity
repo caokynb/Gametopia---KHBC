@@ -736,7 +736,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuManager
   continueButton: {fileID: 1451470628}
   settingsPanel: {fileID: 656782702}
-  firstLevelName: cClocKk
+  firstLevelName: Biomes1
 --- !u!224 &1299884257
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1349,6 +1349,9 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  dirtLayer:
+    serializedVersion: 2
+    m_Bits: 0
   checkSize: {x: 0.8, y: 0.15}
 --- !u!114 &1865170974
 MonoBehaviour:
@@ -1417,6 +1420,9 @@ MonoBehaviour:
   bambooLayer:
     serializedVersion: 2
     m_Bits: 128
+  dirtLayer:
+    serializedVersion: 2
+    m_Bits: 0
   iFrameDuration: 1.5
   maxSlopeAngle: 60
   steepSlideSpeed: 12
