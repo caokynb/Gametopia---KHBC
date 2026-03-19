@@ -457,20 +457,7 @@ public class EnemyAI : MonoBehaviour
 
     void Die()
     {
-        if (anim != null)
-        {
-            anim.SetTrigger("Die");
-            if (myCol != null) myCol.enabled = false;
-            rb.linearVelocity = Vector2.zero;
-            rb.gravityScale = 0f;
-            this.enabled = false;
-
-            Destroy(gameObject, 1f);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+          Destroy(gameObject);
     }
 
     // ==========================================

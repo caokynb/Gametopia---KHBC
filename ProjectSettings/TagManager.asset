@@ -51,14 +51,14 @@ TagManager:
   - name: Midground
     uniqueID: 2854830393
     locked: 0
+  - name: Objs
+    uniqueID: 3733780035
+    locked: 0
   - name: Midground1
     uniqueID: 3252267747
     locked: 0
   - name: Midground2
     uniqueID: 2724514103
-    locked: 0
-  - name: Objs
-    uniqueID: 3733780035
     locked: 0
   - name: Player
     uniqueID: 3163980835

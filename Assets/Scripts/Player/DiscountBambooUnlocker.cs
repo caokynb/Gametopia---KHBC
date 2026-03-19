@@ -33,7 +33,7 @@ public class DiscountBambooUnlocker : MonoBehaviour
 
         Time.timeScale = 0f;
         yield return new WaitForSecondsRealtime(0.5f);
-        yield return new WaitUntil(() => Input.anyKeyDown);
+        yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.F));
 
         if (unlockUIPanel != null) unlockUIPanel.SetActive(false);
 
