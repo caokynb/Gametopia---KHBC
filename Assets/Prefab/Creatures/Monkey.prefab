@@ -87,7 +87,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 973301482186294925, guid: e567a1f739e5e97489c629b6e1edd504, type: 3}
+  m_Sprite: {fileID: -1412688157551961505, guid: 4bf11d0a722d1cf4db994fd41b5e9ace, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 1
   m_FlipY: 0
@@ -135,7 +135,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.13, y: 1.7}
+    oldSize: {x: 1.1225, y: 1.2175}
     newSize: {x: 1.13, y: 1.7}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -187,7 +187,7 @@ MonoBehaviour:
   isBat: 0
   isBoyOnBuffalo: 0
   isMantis: 0
-  health: 1
+  health: 3
   chaseSpeed: 4
   returnSpeed: 2
   detectionRange: 10

@@ -105,6 +105,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9103ba925f7391d418692be84ab8e93a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hazard
+  damageAmount: 999
 --- !u!61 &4757385320185672841
 BoxCollider2D:
   m_ObjectHideFlags: 0
