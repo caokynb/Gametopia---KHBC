@@ -1,8 +1,10 @@
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 public class DialogueTrigger : MonoBehaviour
 {
-    [Header("Cài đặt Chế độ")]
+    [Header("Cài đặt Chế độ Kích hoạt")]
     [Tooltip("Tích vào đây nếu muốn hộp thoại tự bật khi đi ngang qua (Unskippable)")]
     public bool isAutoTrigger = false;
     public GameObject glowEffect;
@@ -75,18 +77,16 @@ public class DialogueTrigger : MonoBehaviour
     {
         if (interactCooldown > 0) interactCooldown -= Time.deltaTime;
 
-        if (glowEffect != null)
+        if (glowEffect != null && hasAppeared && !isAppearing)
         {
-            // Logic: Bật sáng KHI VÀ CHỈ KHI Anh Khoai ở gần + Không phải Auto + Hộp thoại đang TẮT
             bool shouldGlow = playerInRange && !isAutoTrigger && (manager != null && !manager.dialogueBox.activeInHierarchy);
 
-            // Cập nhật trạng thái của Glow cho khớp với logic trên
             if (glowEffect.activeSelf != shouldGlow)
             {
                 glowEffect.SetActive(shouldGlow);
             }
         }
-        // Nếu là NPC bình thường (Không phải Auto), mới cho phép bấm F
+
         if (!isAutoTrigger && playerInRange && Input.GetKeyDown(KeyCode.F) && interactCooldown <= 0f)
         {
             if (manager != null && !manager.dialogueBox.activeInHierarchy)
@@ -111,7 +111,6 @@ public class DialogueTrigger : MonoBehaviour
         {
             playerInRange = true;
 
-            // [MỚI] Nếu là Auto Trigger và chưa từng chạy -> Tự động bật luôn
             if (isAutoTrigger && !hasTriggeredAuto)
             {
                 if (manager != null && !manager.dialogueBox.activeInHierarchy)
@@ -129,7 +128,7 @@ public class DialogueTrigger : MonoBehaviour
                     }
                 }
             }
-            else if (!isAutoTrigger)
+            else if (!isAutoTrigger && hasAppeared)
             {
                 Debug.Log("Anh Khoai đã tới gần. Bấm F để nói chuyện!");
             }

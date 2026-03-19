@@ -59,10 +59,6 @@ public class PlayerMovement : MonoBehaviour
     private Color originalColor;
     private Animator anim;
 
-    [Header("Âm thanh (SFX)")]
-    public AudioClip hurtSound;
-    private AudioSource audioSource;
-
     private bool isFacingRight = true;
     private Rigidbody2D rb;
     private BoxCollider2D cc;
@@ -73,7 +69,6 @@ public class PlayerMovement : MonoBehaviour
     private bool isDead = false;
 
     private bool isInteracting = false;
-    private DialogueManager dialogueManager; // Thêm từ file 11
 
     private bool isGrounded;
     private bool isOnSlope;
@@ -83,6 +78,8 @@ public class PlayerMovement : MonoBehaviour
 
     private float lastJumpTime;
     private float jumpCooldown = 0.1f;
+
+    private DialogueManager dialogueManager;
 
     // ==========================================
     // ZONE 2: INITIALIZATION
@@ -107,17 +104,11 @@ public class PlayerMovement : MonoBehaviour
         if (hasCheckpoint) transform.position = respawnPosition;
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
 
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
-
-        // Tìm DialogueManager từ file 11
         dialogueManager = Object.FindFirstObjectByType<DialogueManager>();
     }
 
-    // --- HÀM KHÓA TỔNG (Từ file 11) ---
+    // --- BÍ KÍP TA: HÀM KHÓA TỔNG ---
+    // Gom tất cả các lý do không được di chuyển vào 1 hàm để dễ quản lý
     private bool IsMovementLocked()
     {
         if (isDead) return true;
@@ -132,26 +123,21 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     void Update()
     {
-        // 1. KIỂM TRA KHÓA (Gộp cơ chế từ file 11)
+        // 1. KIỂM TRA KHÓA
         if (IsMovementLocked())
         {
+            // Triệt tiêu hoàn toàn quán tính và phím bấm
             moveInput = 0f;
             currentSpeed = 0f;
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
 
             if (anim != null) anim.SetFloat("Speed", 0f);
-            return;
+            return; // Chặn không cho code bên dưới chạy
         }
 
         if (stats.currentBambooCount <= 0 && !isDead) Die();
 
         // 2. NHẬN NÚT BẤM (Chỉ chạy khi không bị khóa)
-=======
-        if (isDead || isInteracting) return;
-
-        HandleFootsteps();
-
->>>>>>> Stashed changes
         moveInput = Input.GetAxisRaw("Horizontal");
 
         if (moveInput > 0 && !isFacingRight) Flip();
@@ -175,7 +161,7 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Chặn vật lý nếu bị khóa (Từ file 11)
+        // Chặn không cho xử lý vật lý nếu đang bị khóa
         if (IsMovementLocked())
         {
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
@@ -257,7 +243,6 @@ public class PlayerMovement : MonoBehaviour
         else
             coyoteTimeCounter -= Time.fixedDeltaTime;
     }
-
 
     void ApplyMovement()
     {
@@ -344,12 +329,6 @@ public class PlayerMovement : MonoBehaviour
         if (isInvincible || isDead) return;
 
         stats.healthPoint -= damage;
-
-        // THÊM Ở ĐÂY: Phát tiếng kêu đau
-        if (hurtSound != null && audioSource != null)
-        {
-            audioSource.PlayOneShot(hurtSound);
-        }
 
         if (stats.healthPoint <= 0)
         {
