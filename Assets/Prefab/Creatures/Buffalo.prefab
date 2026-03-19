@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4578481216559320134}
   - component: {fileID: 8239009796728869835}
   - component: {fileID: 7303241780290048101}
+  - component: {fileID: -7788801611758253068}
   m_Layer: 0
   m_Name: Buffalo
   m_TagString: Untagged
@@ -246,3 +247,16 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-7788801611758253068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4007201510224145260}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 829e90fb2f2178240b14504bfd9bd304, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuffaloFade
+  destroyDistance: 40

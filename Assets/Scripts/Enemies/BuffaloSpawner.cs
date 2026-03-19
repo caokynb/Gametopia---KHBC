@@ -88,6 +88,20 @@ public class BuffaloSpawner : MonoBehaviour
             }
         }
     }
+    // Thêm vào trong class BuffaloSpawner
+    public void StopAndClearBuffalo()
+    {
+        // 1. Dừng Coroutine sinh trâu
+        StopAllCoroutines();
+
+        // 2. Tìm tất cả con trâu đang có trong Scene và làm chúng mờ đi
+        // Giả sử Prefab trâu của bạn có gắn script BuffaloFade ở bước 1
+        BuffaloFade[] allBuffalo = FindObjectsByType<BuffaloFade>(FindObjectsSortMode.None);
+        foreach (BuffaloFade b in allBuffalo)
+        {
+            b.StartFadeOut(2f); // Mờ dần trong 2 giây
+        }
+    }
 
     // Vẽ hộp kiểm tra ra màn hình Scene để bạn dễ gỡ lỗi!
     private void OnDrawGizmosSelected()
