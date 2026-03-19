@@ -64,6 +64,15 @@ public class EnemyAI : MonoBehaviour
     private bool isMantisAttacking = false;
     private bool isDashingMantis = false;
 
+    [Header("Âm thanh (SFX)")]
+    public AudioClip moveSound;
+    public AudioClip attackSound;
+    public AudioClip throwSound;  // Tiếng quăng đá
+    public AudioClip hurtSound;   // Tiếng kêu la khi bị chém
+    public AudioClip deathSound;  // Tiếng lúc bốc hơi
+
+    private AudioSource audioSource; // Cái loa gắn trên người con khỉ
+
     [Header("Ground Detection")]
     public LayerMask groundLayer;
     public float groundCheckLength = 1.2f;
@@ -92,6 +101,13 @@ public class EnemyAI : MonoBehaviour
         anim = GetComponent<Animator>();
 
         homePosition = transform.position;
+
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            // Nếu quên gắn loa ngoài Unity, code sẽ tự động gắn dùm luôn cho đỡ lỗi!
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
 
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
@@ -128,6 +144,13 @@ public class EnemyAI : MonoBehaviour
                 float bottomOffset = col != null ? col.bounds.extents.y : 0.5f;
                 transform.position = new Vector3(transform.position.x, hit.point.y + bottomOffset, transform.position.z);
             }
+        }
+        if (isBoyOnBuffalo && moveSound != null)
+        {
+            audioSource.clip = moveSound; // Gắn cuộn băng tiếng bước chân vào loa
+            audioSource.loop = true;      // Bật chế độ lặp đi lặp lại
+            audioSource.volume = 0.6f;    // Chỉnh âm lượng hơi nhỏ một chút để làm nền
+            audioSource.Play();           // Bấm nút Play
         }
     }
 
@@ -342,6 +365,11 @@ public class EnemyAI : MonoBehaviour
 
         health--;
 
+        if (hurtSound != null && audioSource != null && health > 0)
+        {
+            audioSource.PlayOneShot(hurtSound);
+        }
+
         if (anim != null) anim.SetTrigger("Hurt");
 
         StopCoroutine("FlashRed");
@@ -433,6 +461,7 @@ public class EnemyAI : MonoBehaviour
 
     public void SpawnRockEvent()
     {
+        if (throwSound != null && audioSource != null) audioSource.PlayOneShot(throwSound);
         if (rockPrefab != null && throwPoint != null && player != null)
         {
             GameObject rock = Instantiate(rockPrefab, throwPoint.position, Quaternion.identity);
@@ -457,7 +486,11 @@ public class EnemyAI : MonoBehaviour
 
     void Die()
     {
-          Destroy(gameObject);
+        if (deathSound != null)
+        {
+            AudioSource.PlayClipAtPoint(deathSound, transform.position);
+        }
+        Destroy(gameObject);
     }
 
     // ==========================================
@@ -472,6 +505,7 @@ public class EnemyAI : MonoBehaviour
             {
                 playerMovement.TakeDamage(1);
                 touchCooldownTimer = 1.5f;
+
             }
         }
 
@@ -499,6 +533,7 @@ public class EnemyAI : MonoBehaviour
     // ==========================================
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        //Debug.Log($"<color=yellow>Dơi vừa chạm vào: {collision.gameObject.name} (Tag: {collision.gameObject.tag})</color>");
         if (collision.CompareTag("Player") && !isMonkey)
         {
             PlayerMovement playerMovement = collision.GetComponent<PlayerMovement>();
@@ -506,6 +541,7 @@ public class EnemyAI : MonoBehaviour
             {
                 playerMovement.TakeDamage(1);
                 touchCooldownTimer = 1.5f;
+
             }
         }
 

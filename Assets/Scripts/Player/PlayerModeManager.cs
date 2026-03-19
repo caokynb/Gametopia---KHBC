@@ -10,6 +10,15 @@ public class PlayerModeManager : MonoBehaviour
     public GameObject attackVisual;
     public GameObject constructionVisual;
 
+    // --- ĐÃ TÁCH THÀNH 2 ÂM THANH RIÊNG BIỆT ---
+    [Header("Âm thanh (SFX)")]
+    [Tooltip("Tiếng rút kiếm khi chuyển sang đánh")]
+    public AudioClip khacSound;
+    [Tooltip("Tiếng cất kiếm / tre kêu khi chuyển sang xây")]
+    public AudioClip nhapSound;
+
+    private AudioSource audioSource;
+
     // Dùng 'static' để biến này tồn tại xuyên suốt các màn chơi/hồi sinh ---
     public static bool isAttackMode = false;
 
@@ -20,8 +29,14 @@ public class PlayerModeManager : MonoBehaviour
         // Lấy component Animator từ Player
         anim = GetComponent<Animator>();
 
-        // Rất quan trọng: Khi vừa hồi sinh (Start lại), 
-        // phải cập nhật ngay hình ảnh theo trạng thái static đã lưu!
+        // Tự động tìm hoặc gắn Loa cho Anh Khoai
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        // Cập nhật ngay hình ảnh theo trạng thái static đã lưu!
         UpdateModeState();
     }
 
@@ -32,6 +47,21 @@ public class PlayerModeManager : MonoBehaviour
         {
             isAttackMode = !isAttackMode;
             UpdateModeState();
+
+            // --- PHÁT ÂM THANH TÙY THEO CHẾ ĐỘ HIỆN TẠI ---
+            if (audioSource != null)
+            {
+                if (isAttackMode && khacSound != null)
+                {
+                    // Chuyển sang Khắc -> Kêu tiếng rút kiếm
+                    audioSource.PlayOneShot(khacSound);
+                }
+                else if (!isAttackMode && nhapSound != null)
+                {
+                    // Chuyển sang Nhập -> Kêu tiếng cất kiếm/xây tre
+                    audioSource.PlayOneShot(nhapSound);
+                }
+            }
 
             // Debug để bạn kiểm tra trong Console
             string modeName = isAttackMode ? "KHẮC (Tấn Công)" : "NHẬP (Xây Dựng)";
@@ -61,7 +91,7 @@ public class PlayerModeManager : MonoBehaviour
             anim.SetBool("isAttackMode", isAttackMode);
         }
 
-        // --- 4. CẬP NHẬT GIAO DIỆN HUD TẠI ĐÂY ---
+        // 4. CẬP NHẬT GIAO DIỆN HUD TẠI ĐÂY
         HUDManager hud = Object.FindFirstObjectByType<HUDManager>();
         if (hud != null)
         {
