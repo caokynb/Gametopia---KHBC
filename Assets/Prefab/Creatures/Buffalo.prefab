@@ -188,6 +188,11 @@ MonoBehaviour:
   mantisVanishDuration: 0.4
   mantisTeleportDist: 4.5
   mantisAttackCooldown: 2.5
+  moveSound: {fileID: 8300000, guid: 3af2ee1f6b5fbef4a89c3cabff0640ae, type: 3}
+  attackSound: {fileID: 0}
+  throwSound: {fileID: 0}
+  hurtSound: {fileID: 0}
+  deathSound: {fileID: 0}
   groundLayer:
     serializedVersion: 2
     m_Bits: 64

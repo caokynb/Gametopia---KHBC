@@ -27,6 +27,11 @@ public class ConstructionMode : MonoBehaviour
     [SerializeField] LayerMask dirtLayer;
     [SerializeField] Vector2 checkSize = new Vector2(0.9f, 0.15f);
 
+    // --- THÊM BIẾN ÂM THANH Ở ĐÂY ---
+    [Header("Âm thanh (SFX)")]
+    [Tooltip("Tiếng tre đập vào nhau khi xây xong")]
+    public AudioClip buildSound;
+
     private Vector2 dragStartPos;
     private bool isDragging = false;
     private List<GameObject> activePreviews = new List<GameObject>();
@@ -60,6 +65,13 @@ public class ConstructionMode : MonoBehaviour
             if (SpawnSolidBamboo(dragStartPos, finalMousePos))
             {
                 nextSpawnTime = Time.time + spawnDelay;
+
+                // --- PHÁT ÂM THANH TẠI ĐÂY ---
+                // Phát ra âm thanh ở vị trí con trỏ chuột lúc thả chuột ra
+                if (buildSound != null)
+                {
+                    AudioSource.PlayClipAtPoint(buildSound, finalMousePos);
+                }
             }
             ClearPreviews();
             isDragging = false;
@@ -220,7 +232,7 @@ public class ConstructionMode : MonoBehaviour
         if (totalCost > 0)
         {
             stats.currentBambooCount -= totalCost;
-            return true;
+            return true; // Trả về true để báo là đã xây thành công
         }
         return false;
     }

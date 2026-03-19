@@ -217,6 +217,9 @@ MonoBehaviour:
   mantisVanishDuration: 0.4
   mantisTeleportDist: 4.5
   mantisAttackCooldown: 2.5
+  throwSound: {fileID: 8300000, guid: 1bc0299380f31c646850204d52a923d2, type: 3}
+  hurtSound: {fileID: 0}
+  deathSound: {fileID: 0}
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
