@@ -2,16 +2,12 @@ using UnityEngine;
 
 public class Hazard : MonoBehaviour
 {
-    [Header("Cài đặt Sát thương")]
-    [Tooltip("Số máu (hoặc điểm) bị trừ khi Anh Khoai đụng phải bẫy này")]
-    public int damageAmount = 1;
-
     // Sử dụng OnTriggerEnter2D để phát hiện người chơi rơi vào khoảng không hoặc chạm vào gai
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player"))
         {
-            DealDamage(collision.gameObject);
+            InstantKill(collision.gameObject);
         }
     }
 
@@ -20,21 +16,21 @@ public class Hazard : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            DealDamage(collision.gameObject);
+            InstantKill(collision.gameObject);
         }
     }
 
-    private void DealDamage(GameObject player)
+    private void InstantKill(GameObject player)
     {
         // Lấy script PlayerMovement của nhân vật
         PlayerMovement playerScript = player.GetComponent<PlayerMovement>();
 
         if (playerScript != null)
         {
-            // Gọi hàm TakeDamage giống hệt như cách quái vật tấn công Anh Khoai
-            playerScript.TakeDamage(damageAmount);
+            // Gọi hàm TakeDamage với 9999 sát thương để đảm bảo máu về 0 ngay lập tức
+            playerScript.TakeDamage(9999);
 
-            Debug.Log($"<color=orange>Đạp bẫy!</color> Anh Khoai vừa mất {damageAmount} máu.");
+            Debug.Log("<color=red>Tử ẹo!</color> Anh Khoai đã chạm phải bẫy tử thần.");
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
-using System.Collections; // Bắt buộc thêm để dùng Coroutine
+using System.Collections;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(BoxCollider2D))]
@@ -23,11 +23,11 @@ public class PlayerMovement : MonoBehaviour
     public float groundCheckDistance = 0.5f;
     public LayerMask groundLayer;
     public LayerMask bambooLayer;
+    public LayerMask dirtLayer; // Đã thêm Đất mềm
 
     [Header("Cài đặt iFrames")]
     public float iFrameDuration = 1.5f;
     private bool isInvincible = false;
-
 
     [Header("Mở Khóa Kỹ Năng")]
     public static bool hasDiscountBuff = false;
@@ -68,7 +68,6 @@ public class PlayerMovement : MonoBehaviour
     private bool isJumpHeld;
     private bool isDead = false;
 
-    // --- NEW: Biến khóa trạng thái khi đang thắp hương ---
     private bool isInteracting = false;
 
     private bool isGrounded;
@@ -85,7 +84,6 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     void Awake()
     {
-        // Đưa toàn bộ GetComponent lên Awake để lấy dữ liệu ngay giây 0
         rb = GetComponent<Rigidbody2D>();
         cc = GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
@@ -94,10 +92,8 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
-        // Start chỉ dùng để cài đặt thông số sau khi Component đã lấy xong
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 
-        // Thêm an toàn: Kiểm tra stats trước khi gán để chống crash cục bộ
         if (stats != null)
         {
             rb.gravityScale = stats.normalGravity;
@@ -112,19 +108,17 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     void Update()
     {
+        // Ghi chú: Nếu bạn đang dùng hệ thống Dialogue thì bỏ comment ở dưới
+        /*
         if (DialogueManager.instance != null && DialogueManager.instance.isDialogueActive)
         {
-            // Dừng hẳn nhân vật lại (Dùng linearVelocity vì bạn đang dùng Unity bản mới)
             GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
-
-            // Nếu bạn có Animator, bỏ comment dòng dưới để set tốc độ về 0 (đứng im)
-            // GetComponent<Animator>().SetFloat("Speed", 0f); 
-
-            return; // Lệnh return này sẽ ngăn các dòng code di chuyển bên dưới chạy!
+            return; 
         }
+        */
+
         if (stats.currentBambooCount <= 0 && !isDead) Die();
 
-        // CHỈNH SỬA: Nếu đang chết HOẶC đang thắp hương thì không nhận Input
         if (isDead || isInteracting) return;
 
         moveInput = Input.GetAxisRaw("Horizontal");
@@ -150,7 +144,6 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Nếu đang thắp hương, dừng mọi vật lý di chuyển ngang
         if (isInteracting)
         {
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
@@ -162,7 +155,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ==========================================
-    // ZONE 4: SENSORS & PHYSICS (Giữ nguyên logic cũ)
+    // ZONE 4: SENSORS & PHYSICS
     // ==========================================
     void CheckGroundedBambooAndSlope()
     {
@@ -178,7 +171,8 @@ public class PlayerMovement : MonoBehaviour
 
         isGrounded = false;
         RaycastHit2D validHit = new RaycastHit2D();
-        LayerMask combinedLayer = groundLayer | bambooLayer;
+
+        LayerMask combinedLayer = groundLayer | bambooLayer | dirtLayer;
 
         bool touchingGround = false;
         bool touchingBamboo = false;
@@ -193,7 +187,9 @@ public class PlayerMovement : MonoBehaviour
             foreach (RaycastHit2D hit in hits)
             {
                 isGrounded = true;
-                if (((1 << hit.collider.gameObject.layer) & groundLayer.value) != 0)
+
+                if (((1 << hit.collider.gameObject.layer) & groundLayer.value) != 0 ||
+                    ((1 << hit.collider.gameObject.layer) & dirtLayer.value) != 0)
                 {
                     touchingGround = true;
                     validHit = hit;
@@ -285,8 +281,6 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     // ZONE 7: INTERACTION & HELPERS
     // ==========================================
-
-    // Hàm gọi từ Checkpoint.cs
     public void TriggerWishAnimation(float duration)
     {
         StartCoroutine(WishSequence(duration));
@@ -295,12 +289,10 @@ public class PlayerMovement : MonoBehaviour
     private IEnumerator WishSequence(float duration)
     {
         isInteracting = true;
-        // Dừng vận tốc ngang ngay lập tức
         rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
 
         if (anim != null)
         {
-            // Kích hoạt Trigger Wish trong Animator
             anim.SetTrigger("Wish");
         }
 
@@ -316,7 +308,6 @@ public class PlayerMovement : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        // Nếu đang bất tử hoặc đã chết thì không nhận thêm sát thương
         if (isInvincible || isDead) return;
 
         stats.healthPoint -= damage;
@@ -327,32 +318,27 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            // Bật trạng thái bất tử và bắt đầu nhấp nháy
             StartCoroutine(InvincibilityRoutine());
         }
     }
 
-    // --- COROUTINE NHẤP NHÁY KIỂU TERRARIA ---
     private IEnumerator InvincibilityRoutine()
     {
         isInvincible = true;
         float elapsed = 0f;
-        float blinkInterval = 0.1f; // Tốc độ chớp tắt
+        float blinkInterval = 0.1f;
 
         while (elapsed < iFrameDuration)
         {
-            // Tắt hình
             spriteRenderer.enabled = false;
             yield return new WaitForSeconds(blinkInterval);
 
-            // Bật hình
             spriteRenderer.enabled = true;
             yield return new WaitForSeconds(blinkInterval);
 
             elapsed += (blinkInterval * 2);
         }
 
-        // Đảm bảo hiện hình 100% khi hết thời gian
         spriteRenderer.enabled = true;
         isInvincible = false;
     }
@@ -375,7 +361,19 @@ public class PlayerMovement : MonoBehaviour
     {
         if (visited.Contains(currentRB)) return false;
         visited.Add(currentRB);
-        if (currentRB.IsTouchingLayers(groundLayer)) return true;
+
+        // --- BÍ KÍP TA NẰM Ở ĐÂY ---
+        // 1. Kiểm tra va chạm thông thường
+        if (currentRB.IsTouchingLayers(groundLayer) || currentRB.IsTouchingLayers(dirtLayer)) return true;
+
+        // 2. CỨU CÁNH: Nếu bị lỗi khoảng hở (Micro-gap) nhưng tre có Khớp Nối (FixedJoint2D), 
+        // thì chắc chắn 100% nó đang được cắm trên Đất Mềm (DirtLayer).
+        if (currentRB.GetComponent<FixedJoint2D>() != null)
+        {
+            return true;
+        }
+
+        // 3. Quét dọc thân tre để tìm rễ
         List<Collider2D> contacts = new List<Collider2D>();
         ContactFilter2D filter = new ContactFilter2D { useLayerMask = true, layerMask = bambooLayer };
         currentRB.GetContacts(filter, contacts);
@@ -391,21 +389,16 @@ public class PlayerMovement : MonoBehaviour
     {
         isDead = true;
         rb.linearVelocity = Vector2.zero;
-        rb.simulated = false; // Tắt vật lý để không rơi xuyên đất
+        rb.simulated = false;
 
-        // --- 1. KÍCH HOẠT ANIMATION CHẾT ---
         if (anim != null)
         {
-            // Xóa dòng anim.speed = 0f đi để nhân vật được cử động
             anim.SetTrigger("Die");
         }
 
-        // --- 2. HẸN GIỜ LÀM MỜ MÀN HÌNH ---
-        // Cho Anh Khoai 1 giây để diễn cảnh ngã xuống, sau đó mới gọi hàm làm đen màn hình
         Invoke(nameof(CallFader), 0.1f);
     }
 
-    // Hàm phụ trợ để gọi tấm màn đen sau khi đã diễn xong animation
     void CallFader()
     {
         SceneFader fader = Object.FindFirstObjectByType<SceneFader>();
@@ -420,28 +413,4 @@ public class PlayerMovement : MonoBehaviour
     }
 
     void RestartLevel() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-
-    /* // ==========================================
-    // ZONE 8: DEBUG & GIZMOS
-    // ==========================================
-    private void OnDrawGizmosSelected()
-    {
-        BoxCollider2D collider = GetComponent<BoxCollider2D>();
-        if (collider == null) return;
-
-        Vector2 center = collider.bounds.center;
-        float rayLength = collider.bounds.extents.y + groundCheckDistance;
-
-        Gizmos.color = Color.red; // Màu tia laser
-
-        // Vẽ chính xác các tia raycast đang được dùng trong CheckGroundedBambooAndSlope
-        for (int i = 0; i < groundCheckRayCount; i++)
-        {
-            float xOffset = Mathf.Lerp(-groundCheckWidth / 2, groundCheckWidth / 2, (float)i / (groundCheckRayCount - 1));
-            Vector2 rayOrigin = new Vector2(center.x + xOffset, center.y);
-
-            // Vẽ đường thẳng từ chân xuống đất
-            Gizmos.DrawLine(rayOrigin, rayOrigin + Vector2.down * rayLength);
-        }
-    } */
 }
