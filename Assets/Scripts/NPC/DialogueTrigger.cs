@@ -7,7 +7,7 @@ public class DialogueTrigger : MonoBehaviour
     [Header("Cài đặt Chế độ Kích hoạt")]
     [Tooltip("Tích vào đây nếu muốn hộp thoại tự bật khi đi ngang qua (Unskippable)")]
     public bool isAutoTrigger = false;
-    public GameObject glowEffect; 
+    public GameObject glowEffect;
 
     [Header("Cài đặt Xuất hiện (VD: Ông Bụt hiện lên)")]
     [Tooltip("Tích vào đây để nhân vật tàng hình lúc đầu và hiện dần lên khi kích hoạt")]
@@ -23,9 +23,8 @@ public class DialogueTrigger : MonoBehaviour
     [Tooltip("Prefab hiệu ứng khói/phép thuật khi biến mất (Tùy chọn)")]
     public GameObject poofEffectPrefab;
 
-    // --- BÍ KÍP TA NẰM Ở ĐÂY: HỆ THỐNG LƯU TRỮ ---
-    [Header("Lưu Trữ Vĩnh Viễn (Chống lặp lại)")]
-    [Tooltip("Tích vào đây để game nhớ và xóa vĩnh viễn NPC này sau khi đã nói chuyện xong")]
+    [Header("Lưu Trữ Trong Lần Chơi (Chống lặp lại khi chết)")]
+    [Tooltip("Tích vào đây để game nhớ và xóa NPC này sau khi đã nói chuyện xong (Reset khi tắt Play)")]
     public bool saveState = false;
     [Tooltip("BẮT BUỘC ĐIỀN TÊN KHÁC NHAU cho mỗi NPC (VD: OngBut_Map1_KhuA)")]
     public string uniqueID = "OngBut_01";
@@ -36,21 +35,24 @@ public class DialogueTrigger : MonoBehaviour
     private bool playerInRange = false;
     private DialogueManager manager;
     private float interactCooldown = 0f;
-
     private bool hasTriggeredAuto = false;
 
     private SpriteRenderer[] renderers;
     private Collider2D[] colliders;
-    private bool isAppearing = false; 
-    private bool hasAppeared = false; 
+    private bool isAppearing = false;
+    private bool hasAppeared = false;
+
+    // --- BÍ KÍP TA NẰM Ở ĐÂY: DANH SÁCH LƯU TRỮ TĨNH ---
+    // Biến static này sẽ tồn tại xuyên suốt các Scene, nhưng sẽ tự reset khi tắt Play
+    public static List<string> deletedNPCsThisSession = new List<string>();
 
     void Start()
     {
-        // --- 1. KIỂM TRA BỘ NHỚ LƯU TRỮ ---
-        // Nếu có đánh dấu lưu trạng thái, và bộ nhớ báo là đã xóa (value = 1)
-        if (saveState && PlayerPrefs.GetInt(uniqueID, 0) == 1)
+        // --- 1. KIỂM TRA TRÍ NHỚ NGẮN HẠN ---
+        // Kiểm tra xem ID của NPC này đã có trong danh sách bị xóa của lần chơi này chưa
+        if (saveState && deletedNPCsThisSession.Contains(uniqueID))
         {
-            Destroy(gameObject); // Xóa ngay từ frame đầu tiên trước khi người chơi kịp thấy
+            Destroy(gameObject); // Xóa ngay tắp lự
             return;
         }
 
@@ -62,7 +64,7 @@ public class DialogueTrigger : MonoBehaviour
         if (fadeInOnTrigger)
         {
             SetRenderersAlpha(0f);
-            SetCollidersState(false, false); 
+            SetCollidersState(false, false);
             if (glowEffect != null) glowEffect.SetActive(false);
         }
         else
@@ -93,7 +95,7 @@ public class DialogueTrigger : MonoBehaviour
                 {
                     StartCoroutine(AppearAndStartDialogue(false));
                 }
-                else if (hasAppeared) 
+                else if (hasAppeared)
                 {
                     manager.StartDialogue(dialogueLines, false);
                     CheckAndHandleDisappear();
@@ -113,13 +115,13 @@ public class DialogueTrigger : MonoBehaviour
             {
                 if (manager != null && !manager.dialogueBox.activeInHierarchy)
                 {
-                    hasTriggeredAuto = true; 
+                    hasTriggeredAuto = true;
 
                     if (fadeInOnTrigger && !hasAppeared && !isAppearing)
                     {
                         StartCoroutine(AppearAndStartDialogue(true));
                     }
-                    else 
+                    else
                     {
                         manager.StartDialogue(dialogueLines, true);
                         CheckAndHandleDisappear();
@@ -181,7 +183,7 @@ public class DialogueTrigger : MonoBehaviour
         SetCollidersState(true, true);
 
         isAppearing = false;
-        hasAppeared = true; 
+        hasAppeared = true;
 
         manager.StartDialogue(dialogueLines, autoMode);
         CheckAndHandleDisappear();
@@ -220,12 +222,10 @@ public class DialogueTrigger : MonoBehaviour
             yield return null;
         }
 
-        // --- 2. LƯU LẠI VÀ PHÁ HỦY ---
-        if (saveState)
+        // --- 2. LƯU TÊN ÔNG BỤT VÀO DANH SÁCH ---
+        if (saveState && !deletedNPCsThisSession.Contains(uniqueID))
         {
-            // Lưu giá trị 1 (đã biến mất) vào bộ nhớ
-            PlayerPrefs.SetInt(uniqueID, 1);
-            PlayerPrefs.Save(); 
+            deletedNPCsThisSession.Add(uniqueID);
         }
 
         Destroy(gameObject);
@@ -247,9 +247,9 @@ public class DialogueTrigger : MonoBehaviour
         if (colliders == null) return;
         foreach (Collider2D col in colliders)
         {
-            if (!affectTriggers && col.isTrigger) 
+            if (!affectTriggers && col.isTrigger)
             {
-                continue; 
+                continue;
             }
             col.enabled = state;
         }
