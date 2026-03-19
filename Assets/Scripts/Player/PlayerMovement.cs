@@ -14,6 +14,10 @@ public class PlayerMovement : MonoBehaviour
     public static Vector2 respawnPosition;
     public static bool hasCheckpoint = false;
 
+    [Header("Cài đặt Bước chân")]
+    public float stepRate = 0.45f;    // Tốc độ bước chân (số càng nhỏ bước càng nhanh)
+    private float stepTimer;
+
     [Header("Dữ liệu Nhân vật")]
     public PlayerAttributes stats;
 
@@ -139,7 +143,14 @@ public class PlayerMovement : MonoBehaviour
 
         if (stats.currentBambooCount <= 0 && !isDead) Die();
 
+<<<<<<< Updated upstream
         // 2. NHẬN NÚT BẤM (Chỉ chạy khi không bị khóa)
+=======
+        if (isDead || isInteracting) return;
+
+        HandleFootsteps();
+
+>>>>>>> Stashed changes
         moveInput = Input.GetAxisRaw("Horizontal");
 
         if (moveInput > 0 && !isFacingRight) Flip();
@@ -245,6 +256,7 @@ public class PlayerMovement : MonoBehaviour
         else
             coyoteTimeCounter -= Time.fixedDeltaTime;
     }
+
 
     void ApplyMovement()
     {
@@ -418,6 +430,36 @@ public class PlayerMovement : MonoBehaviour
         }
 
         Invoke(nameof(CallFader), 0.1f);
+    }
+
+    void HandleFootsteps()
+    {
+        // Điều kiện phát tiếng: Đang chạm đất + Đang chạy + Không chết
+        if (isGrounded && Mathf.Abs(rb.linearVelocity.x) > 0.1f && !isDead)
+        {
+            stepTimer -= Time.deltaTime;
+            if (stepTimer <= 0f)
+            {
+                PlayFootstepSound();
+                stepTimer = stepRate; // Reset thời gian chờ bước tiếp theo
+            }
+        }
+    }
+
+    void PlayFootstepSound()
+    {
+        // Gọi đến Manager bạn vừa tạo để lấy đúng âm thanh của Scene hiện tại
+        if (SceneSoundManager.Instance != null)
+        {
+            AudioClip clip = SceneSoundManager.Instance.GetWalkSound();
+
+            if (clip != null && audioSource != null)
+            {
+                // Thay đổi Pitch một chút để tiếng bước chân nghe tự nhiên (không bị máy móc)
+                audioSource.pitch = Random.Range(0.9f, 1.1f);
+                audioSource.PlayOneShot(clip, 0.5f); // 0.5f là âm lượng bước chân
+            }
+        }
     }
 
     void CallFader()
