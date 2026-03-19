@@ -81,8 +81,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -561187261
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 665313845716424348, guid: 834adf0ad28d4d549a35a2c64614ac89, type: 3}
@@ -215,6 +215,10 @@ MonoBehaviour:
   mantisVanishDuration: 0.5
   mantisTeleportDist: 4.5
   mantisAttackCooldown: 2.5
+  attackSound: {fileID: 0}
+  throwSound: {fileID: 0}
+  hurtSound: {fileID: 8300000, guid: 02da61b0e90fcb94c9ef7e3a8ee96730, type: 3}
+  deathSound: {fileID: 0}
   groundLayer:
     serializedVersion: 2
     m_Bits: 64

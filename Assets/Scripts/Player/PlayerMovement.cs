@@ -59,6 +59,10 @@ public class PlayerMovement : MonoBehaviour
     private Color originalColor;
     private Animator anim;
 
+    [Header("Âm thanh (SFX)")]
+    public AudioClip hurtSound;       // Tiếng Anh Khoai kêu "Á!"
+    private AudioSource audioSource;  // Cái loa
+
     private bool isFacingRight = true;
     private Rigidbody2D rb;
     private BoxCollider2D cc;
@@ -103,8 +107,6 @@ public class PlayerMovement : MonoBehaviour
 
         if (hasCheckpoint) transform.position = respawnPosition;
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
-
-        dialogueManager = Object.FindFirstObjectByType<DialogueManager>();
     }
 
     // --- BÍ KÍP TA: HÀM KHÓA TỔNG ---
@@ -329,6 +331,12 @@ public class PlayerMovement : MonoBehaviour
         if (isInvincible || isDead) return;
 
         stats.healthPoint -= damage;
+
+        // THÊM Ở ĐÂY: Phát tiếng kêu đau
+        if (hurtSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(hurtSound);
+        }
 
         if (stats.healthPoint <= 0)
         {
