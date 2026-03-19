@@ -6,6 +6,10 @@ public class DiscountBambooUnlocker : MonoBehaviour
     [Header("Giao diện UI (Giống Double Jump)")]
     public GameObject unlockUIPanel;
 
+    [Header("Âm thanh (SFX)")]
+    [Tooltip("Tiếng nhạc khi nhặt được buff giảm tiêu hao")]
+    public AudioClip unlockSound; // THÊM BIẾN NÀY
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player"))
@@ -14,11 +18,14 @@ public class DiscountBambooUnlocker : MonoBehaviour
 
             if (player != null)
             {
-                // 1. MỞ KHÓA BUFF VĨNH VIỄN BẰNG BIẾN STATIC
                 PlayerMovement.hasDiscountBuff = true;
-                Debug.Log("<color=lime>ĐÃ MỞ KHÓA:</color> Buff Giảm 50% Tiêu Hao Tre Vĩnh Viễn!");
 
-                // 2. Hiện bảng thông báo
+                // --- PHÁT ÂM THANH TẠI ĐÂY ---
+                if (unlockSound != null)
+                {
+                    AudioSource.PlayClipAtPoint(unlockSound, transform.position);
+                }
+
                 StartCoroutine(ShowUnlockUI());
             }
         }
@@ -33,10 +40,11 @@ public class DiscountBambooUnlocker : MonoBehaviour
 
         Time.timeScale = 0f;
         yield return new WaitForSecondsRealtime(0.5f);
+
+        // Chờ phím F để đóng
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.F));
 
         if (unlockUIPanel != null) unlockUIPanel.SetActive(false);
-
         Time.timeScale = 1f;
         Destroy(gameObject);
     }
