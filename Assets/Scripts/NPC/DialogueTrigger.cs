@@ -29,6 +29,13 @@ public class DialogueTrigger : MonoBehaviour
     [Tooltip("BẮT BUỘC ĐIỀN TÊN KHÁC NHAU cho mỗi NPC (VD: OngBut_Map1_KhuA)")]
     public string uniqueID = "OngBut_01";
 
+    // --- MỚI THÊM: MENU CHỌN CẮT CẢNH ENDING ---
+    public enum EndingSequenceType { Khong_Co_Gi, KhacNhap_Phan1, KhacXuat_Phan2 }
+
+    [Header("Cài đặt Ending (Chỉ dùng cho cảnh kết thúc)")]
+    [Tooltip("Chọn xem đoạn hội thoại này xong thì gọi Cắt cảnh nào")]
+    public EndingSequenceType endingType = EndingSequenceType.Khong_Co_Gi;
+
     [Header("Nội dung cuộc trò chuyện")]
     public DialogueLine[] dialogueLines;
 
@@ -42,17 +49,15 @@ public class DialogueTrigger : MonoBehaviour
     private bool isAppearing = false;
     private bool hasAppeared = false;
 
-    // --- BÍ KÍP TA NẰM Ở ĐÂY: DANH SÁCH LƯU TRỮ TĨNH ---
     // Biến static này sẽ tồn tại xuyên suốt các Scene, nhưng sẽ tự reset khi tắt Play
     public static List<string> deletedNPCsThisSession = new List<string>();
 
     void Start()
     {
-        // --- 1. KIỂM TRA TRÍ NHỚ NGẮN HẠN ---
-        // Kiểm tra xem ID của NPC này đã có trong danh sách bị xóa của lần chơi này chưa
+        // 1. KIỂM TRA TRÍ NHỚ NGẮN HẠN
         if (saveState && deletedNPCsThisSession.Contains(uniqueID))
         {
-            Destroy(gameObject); // Xóa ngay tắp lự
+            Destroy(gameObject);
             return;
         }
 
@@ -98,7 +103,7 @@ public class DialogueTrigger : MonoBehaviour
                 else if (hasAppeared)
                 {
                     manager.StartDialogue(dialogueLines, false);
-                    CheckAndHandleDisappear();
+                    CheckAndHandleDialogueEnd(); // Đã sửa tên hàm
                 }
                 interactCooldown = 0.5f;
             }
@@ -124,7 +129,7 @@ public class DialogueTrigger : MonoBehaviour
                     else
                     {
                         manager.StartDialogue(dialogueLines, true);
-                        CheckAndHandleDisappear();
+                        CheckAndHandleDialogueEnd(); // Đã sửa tên hàm
                     }
                 }
             }
@@ -143,11 +148,13 @@ public class DialogueTrigger : MonoBehaviour
         }
     }
 
-    private void CheckAndHandleDisappear()
+    // --- ĐÃ NÂNG CẤP HÀM NÀY ---
+    // Bây giờ nó sẽ kích hoạt nếu CÓ TÍCH BIẾN MẤT HOẶC CÓ CHỌN ENDING
+    private void CheckAndHandleDialogueEnd()
     {
-        if (disappearAfterDialogue)
+        if (disappearAfterDialogue || endingType != EndingSequenceType.Khong_Co_Gi)
         {
-            StartCoroutine(WaitAndDisappear());
+            StartCoroutine(WaitAndHandleDialogueEnd());
         }
     }
 
@@ -186,49 +193,64 @@ public class DialogueTrigger : MonoBehaviour
         hasAppeared = true;
 
         manager.StartDialogue(dialogueLines, autoMode);
-        CheckAndHandleDisappear();
+        CheckAndHandleDialogueEnd(); // Đã sửa tên hàm
     }
 
-    private IEnumerator WaitAndDisappear()
+    // --- COROUTINE CHÍNH ĐỂ XỬ LÝ SAU KHI TẮT HỘI THOẠI ---
+    private IEnumerator WaitAndHandleDialogueEnd()
     {
         yield return new WaitForEndOfFrame();
         yield return new WaitUntil(() => !manager.dialogueBox.activeInHierarchy);
 
-        if (poofEffectPrefab != null)
+        // --- 1. GỌI ĐẠO DIỄN LÀM ENDING (NẾU CÓ) ---
+        if (endingType == EndingSequenceType.KhacNhap_Phan1 && EndingManager.instance != null)
         {
-            Instantiate(poofEffectPrefab, transform.position, Quaternion.identity);
+            EndingManager.instance.PlayEndingPart1();
+        }
+        else if (endingType == EndingSequenceType.KhacXuat_Phan2 && EndingManager.instance != null)
+        {
+            EndingManager.instance.PlayEndingPart2();
         }
 
-        SetCollidersState(false, true);
-
-        Color[] startColors = new Color[renderers.Length];
-        for (int i = 0; i < renderers.Length; i++)
+        // --- 2. XỬ LÝ LÀM MỜ BIẾN MẤT (NẾU CÓ TÍCH) ---
+        if (disappearAfterDialogue)
         {
-            startColors[i] = renderers[i].color;
-        }
+            if (poofEffectPrefab != null)
+            {
+                Instantiate(poofEffectPrefab, transform.position, Quaternion.identity);
+            }
 
-        float elapsedTime = 0f;
-        while (elapsedTime < fadeDuration)
-        {
-            elapsedTime += Time.deltaTime;
-            float alpha = Mathf.Lerp(1f, 0f, elapsedTime / fadeDuration);
+            SetCollidersState(false, true);
 
+            Color[] startColors = new Color[renderers.Length];
             for (int i = 0; i < renderers.Length; i++)
             {
-                Color newColor = startColors[i];
-                newColor.a = alpha;
-                renderers[i].color = newColor;
+                startColors[i] = renderers[i].color;
             }
-            yield return null;
-        }
 
-        // --- 2. LƯU TÊN ÔNG BỤT VÀO DANH SÁCH ---
-        if (saveState && !deletedNPCsThisSession.Contains(uniqueID))
-        {
-            deletedNPCsThisSession.Add(uniqueID);
-        }
+            float elapsedTime = 0f;
+            while (elapsedTime < fadeDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                float alpha = Mathf.Lerp(1f, 0f, elapsedTime / fadeDuration);
 
-        Destroy(gameObject);
+                for (int i = 0; i < renderers.Length; i++)
+                {
+                    Color newColor = startColors[i];
+                    newColor.a = alpha;
+                    renderers[i].color = newColor;
+                }
+                yield return null;
+            }
+
+            // Lưu tên vào danh sách đã xóa
+            if (saveState && !deletedNPCsThisSession.Contains(uniqueID))
+            {
+                deletedNPCsThisSession.Add(uniqueID);
+            }
+
+            Destroy(gameObject);
+        }
     }
 
     private void SetRenderersAlpha(float alpha)
