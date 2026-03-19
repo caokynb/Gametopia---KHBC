@@ -15,17 +15,15 @@ public class DialogueLine
 
 public class DialogueManager : MonoBehaviour
 {
-    // [MỚI 1] Biến toàn cục để các script khác dễ dàng gọi đến
     public static DialogueManager instance;
 
-    // [MỚI 2] Biến đánh dấu xem hộp thoại có đang bật không
     public bool isDialogueActive = false;
 
-    // [MỚI 3] Thêm hàm Awake này vào ngay dưới khai báo biến
     void Awake()
     {
         if (instance == null) instance = this;
     }
+
     [Header("UI Elements")]
     public GameObject dialogueBox;
     public TextMeshProUGUI nameText;
@@ -34,15 +32,13 @@ public class DialogueManager : MonoBehaviour
 
     [Header("Cài đặt")]
     public float typingSpeed = 0.04f;
-    [Tooltip("Thời gian chờ trước khi tự động chuyển câu (Dành cho Auto Mode)")]
-    public float autoDelay = 1.5f;
 
     private Queue<DialogueLine> lines;
     private bool isTyping = false;
     private string currentLine = "";
 
-    // [MỚI] Cờ đánh dấu xem có đang ở chế độ Tự động không
-    private bool isAutoMode = false;
+    // --- BÍ KÍP TA: Bộ đếm chống Input Bleed ---
+    private float nextInputTime = 0f;
 
     void Start()
     {
@@ -52,29 +48,43 @@ public class DialogueManager : MonoBehaviour
 
     void Update()
     {
-        // [ĐÃ SỬA] Chỉ cho phép bấm F để tua nhanh/chuyển câu nếu KHÔNG phải Auto Mode
-        if (!isAutoMode && dialogueBox != null && dialogueBox.activeInHierarchy && Input.GetKeyDown(KeyCode.F))
+        if (dialogueBox != null && dialogueBox.activeInHierarchy)
         {
-            if (isTyping)
+            // Chặn mọi nút bấm nếu chưa qua thời gian "nguội" (Cooldown)
+            if (Time.time < nextInputTime) return;
+
+            if (Input.GetKeyDown(KeyCode.F) || Input.GetMouseButtonDown(0))
+            {
+                if (isTyping)
+                {
+                    StopAllCoroutines();
+                    dialogueText.text = currentLine;
+                    isTyping = false;
+                }
+                else
+                {
+                    DisplayNextLine();
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.Tab) || Input.GetMouseButtonDown(1))
             {
                 StopAllCoroutines();
-                dialogueText.text = currentLine;
-                isTyping = false;
-            }
-            else
-            {
-                DisplayNextLine();
+                lines.Clear();
+                EndDialogue();
             }
         }
     }
 
-    // [ĐÃ SỬA] Nhận thêm biến truyền vào để biết đây là Auto hay Manual
     public void StartDialogue(DialogueLine[] dialogueLines, bool autoMode = false)
     {
         isDialogueActive = true;
-        isAutoMode = autoMode;
         dialogueBox.SetActive(true);
         lines.Clear();
+
+        // --- BÍ KÍP TA NẰM Ở ĐÂY ---
+        // Ép hệ thống điếc trong 0.2 giây đầu tiên để không nhận nhầm nút F lúc kích hoạt
+        nextInputTime = Time.time + 0.2f;
 
         foreach (DialogueLine line in dialogueLines)
         {
@@ -126,24 +136,15 @@ public class DialogueManager : MonoBehaviour
         }
 
         isTyping = false;
-
-        // [MỚI] Nếu là Auto Mode, đợi 1 khoảng thời gian rồi tự động chạy câu tiếp theo
-        if (isAutoMode)
-        {
-            yield return new WaitForSeconds(autoDelay);
-            DisplayNextLine();
-        }
     }
 
     void EndDialogue()
     {
-        // Gọi Coroutine để tạo độ trễ nhỏ trước khi tắt
         StartCoroutine(CloseDialogueRoutine());
     }
 
     IEnumerator CloseDialogueRoutine()
     {
-        // Chờ 0.1 giây để phím F "nguội" đi, tránh bị nhận diện 2 lần
         yield return new WaitForSeconds(0.2f);
 
         if (dialogueBox != null)
