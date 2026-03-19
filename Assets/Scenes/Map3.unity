@@ -928,7 +928,7 @@ Transform:
   m_GameObject: {fileID: 596026828}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -137.43056, y: -3.3907623, z: -10}
+  m_LocalPosition: {x: -69.79809, y: -0.6592419, z: -10}
   m_LocalScale: {x: 0.9913, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2581,7 +2581,7 @@ Transform:
   m_GameObject: {fileID: 1933140537}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -137.43056, y: -3.3907623, z: -10}
+  m_LocalPosition: {x: -69.79809, y: -0.6592419, z: -10}
   m_LocalScale: {x: 0.9913, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2890,6 +2890,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   checkSize: {x: 0.8, y: 0.15}
+  buildSound: {fileID: 0}
 --- !u!114 &2014253082
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2926,6 +2927,8 @@ MonoBehaviour:
   constructionModeScript: {fileID: 2014253081}
   attackVisual: {fileID: 0}
   constructionVisual: {fileID: 0}
+  khacSound: {fileID: 0}
+  nhapSound: {fileID: 0}
 --- !u!114 &2014253084
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2970,6 +2973,7 @@ MonoBehaviour:
   jumpBufferTime: 0.1
   jumpCutMultiplier: 0.5
   restartDelay: 1.5
+  hurtSound: {fileID: 0}
 --- !u!95 &2014253085
 Animator:
   serializedVersion: 7
@@ -3133,7 +3137,7 @@ Transform:
   m_GameObject: {fileID: 2014253080}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -137.43056, y: -5.8907623, z: 0}
+  m_LocalPosition: {x: -69.79809, y: -3.159242, z: 0}
   m_LocalScale: {x: 0.9913, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
