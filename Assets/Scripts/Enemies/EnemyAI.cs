@@ -152,6 +152,8 @@ public class EnemyAI : MonoBehaviour
             audioSource.volume = 0.6f;    // Chỉnh âm lượng hơi nhỏ một chút để làm nền
             audioSource.Play();           // Bấm nút Play
         }
+
+        movingRight = transform.localScale.x > 0;
     }
 
     void Update()
@@ -406,7 +408,20 @@ public class EnemyAI : MonoBehaviour
 
     void ChasePlayer() { if (isGrounded) MoveTowards(player.position.x, chaseSpeed); }
     void FacePlayer() { float direction = (player.position.x > transform.position.x) ? 1 : -1; if (direction > 0 && !movingRight) Flip(); else if (direction < 0 && movingRight) Flip(); }
-    void MoveTowards(float targetX, float speed) { float direction = (targetX > transform.position.x) ? 1 : -1; rb.linearVelocity = new Vector2(direction * speed, rb.linearVelocity.y); if (direction > 0 && !movingRight) Flip(); else if (direction < 0 && movingRight) Flip(); }
+    void MoveTowards(float targetX, float speed)
+    {
+        float distance = targetX - transform.position.x;
+
+        // Nếu đã đứng rất gần mục tiêu (khoảng 0.1 đơn vị) thì không cần di chuyển hay xoay hướng nữa
+        if (Mathf.Abs(distance) < 0.1f) return;
+
+        float direction = (distance > 0) ? 1 : -1;
+        rb.linearVelocity = new Vector2(direction * speed, rb.linearVelocity.y);
+
+        // Kiểm tra để Flip Sprite
+        if (direction > 0 && !movingRight) Flip();
+        else if (direction < 0 && movingRight) Flip();
+    }
     void StopMoving() { rb.linearVelocity = new Vector2(0, rb.linearVelocity.y); }
     void Flip() { movingRight = !movingRight; transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z); }
 
