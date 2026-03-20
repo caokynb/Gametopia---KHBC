@@ -102,7 +102,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3890964958461401865}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 18e81c35740ea1847a21c816a2517309, type: 2}
   m_CullingMode: 0
@@ -128,6 +128,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f761e56b01784be47b772279964ed8c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Checkpoint
+  unsavedSprite: {fileID: 8127232072140049607, guid: 4782259d55a3a554a8daa889a78834c2, type: 3}
+  savedSprite: {fileID: -6181586459832364322, guid: f77ee688b2e89464c82e771444c96051, type: 3}
 --- !u!61 &3253941387356077393
 BoxCollider2D:
   m_ObjectHideFlags: 0

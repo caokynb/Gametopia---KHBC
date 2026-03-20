@@ -7,8 +7,16 @@ public class DoubleJumpUnlocker : MonoBehaviour
     public GameObject unlockUIPanel;
 
     [Header("Âm thanh (SFX)")]
-    [Tooltip("Tiếng nhạc hào hùng khi nhặt được bí kíp")]
-    public AudioClip unlockSound; // THÊM BIẾN NÀY
+    public AudioClip unlockSound;
+
+    void Start()
+    {
+        // Kiểm tra xem ổ cứng đã lưu việc ăn bí kíp này chưa. 1 là rồi, 0 là chưa.
+        if (PlayerPrefs.GetInt("HasDoubleJump", 0) == 1)
+        {
+            Destroy(gameObject); // Đã ăn rồi thì xóa luôn cục bí kíp, không cho ăn lại
+        }
+    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -20,7 +28,10 @@ public class DoubleJumpUnlocker : MonoBehaviour
             {
                 PlayerMovement.canJumpOnBamboo = true;
 
-                // --- PHÁT ÂM THANH TẠI ĐÂY ---
+                // --- LƯU CHẾT VÀO Ổ CỨNG ---
+                PlayerPrefs.SetInt("HasDoubleJump", 1);
+                PlayerPrefs.Save();
+
                 if (unlockSound != null)
                 {
                     AudioSource.PlayClipAtPoint(unlockSound, transform.position);
@@ -41,7 +52,6 @@ public class DoubleJumpUnlocker : MonoBehaviour
         Time.timeScale = 0f;
         yield return new WaitForSecondsRealtime(0.5f);
 
-        // Chờ phím F để đóng
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.F));
 
         if (unlockUIPanel != null) unlockUIPanel.SetActive(false);

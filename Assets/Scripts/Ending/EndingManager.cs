@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement; // QUAN TRỌNG: Thêm thư viện này để load Scene
 
 public class EndingManager : MonoBehaviour
 {
@@ -18,6 +19,10 @@ public class EndingManager : MonoBehaviour
     [Header("Diễn Viên (GameObjects)")]
     public GameObject oldNPCs; // Phú Ông & Cậu Cả đứng dưới đất
     public GameObject bambooNPCs; // Phú Ông & Cậu Cả bị dính trên tre
+
+    [Header("Chuyển Cảnh Cuối")]
+    public float creditDisplayTime = 5f; // Thời gian hiện bảng Credit (chỉnh tùy ý)
+    public string mainMenuSceneName = "MainMenu"; // Tên Scene Menu Chính của bạn
 
     void Awake()
     {
@@ -79,6 +84,15 @@ public class EndingManager : MonoBehaviour
         fader.FadeOut();
         yield return new WaitForSeconds(1.5f);
 
+        AudioSource[] allAudioSources = Object.FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
+        foreach (AudioSource audio in allAudioSources)
+        {
+            if (audio != null && audio.isPlaying)
+            {
+                audio.Stop();
+            }
+        }
+
         // 2. Hiện chữ Khắc Xuất + Anh Khoai lấy chị Mùi
         if (panelKhacXuat != null) panelKhacXuat.SetActive(true);
         yield return new WaitForSeconds(textDisplayTime);
@@ -87,6 +101,13 @@ public class EndingManager : MonoBehaviour
         // 3. Bật Credit lên (Vẫn giữ màn hình đen làm nền cho Credit)
         if (panelCredit != null) panelCredit.SetActive(true);
 
-        // Kết thúc trọn vẹn!
+        // 4. CHỜ NGƯỜI CHƠI XEM CREDIT
+        yield return new WaitForSeconds(creditDisplayTime);
+
+        // Optional: Xóa file save để người chơi phải chơi lại từ đầu khi New Game
+        // PlayerPrefs.DeleteAll(); 
+
+        // 5. QUAY VỀ MAIN MENU
+        SceneManager.LoadScene(mainMenuSceneName);
     }
 }

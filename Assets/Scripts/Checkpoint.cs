@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
-using UnityEngine.SceneManagement; // BẮT BUỘC THÊM DÒNG NÀY ĐỂ LƯU TÊN MAP
+using UnityEngine.SceneManagement;
 
 public class Checkpoint : MonoBehaviour
 {
@@ -9,10 +9,13 @@ public class Checkpoint : MonoBehaviour
     private bool isPlayerNear = false;
     private PlayerMovement playerMovement;
     private ConstructionMode constructionScript;
-    private Animator anim;
-    private bool isActivated = false;
 
-    // --- Biến để tránh người chơi bấm F liên tục khi đang chạy anim ---
+    [Header("Cài đặt Hình ảnh Miếu")]
+    public Sprite unsavedSprite; // Ảnh miếu bẩn (chưa lưu)
+    public Sprite savedSprite;   // Ảnh miếu sạch (đã lưu)
+
+    private SpriteRenderer sr;
+    private bool isActivated = false;
     private bool isProcessing = false;
 
     void Awake() { allCheckpoints.Add(this); }
@@ -20,17 +23,28 @@ public class Checkpoint : MonoBehaviour
 
     void Start()
     {
-        anim = GetComponent<Animator>();
+        sr = GetComponent<SpriteRenderer>();
         constructionScript = Object.FindFirstObjectByType<ConstructionMode>();
-        if (PlayerMovement.hasCheckpoint && (Vector2)transform.position == PlayerMovement.respawnPosition)
+
+        // Set ảnh mặc định ban đầu là chưa lau
+        if (sr != null && unsavedSprite != null)
         {
-            SetCheckpointVisual(true);
+            sr.sprite = unsavedSprite;
+        }
+
+        // KIỂM TRA LÚC HỒI SINH: Nếu đúng là miếu đã lưu thì đổi ảnh luôn
+        if (PlayerMovement.hasCheckpoint)
+        {
+            float distance = Vector2.Distance(transform.position, PlayerMovement.respawnPosition);
+            if (distance < 0.1f)
+            {
+                SetCheckpointVisual(true);
+            }
         }
     }
 
     void Update()
     {
-        // Kiểm tra thêm !isProcessing
         if (isPlayerNear && Input.GetKeyDown(KeyCode.F) && !isProcessing && !isActivated)
         {
             StartCoroutine(ProcessCheckpointActivation());
@@ -40,35 +54,30 @@ public class Checkpoint : MonoBehaviour
     IEnumerator ProcessCheckpointActivation()
     {
         isProcessing = true;
-        float animDuration = 1.0f; // Độ dài hoạt ảnh thắp hương 
+        float animDuration = 1.0f; // Thời gian Anh Khoai đứng khấn/lau miếu
 
-        // 1. Gọi Anh Khoai diễn hoạt ảnh thắp hương
         if (playerMovement != null)
         {
             playerMovement.TriggerWishAnimation(animDuration);
         }
 
-        // 2. Chạy hoạt ảnh "Saving" trên Miếu 
-        if (anim != null)
-        {
-            anim.SetTrigger("StartSaving");
-        }
-
-        // 3. CHỜ hoạt ảnh chạy hết 1 vòng
+        // Chờ Anh Khoai diễn xong hoạt ảnh
         yield return new WaitForSeconds(animDuration);
 
-        // 4. Đặt lại toàn bộ Checkpoint khác thành chưa kích hoạt
+        // Đặt tất cả các miếu khác về ảnh cũ
         foreach (Checkpoint cp in allCheckpoints)
         {
             cp.SetCheckpointVisual(false);
         }
 
+        // Đổi miếu này thành ảnh sạch sẽ
         SetCheckpointVisual(true);
 
-        // 5. Hồi phục Tre và Dọn dẹp map
-        if (playerMovement != null)
+        // HỒI PHỤC CHỈ SỐ
+        if (playerMovement != null && playerMovement.stats != null)
         {
             playerMovement.stats.currentBambooCount = playerMovement.stats.maxBambooCount;
+            playerMovement.stats.healthPoint = playerMovement.stats.maxHealth;
         }
 
         if (constructionScript != null)
@@ -76,29 +85,30 @@ public class Checkpoint : MonoBehaviour
             constructionScript.ClearAllSpawnedBamboo();
         }
 
-        // 6. LƯU VỊ TRÍ HỒI SINH TẠM THỜI (Soft Save)
+        // LƯU TIẾN ĐỘ
         PlayerMovement.respawnPosition = transform.position;
         PlayerMovement.hasCheckpoint = true;
 
-        // 7. LƯU TIẾN ĐỘ VÀO Ổ CỨNG (Hard Save cho Main Menu)
+        PlayerMovement.checkpointScene = SceneManager.GetActiveScene().name;
+
         string currentScene = SceneManager.GetActiveScene().name;
         PlayerPrefs.SetString("SavedLevel", currentScene);
         PlayerPrefs.Save();
 
         isProcessing = false;
-        Debug.Log("<color=lime>Checkpoint chính thức được lưu sau khi thắp hương!</color> Đã lưu Map: " + currentScene);
+        Debug.Log("<color=lime>Đã lưu tiến độ bằng Sprite!</color>");
     }
 
     public void SetCheckpointVisual(bool active)
     {
         isActivated = active;
-        if (anim != null)
+        if (sr != null)
         {
-            anim.SetBool("isSaved", active);
+            // Nếu active = true thì dùng ảnh sạch, ngược lại dùng ảnh bẩn
+            sr.sprite = active ? savedSprite : unsavedSprite;
         }
     }
 
-    // --- VA CHẠM GIỮ NGUYÊN ---
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player"))

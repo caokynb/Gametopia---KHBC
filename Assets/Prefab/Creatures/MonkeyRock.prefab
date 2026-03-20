@@ -133,7 +133,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d27900c2d681321409852144c42355e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RockProjectile
-  speed: 5
+  speed: 3
   damage: 1
   lifeTime: 3
   bambooLayerName: Bamboo

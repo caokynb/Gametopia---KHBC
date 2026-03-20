@@ -13,6 +13,7 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     public static Vector2 respawnPosition;
     public static bool hasCheckpoint = false;
+    public static string checkpointScene = "";
 
     [Header("Dữ liệu Nhân vật")]
     public PlayerAttributes stats;
@@ -59,6 +60,14 @@ public class PlayerMovement : MonoBehaviour
     private Color originalColor;
     private Animator anim;
 
+    // --- THÊM: BIẾN ÂM THANH ---
+    [Header("Âm thanh (SFX)")]
+    public AudioClip hurtSound;      // Tiếng khi bị thương
+    public float stepRate = 0.45f;   // Nhịp bước chân
+    private float stepTimer;
+    private AudioSource audioSource; // Cái loa của Anh Khoai
+    private AudioSource footstepSource;
+
     private bool isFacingRight = true;
     private Rigidbody2D rb;
     private BoxCollider2D cc;
@@ -101,14 +110,21 @@ public class PlayerMovement : MonoBehaviour
             rb.gravityScale = stats.normalGravity;
         }
 
-        if (hasCheckpoint) transform.position = respawnPosition;
+        if (hasCheckpoint && checkpointScene == SceneManager.GetActiveScene().name)
+        {
+            transform.position = respawnPosition;
+        }
         if (spriteRenderer != null) originalColor = spriteRenderer.color;
 
         dialogueManager = Object.FindFirstObjectByType<DialogueManager>();
+
+        // --- THÊM: KHỞI TẠO AUDIO SOURCE ---
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+
+        footstepSource = gameObject.AddComponent<AudioSource>();
     }
 
-    // --- BÍ KÍP TA: HÀM KHÓA TỔNG ---
-    // Gom tất cả các lý do không được di chuyển vào 1 hàm để dễ quản lý
     private bool IsMovementLocked()
     {
         if (isDead) return true;
@@ -123,22 +139,22 @@ public class PlayerMovement : MonoBehaviour
     // ==========================================
     void Update()
     {
-        // 1. KIỂM TRA KHÓA
         if (IsMovementLocked())
         {
-            // Triệt tiêu hoàn toàn quán tính và phím bấm
             moveInput = 0f;
             currentSpeed = 0f;
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
 
             if (anim != null) anim.SetFloat("Speed", 0f);
-            return; // Chặn không cho code bên dưới chạy
+            return;
         }
 
         if (stats.currentBambooCount <= 0 && !isDead) Die();
 
-        // 2. NHẬN NÚT BẤM (Chỉ chạy khi không bị khóa)
         moveInput = Input.GetAxisRaw("Horizontal");
+
+        // --- THÊM: GỌI HÀM BƯỚC CHÂN ---
+        HandleFootsteps();
 
         if (moveInput > 0 && !isFacingRight) Flip();
         else if (moveInput < 0 && isFacingRight) Flip();
@@ -161,7 +177,6 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Chặn không cho xử lý vật lý nếu đang bị khóa
         if (IsMovementLocked())
         {
             rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
@@ -297,8 +312,53 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ==========================================
-    // ZONE 7: INTERACTION & HELPERS
+    // ZONE 7: INTERACTION, SOUNDS & HELPERS
     // ==========================================
+
+    // --- THÊM: LOGIC XỬ LÝ TIẾNG BƯỚC CHÂN ---
+    void HandleFootsteps()
+    {
+        // Nếu ĐANG CHẠY trên mặt đất
+        if (isGrounded && Mathf.Abs(rb.linearVelocity.x) > 0.1f && !isDead)
+        {
+            stepTimer -= Time.deltaTime;
+            if (stepTimer <= 0f)
+            {
+                PlayFootstepSound();
+                stepTimer = stepRate;
+            }
+        }
+        else // NẾU ĐÃ DỪNG LẠI HOẶC ĐANG NHẢY TRÊN KHÔNG
+        {
+            // Ngắt tiếng bước chân ngay lập tức
+            if (footstepSource != null && footstepSource.isPlaying)
+            {
+                footstepSource.Stop();
+            }
+
+            // Reset timer để bước tiếp theo kêu ngay lập tức không bị delay
+            stepTimer = 0f;
+        }
+    }
+
+    void PlayFootstepSound()
+    {
+        if (SceneSoundManager.Instance == null) return;
+
+        AudioClip clip = SceneSoundManager.Instance.GetWalkSound();
+
+        // Sửa audioSource thành footstepSource
+        if (clip != null && footstepSource != null)
+        {
+            footstepSource.pitch = Random.Range(0.9f, 1.1f);
+
+            // Cài đặt clip và Play (không dùng PlayOneShot nữa để có thể Stop)
+            footstepSource.clip = clip;
+            footstepSource.volume = 0.5f;
+            footstepSource.Play();
+        }
+    }
+
     public void TriggerWishAnimation(float duration)
     {
         StartCoroutine(WishSequence(duration));
@@ -330,6 +390,12 @@ public class PlayerMovement : MonoBehaviour
 
         stats.healthPoint -= damage;
 
+        // --- THÊM: PHÁT TIẾNG KHI BỊ THƯƠNG ---
+        if (hurtSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(hurtSound);
+        }
+
         if (stats.healthPoint <= 0)
         {
             Die();
@@ -337,6 +403,7 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             StartCoroutine(InvincibilityRoutine());
+            StartCoroutine(FlashRedEffect());
         }
     }
 
@@ -424,6 +491,7 @@ public class PlayerMovement : MonoBehaviour
             RestartLevel();
         }
     }
+
 
     void RestartLevel() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 }

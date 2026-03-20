@@ -9,11 +9,21 @@ public class DestructibleObject : MonoBehaviour
     [Header("Cấu hình vật phẩm rơi ra")]
     public GameObject dropItemPrefab;
 
+    [Header("Âm thanh (SFX)")]
+    public AudioClip hitSound;    // Tiếng khi bị chém trúng
+    public AudioClip breakSound;  // Tiếng khi bị vỡ nát hoàn toàn
+
     // Hàm nhận sát thương gọi từ PlayerCombat
     public void TakeDamage()
     {
         health -= 1;
         Debug.Log(gameObject.name + " bị trúng đòn! Máu còn: " + health);
+
+        // Phát âm thanh khi bị chém trúng
+        if (hitSound != null)
+        {
+            AudioSource.PlayClipAtPoint(hitSound, transform.position);
+        }
 
         // Hiệu ứng nhấp nháy để người chơi biết đã đánh trúng
         StopAllCoroutines();
@@ -28,6 +38,13 @@ public class DestructibleObject : MonoBehaviour
     private void DestroyObject()
     {
         Debug.Log("Vật thể đã bị phá hủy hoàn toàn!");
+
+        // Phát âm thanh khi vỡ nát
+        if (breakSound != null)
+        {
+            AudioSource.PlayClipAtPoint(breakSound, transform.position);
+        }
+
         if (dropItemPrefab != null)
         {
             Instantiate(dropItemPrefab, transform.position, Quaternion.identity);

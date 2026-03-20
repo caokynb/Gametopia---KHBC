@@ -143,6 +143,7 @@ MonoBehaviour:
   mantisVanishDuration: 0.4
   mantisTeleportDist: 4.5
   mantisAttackCooldown: 2.5
+  moveSound: {fileID: 0}
   attackSound: {fileID: 8300000, guid: 83dc89ada2cda6746982a31e1c991173, type: 3}
   throwSound: {fileID: 0}
   hurtSound: {fileID: 8300000, guid: 49cfc6ba11589c44ca0bb7ed57b6ca46, type: 3}
@@ -303,7 +304,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0

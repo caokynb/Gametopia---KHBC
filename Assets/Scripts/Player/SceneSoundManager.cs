@@ -5,9 +5,9 @@ using System.Collections.Generic;
 [System.Serializable]
 public class SceneAudioData
 {
-    public string sceneName;    // Tên Scene trong Unity
-    public AudioClip walkSound;  // Tiếng đi bộ của Scene đó
-    public AudioClip ambienceSound; // [THÊM] Tiếng môi trường (Gió, mưa, chim hót...)
+    public string sceneName;       // Tên Scene
+    public AudioClip walkSound;     // Tiếng bước chân
+    public AudioClip ambienceSound; // Tiếng môi trường (gió, chim hót...)
 }
 
 public class SceneSoundManager : MonoBehaviour
@@ -15,8 +15,7 @@ public class SceneSoundManager : MonoBehaviour
     public static SceneSoundManager Instance;
     public List<SceneAudioData> sceneSounds;
 
-    // Loa chuyên biệt để phát tiếng Ambience lặp đi lặp lại
-    private AudioSource ambienceSource;
+    private AudioSource ambienceSource; // Loa tàng hình phát tiếng môi trường
 
     void Awake()
     {
@@ -25,9 +24,9 @@ public class SceneSoundManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
-            // Tự tạo một cái loa tàng hình chuyên phát tiếng nền
+            // Tự tạo loa phát Ambience
             ambienceSource = gameObject.AddComponent<AudioSource>();
-            ambienceSource.loop = true; // Luôn luôn lặp lại
+            ambienceSource.loop = true;
             ambienceSource.playOnAwake = false;
         }
         else { Destroy(gameObject); }
@@ -35,7 +34,6 @@ public class SceneSoundManager : MonoBehaviour
 
     void OnEnable()
     {
-        // Đăng ký sự kiện: Mỗi khi Load Scene xong thì tự động đổi tiếng Ambience
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -56,16 +54,15 @@ public class SceneSoundManager : MonoBehaviour
         {
             if (data.sceneName == currentScene)
             {
-                // Nếu Map này có tiếng Ambience và nó khác với tiếng đang phát
                 if (data.ambienceSound != null && ambienceSource.clip != data.ambienceSound)
                 {
                     ambienceSource.clip = data.ambienceSound;
-                    ambienceSource.volume = 0.4f; // Âm lượng nền vừa phải
+                    ambienceSource.volume = 0.4f; // Âm lượng môi trường
                     ambienceSource.Play();
                 }
                 else if (data.ambienceSound == null)
                 {
-                    ambienceSource.Stop(); // Nếu Map này không có Ambience thì tắt
+                    ambienceSource.Stop();
                 }
                 return;
             }

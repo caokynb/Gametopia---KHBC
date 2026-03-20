@@ -3,12 +3,20 @@ using System.Collections;
 
 public class DiscountBambooUnlocker : MonoBehaviour
 {
-    [Header("Giao diện UI (Giống Double Jump)")]
+    [Header("Giao diện UI")]
     public GameObject unlockUIPanel;
 
     [Header("Âm thanh (SFX)")]
-    [Tooltip("Tiếng nhạc khi nhặt được buff giảm tiêu hao")]
-    public AudioClip unlockSound; // THÊM BIẾN NÀY
+    public AudioClip unlockSound;
+
+    void Start()
+    {
+        // Kiểm tra ổ cứng xem đã ăn buff này chưa
+        if (PlayerPrefs.GetInt("HasDiscountBuff", 0) == 1)
+        {
+            Destroy(gameObject);
+        }
+    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -20,7 +28,10 @@ public class DiscountBambooUnlocker : MonoBehaviour
             {
                 PlayerMovement.hasDiscountBuff = true;
 
-                // --- PHÁT ÂM THANH TẠI ĐÂY ---
+                // --- LƯU CHẾT VÀO Ổ CỨNG ---
+                PlayerPrefs.SetInt("HasDiscountBuff", 1);
+                PlayerPrefs.Save();
+
                 if (unlockSound != null)
                 {
                     AudioSource.PlayClipAtPoint(unlockSound, transform.position);
@@ -41,7 +52,6 @@ public class DiscountBambooUnlocker : MonoBehaviour
         Time.timeScale = 0f;
         yield return new WaitForSecondsRealtime(0.5f);
 
-        // Chờ phím F để đóng
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.F));
 
         if (unlockUIPanel != null) unlockUIPanel.SetActive(false);
