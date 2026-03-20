@@ -475,7 +475,7 @@ public class PlayerMovement : MonoBehaviour
         {
             anim.SetTrigger("Die");
         }
-
+        MusicTriggerZone.StopMusic();
         Invoke(nameof(CallFader), 0.1f);
     }
 

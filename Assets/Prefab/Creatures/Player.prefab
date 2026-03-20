@@ -238,7 +238,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00348287ada67bc4ca28c92df50a93eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  stepRate: 0.45
   stats:
     maxBambooCount: 100
     currentBambooCount: 100
@@ -272,6 +271,7 @@ MonoBehaviour:
   jumpCutMultiplier: 0.5
   restartDelay: 1.5
   hurtSound: {fileID: 8300000, guid: bcb01b89cc25b29498aeda8b7b7b6402, type: 3}
+  stepRate: 0.45
 --- !u!114 &3966696064628223792
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -310,6 +310,7 @@ MonoBehaviour:
   bambooCostPerAttack: 1
   attackCooldown: 0.4
   hitVFXPrefab: {fileID: 6960770736249994957, guid: ae26ffdc40df98743898a1215c8d9727, type: 3}
+  swingSound: {fileID: 8300000, guid: 1c10260ce2bbf924faf7d584c38df0a8, type: 3}
 --- !u!114 &942477307766396899
 MonoBehaviour:
   m_ObjectHideFlags: 0

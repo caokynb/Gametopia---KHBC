@@ -23,6 +23,9 @@ public class AttackMode : MonoBehaviour
     [Header("Hiệu ứng (VFX)")]
     public GameObject hitVFXPrefab;
 
+    [Header("Âm thanh (SFX)")]
+    public AudioClip swingSound;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -77,6 +80,11 @@ public class AttackMode : MonoBehaviour
         if (anim != null)
         {
             anim.SetTrigger("Slash");
+        }
+
+        if (swingSound != null)
+        {
+            AudioSource.PlayClipAtPoint(swingSound, transform.position);
         }
 
         Attack();

@@ -737,6 +737,7 @@ MonoBehaviour:
   continueButton: {fileID: 1451470628}
   settingsPanel: {fileID: 656782702}
   firstLevelName: Biomes1
+  clickSound: {fileID: 8300000, guid: c92409fc6dc1e2a4fbeadb2ccb89ab5d, type: 3}
 --- !u!224 &1299884257
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1353,6 +1354,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   checkSize: {x: 0.8, y: 0.15}
+  buildSound: {fileID: 0}
 --- !u!114 &1865170974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1389,6 +1391,8 @@ MonoBehaviour:
   constructionModeScript: {fileID: 1865170973}
   attackVisual: {fileID: 0}
   constructionVisual: {fileID: 0}
+  khacSound: {fileID: 0}
+  nhapSound: {fileID: 0}
 --- !u!114 &1865170976
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1433,6 +1437,8 @@ MonoBehaviour:
   jumpBufferTime: 0.1
   jumpCutMultiplier: 0.5
   restartDelay: 0.5
+  hurtSound: {fileID: 0}
+  stepRate: 0.45
 --- !u!95 &1865170977
 Animator:
   serializedVersion: 7
