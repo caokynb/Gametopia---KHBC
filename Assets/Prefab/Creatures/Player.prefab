@@ -270,7 +270,7 @@ MonoBehaviour:
   jumpBufferTime: 0.1
   jumpCutMultiplier: 0.5
   restartDelay: 1.5
-  hurtSound: {fileID: 8300000, guid: bcb01b89cc25b29498aeda8b7b7b6402, type: 3}
+  hurtSound: {fileID: 8300000, guid: c5ea3eeb0a512a747834c0b2ae9b398c, type: 3}
   stepRate: 0.45
 --- !u!114 &3966696064628223792
 MonoBehaviour:
@@ -288,8 +288,8 @@ MonoBehaviour:
   constructionModeScript: {fileID: 942477307766396899}
   attackVisual: {fileID: 0}
   constructionVisual: {fileID: 0}
-  khacSound: {fileID: 8300000, guid: 9cc9ad14cfabac746a936ce0b5614390, type: 3}
-  nhapSound: {fileID: 8300000, guid: 4e615440da18ab043a18c09f40bd48b7, type: 3}
+  khacSound: {fileID: 8300000, guid: 7ea55ef0147cac745a44ff2d679458d3, type: 3}
+  nhapSound: {fileID: 8300000, guid: 53217a063caa5f34dabc3974aa065865, type: 3}
 --- !u!114 &1402375966260716578
 MonoBehaviour:
   m_ObjectHideFlags: 0

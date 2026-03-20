@@ -11,10 +11,10 @@ public class DoubleJumpUnlocker : MonoBehaviour
 
     void Start()
     {
-        // Kiểm tra xem ổ cứng đã lưu việc ăn bí kíp này chưa. 1 là rồi, 0 là chưa.
+        // Kiểm tra xem ổ cứng đã LƯU THẬT SỰ việc ăn bí kíp này chưa
         if (PlayerPrefs.GetInt("HasDoubleJump", 0) == 1)
         {
-            Destroy(gameObject); // Đã ăn rồi thì xóa luôn cục bí kíp, không cho ăn lại
+            Destroy(gameObject);
         }
     }
 
@@ -26,11 +26,8 @@ public class DoubleJumpUnlocker : MonoBehaviour
 
             if (player != null)
             {
+                // CHỈ CHO MƯỢN BUFF (Không lưu vào PlayerPrefs nữa)
                 PlayerMovement.canJumpOnBamboo = true;
-
-                // --- LƯU CHẾT VÀO Ổ CỨNG ---
-                PlayerPrefs.SetInt("HasDoubleJump", 1);
-                PlayerPrefs.Save();
 
                 if (unlockSound != null)
                 {

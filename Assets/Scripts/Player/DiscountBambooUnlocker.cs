@@ -11,7 +11,7 @@ public class DiscountBambooUnlocker : MonoBehaviour
 
     void Start()
     {
-        // Kiểm tra ổ cứng xem đã ăn buff này chưa
+        // Kiểm tra xem ổ cứng đã LƯU THẬT SỰ việc ăn bí kíp này chưa
         if (PlayerPrefs.GetInt("HasDiscountBuff", 0) == 1)
         {
             Destroy(gameObject);
@@ -26,11 +26,8 @@ public class DiscountBambooUnlocker : MonoBehaviour
 
             if (player != null)
             {
+                // CHỈ CHO MƯỢN BUFF (Không lưu vào PlayerPrefs nữa)
                 PlayerMovement.hasDiscountBuff = true;
-
-                // --- LƯU CHẾT VÀO Ổ CỨNG ---
-                PlayerPrefs.SetInt("HasDiscountBuff", 1);
-                PlayerPrefs.Save();
 
                 if (unlockSound != null)
                 {

@@ -10,11 +10,8 @@ public class Checkpoint : MonoBehaviour
     private PlayerMovement playerMovement;
     private ConstructionMode constructionScript;
 
-    [Header("Cài đặt Hình ảnh Miếu")]
-    public Sprite unsavedSprite; // Ảnh miếu bẩn (chưa lưu)
-    public Sprite savedSprite;   // Ảnh miếu sạch (đã lưu)
+    private Animator anim;
 
-    private SpriteRenderer sr;
     private bool isActivated = false;
     private bool isProcessing = false;
 
@@ -23,29 +20,29 @@ public class Checkpoint : MonoBehaviour
 
     void Start()
     {
-        sr = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
         constructionScript = Object.FindFirstObjectByType<ConstructionMode>();
 
-        // Set ảnh mặc định ban đầu là chưa lau
-        if (sr != null && unsavedSprite != null)
-        {
-            sr.sprite = unsavedSprite;
-        }
-
-        // KIỂM TRA LÚC HỒI SINH: Nếu đúng là miếu đã lưu thì đổi ảnh luôn
+        // KIỂM TRA LÚC HỒI SINH
         if (PlayerMovement.hasCheckpoint)
         {
             float distance = Vector2.Distance(transform.position, PlayerMovement.respawnPosition);
-            if (distance < 0.1f)
+            if (distance < 1.0f)
             {
                 SetCheckpointVisual(true);
+                if (anim != null) anim.Play("Saved", 0, 1f);
+            }
+            else
+            {
+                SetCheckpointVisual(false);
+                if (anim != null) anim.Play("Unsave", 0, 1f);
             }
         }
     }
 
     void Update()
     {
-        if (isPlayerNear && Input.GetKeyDown(KeyCode.F) && !isProcessing && !isActivated)
+        if (isPlayerNear && Input.GetKeyDown(KeyCode.F) && !isProcessing)
         {
             StartCoroutine(ProcessCheckpointActivation());
         }
@@ -54,59 +51,53 @@ public class Checkpoint : MonoBehaviour
     IEnumerator ProcessCheckpointActivation()
     {
         isProcessing = true;
-        float animDuration = 1.0f; // Thời gian Anh Khoai đứng khấn/lau miếu
+        float animDuration = 1.0f; // Thời gian Anh Khoai đứng khấn
 
-        if (playerMovement != null)
-        {
-            playerMovement.TriggerWishAnimation(animDuration);
-        }
+        if (anim != null) anim.SetTrigger("StartSaving");
 
-        // Chờ Anh Khoai diễn xong hoạt ảnh
+        if (playerMovement != null) playerMovement.TriggerWishAnimation(animDuration);
+
         yield return new WaitForSeconds(animDuration);
 
-        // Đặt tất cả các miếu khác về ảnh cũ
         foreach (Checkpoint cp in allCheckpoints)
         {
-            cp.SetCheckpointVisual(false);
+            if (cp != this) cp.SetCheckpointVisual(false);
         }
 
-        // Đổi miếu này thành ảnh sạch sẽ
         SetCheckpointVisual(true);
 
-        // HỒI PHỤC CHỈ SỐ
         if (playerMovement != null && playerMovement.stats != null)
         {
             playerMovement.stats.currentBambooCount = playerMovement.stats.maxBambooCount;
             playerMovement.stats.healthPoint = playerMovement.stats.maxHealth;
         }
 
-        if (constructionScript != null)
-        {
-            constructionScript.ClearAllSpawnedBamboo();
-        }
+        if (constructionScript != null) constructionScript.ClearAllSpawnedBamboo();
 
-        // LƯU TIẾN ĐỘ
+        // ==========================================
+        // 7. CHỐT SỔ TIẾN ĐỘ & KỸ NĂNG
+        // ==========================================
         PlayerMovement.respawnPosition = transform.position;
         PlayerMovement.hasCheckpoint = true;
-
         PlayerMovement.checkpointScene = SceneManager.GetActiveScene().name;
+
+        // BÍ KÍP: Kiểm tra xem trên người Anh Khoai lúc này có Buff không. 
+        // Có cái nào thì lưu cứng cái đó lại!
+        if (PlayerMovement.hasDiscountBuff) PlayerPrefs.SetInt("HasDiscountBuff", 1);
+        if (PlayerMovement.canJumpOnBamboo) PlayerPrefs.SetInt("HasDoubleJump", 1);
 
         string currentScene = SceneManager.GetActiveScene().name;
         PlayerPrefs.SetString("SavedLevel", currentScene);
         PlayerPrefs.Save();
 
         isProcessing = false;
-        Debug.Log("<color=lime>Đã lưu tiến độ bằng Sprite!</color>");
+        Debug.Log("<color=lime>Đã thắp hương và CHỐT SỔ mọi kỹ năng!</color>");
     }
 
     public void SetCheckpointVisual(bool active)
     {
         isActivated = active;
-        if (sr != null)
-        {
-            // Nếu active = true thì dùng ảnh sạch, ngược lại dùng ảnh bẩn
-            sr.sprite = active ? savedSprite : unsavedSprite;
-        }
+        if (anim != null) anim.SetBool("isSaved", active);
     }
 
     void OnTriggerEnter2D(Collider2D collision)

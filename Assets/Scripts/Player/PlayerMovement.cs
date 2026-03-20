@@ -118,11 +118,17 @@ public class PlayerMovement : MonoBehaviour
 
         dialogueManager = Object.FindFirstObjectByType<DialogueManager>();
 
-        // --- THÊM: KHỞI TẠO AUDIO SOURCE ---
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
         footstepSource = gameObject.AddComponent<AudioSource>();
+
+        // ==========================================
+        // --- BÍ KÍP TA: ĐỒNG BỘ NGÂN HÀNG KỸ NĂNG ---
+        // ==========================================
+        // Nếu vừa chết xong, xoá hết buff tạm thời. Chỉ giữ lại buff nếu trong PlayerPrefs có lưu số 1
+        hasDiscountBuff = (PlayerPrefs.GetInt("HasDiscountBuff", 0) == 1);
+        canJumpOnBamboo = (PlayerPrefs.GetInt("HasDoubleJump", 0) == 1);
     }
 
     private bool IsMovementLocked()
